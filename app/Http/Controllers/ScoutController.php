@@ -286,20 +286,15 @@ class ScoutController extends Controller
     {
         $data = Request::all();
         $rules = array(
-            'title' => 'required',
+            'title' => 'required|unique:post',
             'description' => 'required',
-            'file' => 'required',
-            'tags' => 'required',
             'budget' => 'required|numeric',
         );
         $message = array(
             'title.required' => 'Required',
             'description.required' => 'Required',
-            'file.required' => 'Required',
-            'tags.required' => 'Required',
             'budget.required' => 'Required',
             'budget.numeric' => 'Numbers Only!',
-            'budget.required' => 'Required',
         );
 
         $validation = Validator::make($data, $rules, $message);
@@ -311,16 +306,15 @@ class ScoutController extends Controller
                 $detail = new Post;
                 $detail->id =null;
                 $detail->scout_id = Auth::user()->id;
-                $detail->title =$data['title'];
-                $detail->description =$data['description'];
+                $detail->title =strtolower($data['title']);
+                $detail->description =strtolower($data['description']);
                 if( Request::hasFile('file') ) {
                         $destinationPath = public_path().'/files/';
                         $file = Request::file('file');
-                        $filename = $file->getClientOriginalName();
+                        $filename = str_random(10).".".$file->getClientOriginalExtension();
                         $file->move($destinationPath, $filename);
                         $detail->file = $filename;
                     }
-
                 $tags = json_encode(explode(',', $data['tags'][0]));
                 $detail->tags =$tags;
                 $detail->budget =$data['budget'];

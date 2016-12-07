@@ -72,7 +72,7 @@
                            <div class="form-group">
                        
                         <div class="col-sm-10">
-                          {!! Form::text('firstname',null,['class'=>'form-control', 'placeholder'=>'Enter your first name']) !!}
+                          {!! Form::text('firstname',null,['class'=>'form-control', 'placeholder'=>'Enter your first name', 'required'=>'required']) !!}
                           <!-- <input type="text" class="form-control" name="lastname" id="lastname" placeholder="Your Last Name"> -->
                               
 
@@ -84,7 +84,7 @@
                       <div class="form-group">
                        
                         <div class="col-sm-10">
-                          {!! Form::text('lastname',null,['class'=>'form-control', 'placeholder'=>'Enter your last name']) !!}
+                          {!! Form::text('lastname',null,['class'=>'form-control', 'placeholder'=>'Enter your last name', 'required'=>'required']) !!}
                           <!-- <input type="text" class="form-control" name="lastname" id="lastname" placeholder="Your Last Name"> -->
                               
 
@@ -96,7 +96,7 @@
                          <div class="form-group">
                        
                         <div class="col-sm-10">
-                          {!! Form::text('address',null,['class'=>'form-control', 'placeholder'=>'Enter your address']) !!}
+                          {!! Form::text('address',null,['class'=>'form-control', 'placeholder'=>'Enter your address', 'required'=>'required']) !!}
                           <!-- <input type="text" class="form-control" name="firstname" id="firstname" placeholder="Your First Name"> -->
                             
 
@@ -108,7 +108,7 @@
                          <div class="form-group">
                        
                         <div class="col-sm-10">
-                          {!! Form::email('emailaddress', '', ['class' => 'form-control', 'placeholder' => 'Your Email Address']); !!}
+                          {!! Form::email('emailaddress', '', ['class' => 'form-control', 'placeholder' => 'Your Email Address', 'required'=>'required']); !!}
                             <!-- <input type="input" class="form-control" name="email" id="email" placeholder="Enter Email address"> -->
                                                 
 
@@ -120,7 +120,7 @@
                       <div class="form-group">
                        
                         <div class="col-sm-10">
-                          {!! Form::number('contact', '', array('class' => 'form-control', 'placeholder' => 'Your Contact Number')) !!}
+                          {!! Form::number('contact', '', array('class' => 'form-control', 'placeholder' => 'Your Contact Number', 'required'=>'required')) !!}
                           <!-- <input type="text" class="form-control" name="contactno" id="contactno" placeholder="Enter email"> -->
                                                 
 
@@ -132,7 +132,7 @@
                       <div class="form-group">
                        
                         <div class="col-sm-10">
-                        {!! Form::text('birthday', '', array('id' => 'datepicker','class' => 'form-control', 'placeholder' => 'Your Date of Birth')) !!}                        
+                        {!! Form::text('birthday', '', array('id' => 'datepicker','class' => 'form-control', 'placeholder' => 'Your Date of Birth', 'required'=>'required')) !!}                        
                                                   
 
                                                   @foreach($errors->get('birthday') as $message)
@@ -140,10 +140,20 @@
                                                     @endforeach
                         </div>                     
                       </div>
+                      <div class="form-group">
+                       
+                        <div class="col-sm-10">
+                        {!! Form::label('gender', 'Gender', array('class' => 'form-control')) !!}
+                        {!! Form::label('gender', 'Male') !!}
+                        {!! Form::radio('gender', 'Male', false) !!}
+                        {!! Form::label('gender', 'Female') !!}
+                        {!! Form::radio('gender', 'Female', true) !!}
+                        </div>
+                      </div>
                        <div class="form-group">
                         
                         <div class="col-sm-10"> 
-                          {!! Form::text('username', '', array('class' => 'form-control', 'placeholder' => 'Your username')) !!}
+                          {!! Form::text('username', '', array('class' => 'form-control', 'placeholder' => 'Your username', 'required'=>'required')) !!}
                           <!-- <input type="input" class="form-control" name="username" id="username" placeholder="Enter username"> -->
                                                 
 
@@ -155,7 +165,7 @@
                       <div class="form-group">
                         
                         <div class="col-sm-10"> 
-                          {!! Form::password('password', ['class' => 'form-control', 'placeholder' => 'Enter your password']) !!}
+                          {!! Form::password('password', ['class' => 'form-control', 'placeholder' => 'Enter your password', 'required'=>'required']) !!}
                           <!-- <input type="password" class="form-control" name="password" id="pwd" placeholder="Enter password"> -->
                                                 
 
@@ -167,7 +177,7 @@
                       <div class="form-group"> 
                         <div class="col-sm-10">
                           <div class="checkbox">
-                            <label><input type="checkbox">Yes, I understand and agree to the Talent Scout Terms of Service</label>
+                            <label><input type="checkbox">Yes, I understand and agree to the <a href="">Talent Scout Terms of Service</a></label>
                           </div>
                         </div>
                       </div>

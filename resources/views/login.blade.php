@@ -40,7 +40,7 @@
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
                 
-                <a class="navbar-brand page-scroll" href="{!! URL::to('/home') !!}"><img src="../img/logo.png" class="logo"></a>
+                <a class="navbar-brand page-scroll" href="{!! URL::to('/') !!}"><img src="../img/logo.png" class="logo"></a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
@@ -58,7 +58,7 @@
                     {!! Form::open(['url'=>'/login']) !!}
                       <div class="form-group">
                         <!-- {{--{!! Form::input('number','userID',null,['class'=>'form-control','placeholder'=>'ID NUMBER']) !!}--}} -->
-                        {!! Form::text('username',null,['class'=>'form-control','placeholder'=>'Enter your Username']) !!}
+                        {!! Form::text('username',null,['class'=>'form-control','placeholder'=>'Enter your Username', 'required'=>'required']) !!}
                       </div>
                       <div class="form-group">
                         @foreach($errors->get('email') as $message)
@@ -66,7 +66,7 @@
                         @endforeach
                       </div>
                       <div class="form-group">
-                        {!! Form::password('password',['class'=>'form-control','placeholder'=>'Password']) !!}
+                        {!! Form::password('password',['class'=>'form-control','placeholder'=>'Password', 'required'=>'required']) !!}
                       </div>
                       <div class="form-group">
                          @foreach($errors->get('password') as $message)
@@ -79,6 +79,7 @@
                         </div>
                         <div class="col-sm-6">
                             <a class="pull-right" href="{!! URL::to('/forgotpassword') !!}">Forgot Password?</a>
+                            Don't have an account? <a href="{{ URL::to('/#services') }}">Register</a>
                         </div>
                       </div>
                     {!! Form::close() !!}

@@ -90,22 +90,12 @@
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               <span class="glyphicon glyphicon-bell"></span>
               </a>
-              <ul class="dropdown-menu">
-                <li>
-                  <a href="#">Action</a>
-                </li>
-                <li>
-                  <a href="#">Another action</a>
-                </li>
-                <li>
-                  <a href="#">Something else here</a>
-                </li>
-                <li class="divider">
-                </li>
-                <li>
-                  <a href="#">Separated link</a>
-                </li>
-              </ul>
+              {{-- @foreach($unreadNotifications as $notification)
+              <div class="notification {{ $notification->type }}">    
+                  <p class="subject">{{ $notification->subject }}</p>
+                  <p class="body">{{ $notification->body }}</p>
+              </div>
+              @endforeach --}}
             </li>
             <li>
               <a href="#">Welcome {!! ucfirst(Session::get('firstname')),' ', ucfirst(Session::get('lastname'))  !!} !</a>

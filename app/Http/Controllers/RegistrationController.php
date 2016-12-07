@@ -13,6 +13,7 @@ use Auth;
 use Session;
 use App\Scout;
 use App\Group;
+use Carbon\Carbon;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
@@ -52,10 +53,10 @@ class RegistrationController extends Controller
             'lastname' => 'required|regex:/^[\pL\s\-]+$/u',
             'firstname' => 'required|regex:/^[\pL\s\-]+$/u',
             'birthday' => 'required|date',
-            'contact' => 'required|numeric',
+            'contact' => 'required|numeric|digits:11',
             'emailaddress' => 'required|unique:users',
-            'username' => 'required|unique:users',
-            'password' => 'required',
+            'username' => 'required|unique:users|min:5',
+            'password' => 'required|alphaNum|min:6',
         );
 
         $message = array(
@@ -78,12 +79,18 @@ class RegistrationController extends Controller
             if(User::where('username', $data['username'])->first()) {
                 return back()->withInput();
             } else {
+                
                 $detail = new User;
                 $detail->id =null;
                 $detail->roleID =1;
                 $detail->firstname =strtolower($data['firstname']);
                 $detail->lastname =strtolower($data['lastname']);
-                $detail->birthday =$data['birthday']; 
+                $detail->birthday =$data['birthday'];
+                //using Carbon package for easier date
+                $created = Carbon::createFromFormat('Y-m-d', $data['birthday']);
+                $now = Carbon::now(); 
+                $detail->age = $created->diffInYears($now);
+                $detail->gender = strtolower($data['gender']);
                 $detail->contactno =$data['contact'];
                 $detail->emailaddress =$data['emailaddress'];
                 $detail->username =strtolower($data['username']);
@@ -102,7 +109,7 @@ class RegistrationController extends Controller
                 $message->to(Request::get('emailaddress'), Request::get('username'))
                     ->subject('Verify your email address');
                 });
-                Session::flash('message', 'Thanks for signing up! Please check your email.');
+                Session::flash('message', 'Thanks for signing up! Please check your email to activate your account.');
                 return Redirect::to('http://localhost:8000/login');
             }
         } else {
@@ -116,10 +123,10 @@ class RegistrationController extends Controller
         $rules = array(
             'groupname' => 'regex:/^[\pL\s\-]+$/u',
             'founded' => 'required|date',
-            'contactgroup' => 'required|numeric',
+            'contactgroup' => 'required|numeric|digits:11',
             'emailaddressg' => 'required|unique:group',
-            'user_name' => 'required|unique:group',
-            'passwordg' => 'required',
+            'user_name' => 'required|unique:group|min:5',
+            'passwordg' => 'required|alphaNum|min:6',
         );
 
         $message = array(
@@ -217,10 +224,10 @@ class RegistrationController extends Controller
             'firstname' => 'required|regex:/^[\pL\s\-]+$/u',
             'lastname' => 'required|regex:/^[\pL\s\-]+$/u',
             'birthday' => 'required|date',
-            'contact' => 'required|numeric',
+            'contact' => 'required|numeric|digits:11',
             'emailaddress' => 'required|unique:users',
-            'username' => 'required|unique:users',
-            'password' => 'required',
+            'username' => 'required|unique:users|min:5',
+            'password' => 'required|alphaNum|min:6',
         );
 
         $message = array(
@@ -250,6 +257,11 @@ class RegistrationController extends Controller
                 $detail->firstname =strtolower($data['firstname']);
                 $detail->lastname =strtolower($data['lastname']);
                 $detail->birthday =$data['birthday'];
+                //using Carbon package for easier date
+                $created = Carbon::createFromFormat('Y-m-d', $data['birthday']);
+                $now = Carbon::now(); 
+                $detail->age = $created->diffInYears($now);
+                $detail->gender = strtolower($data['gender']);
                 $detail->contactno =$data['contact'];
                 $detail->emailaddress =$data['emailaddress'];
                 $detail->username =strtolower($data['username']);

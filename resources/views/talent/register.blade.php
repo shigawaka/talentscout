@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -83,7 +83,7 @@
                            <div class="form-group">
                        
                         <div class="col-sm-10">
-                        {!! Form::text('firstname',null,['class'=>'form-control', 'placeholder'=>'Enter your first name']) !!}
+                        {!! Form::text('firstname',null,['class'=>'form-control', 'placeholder'=>'Enter your first name', 'required'=>'required']) !!}
                           <!-- <input type="text" class="form-control" name="lastname" id="lastname" placeholder="Your Last Name"> -->
                               
 
@@ -95,7 +95,7 @@
                          <div class="form-group">
                        
                         <div class="col-sm-10">
-                          {!! Form::text('lastname',null,['class'=>'form-control', 'placeholder'=>'Enter your last name']) !!}
+                          {!! Form::text('lastname',null,['class'=>'form-control', 'placeholder'=>'Enter your last name', 'required'=>'required']) !!}
                           <!-- <input type="text" class="form-control" name="firstname" id="firstname" placeholder="Your First Name"> -->
                             
 
@@ -107,7 +107,7 @@
                          <div class="form-group">
                        
                         <div class="col-sm-10">
-                        {!! Form::text('birthday', '', array('id' => 'datepicker','class' => 'form-control', 'placeholder' => 'Your Date of Birth')) !!}                        
+                        {!! Form::text('birthday', '', array('id' => 'datepicker','class' => 'form-control', 'placeholder' => 'Your Date of Birth', 'required'=>'required')) !!}                        
                                                   
 
                                                   @foreach($errors->get('birthday') as $message)
@@ -118,7 +118,17 @@
                       <div class="form-group">
                        
                         <div class="col-sm-10">
-                        {!! Form::number('contact', '', array('class' => 'form-control', 'placeholder' => 'Your Contact Number')) !!}
+                        {!! Form::label('gender', 'Gender', array('class' => 'form-control')) !!}
+                        {!! Form::label('gender', 'Male') !!}
+                        {!! Form::radio('gender', 'Male', false) !!}
+                        {!! Form::label('gender', 'Female') !!}
+                        {!! Form::radio('gender', 'Female', true) !!}
+                        </div>
+                      </div>
+                      <div class="form-group">
+                       
+                        <div class="col-sm-10">
+                        {!! Form::number('contact', '', array('class' => 'form-control', 'placeholder' => 'Your Contact Number', 'required'=>'required')) !!}
                           <!-- <input type="text" class="form-control" name="contactno" id="contactno" placeholder="Enter email"> -->
                                                 
 
@@ -131,7 +141,7 @@
                         
                         <div class="col-sm-10"> 
                         <!-- {!! Form::email('email', '', array('class' => 'form-control', 'placeholder' => 'Your Email Address')) !!} -->
-                        {!! Form::email('emailaddress', '', ['class' => 'form-control', 'placeholder' => 'Your Email Address']); !!}
+                        {!! Form::email('emailaddress', '', ['class' => 'form-control', 'placeholder' => 'Your Email Address', 'required'=>'required']); !!}
                             <!-- <input type="input" class="form-control" name="email" id="email" placeholder="Enter Email address"> -->
                                                 
 
@@ -143,7 +153,7 @@
                       <div class="form-group">
                         
                         <div class="col-sm-10"> 
-                        {!! Form::text('username', '', array('class' => 'form-control', 'placeholder' => 'Your username')) !!}
+                        {!! Form::text('username', '', array('class' => 'form-control', 'placeholder' => 'Your username', 'required'=>'required')) !!}
                           <!-- <input type="input" class="form-control" name="username" id="username" placeholder="Enter username"> -->
                                                 
 
@@ -156,7 +166,7 @@
                         
                         <div class="col-sm-10"> 
                         <!-- {!! Form::password('password', '', array('class' => 'form-control', 'placeholder' => 'Enter your password')) !!} -->
-                        {!! Form::password('password', ['class' => 'form-control', 'placeholder' => 'Enter your password']) !!}
+                        {!! Form::password('password', ['class' => 'form-control', 'placeholder' => 'Enter your password', 'required'=>'required']) !!}
                           <!-- <input type="password" class="form-control" name="password" id="pwd" placeholder="Enter password"> -->
                                                 
 
@@ -174,7 +184,7 @@
                       </div>
                       <div class="form-group"> 
                         <div class=" col-sm-10">
-                          {!! Form::button('Create Account',['class'=>'btn btn-success btn-lg btn-block', 'type' => 'submit ']) !!}
+                          {!! Form::button('Create Account',['class'=>'btn btn-success btn-lg btn-block', 'type' => 'submit ', 'required'=>'required']) !!}
                           <!-- <button type="submit" class="btn btn-default">Create Account</button> -->
                         </div>
                       </div>
@@ -192,7 +202,7 @@
                            <div class="form-group">
                        
                         <div class="col-sm-10">
-                        {!! Form::text('groupname',null,['class'=>'form-control', 'placeholder'=>'Enter your groupname']) !!}
+                        {!! Form::text('groupname',null,['class'=>'form-control', 'placeholder'=>'Enter your groupname', 'required'=>'required']) !!}
                           <!-- <input type="text" class="form-control" name="lastname" id="lastname" placeholder="Your Last Name"> -->
                               
 
@@ -204,7 +214,7 @@
                          <div class="form-group">
                        
                         <div class="col-sm-10">
-                        {!! Form::text('founded', '', array('id' => 'datepicker2','class' => 'form-control', 'placeholder' => 'Date founded')) !!}                        
+                        {!! Form::text('founded', '', array('id' => 'datepicker2','class' => 'form-control', 'placeholder' => 'Date founded', 'required'=>'required')) !!}                        
                                                   
 
                                                   @foreach($errors->get('founded') as $message)
@@ -215,7 +225,7 @@
                       <div class="form-group">
                        
                         <div class="col-sm-10">
-                        {!! Form::number('contactgroup', '', array('class' => 'form-control', 'placeholder' => 'Group Contact Number')) !!}
+                        {!! Form::number('contactgroup', '', array('class' => 'form-control', 'placeholder' => 'Group Contact Number', 'required'=>'required')) !!}
                           <!-- <input type="text" class="form-control" name="contactno" id="contactno" placeholder="Enter email"> -->
                                                 
 
@@ -228,7 +238,7 @@
                         
                         <div class="col-sm-10"> 
                         <!-- {!! Form::email('email', '', array('class' => 'form-control', 'placeholder' => 'Your Email Address')) !!} -->
-                        {!! Form::email('emailaddressg', '', ['class' => 'form-control', 'placeholder' => 'Group Email Address']); !!}
+                        {!! Form::email('emailaddressg', '', ['class' => 'form-control', 'placeholder' => 'Group Email Address', 'required'=>'required']); !!}
                             <!-- <input type="input" class="form-control" name="email" id="email" placeholder="Enter Email address"> -->
                                                 
 
@@ -240,7 +250,7 @@
                       <div class="form-group">
                         
                         <div class="col-sm-10"> 
-                        {!! Form::text('user_name', '', array('class' => 'form-control', 'placeholder' => 'Your username')) !!}
+                        {!! Form::text('user_name', '', array('class' => 'form-control', 'placeholder' => 'Your username', 'required'=>'required')) !!}
                           <!-- <input type="input" class="form-control" name="username" id="username" placeholder="Enter username"> -->
                                                 
 
@@ -253,7 +263,7 @@
                         
                         <div class="col-sm-10"> 
                         <!-- {!! Form::password('password', '', array('class' => 'form-control', 'placeholder' => 'Enter your password')) !!} -->
-                        {!! Form::password('passwordg', ['class' => 'form-control', 'placeholder' => 'Enter your password']) !!}
+                        {!! Form::password('passwordg', ['class' => 'form-control', 'placeholder' => 'Enter your password', 'required'=>'required']) !!}
                           <!-- <input type="password" class="form-control" name="password" id="pwd" placeholder="Enter password"> -->
                                                 
 

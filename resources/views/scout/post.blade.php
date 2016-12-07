@@ -138,6 +138,7 @@
         {!! Form::submit('Sort', array('class' => 'btn btn-info btn-lg')) !!} 
         {!! Form::close() !!}
         </div>
+          
            <!-- {!! Form::button('Create Account',['id' => 'modal-403917','href' => '#modal-container-403917','role' => 'button','class'=>'btn btn-success btn-lg btn-block']) !!} -->
            <a id="modal-403917" href="#modal-container-403917" role="button" class="btn btn-success btn-lg" data-toggle="modal">ADD POST</a>
           
@@ -157,18 +158,18 @@
                     Add Title
                 </h3>
                 <div class="col-xs-12">
-                {!! Form::text('title', '', array('class' => 'col-xs-12','placeholder' => 'Enter Post Title')) !!}
+                {!! Form::text('title', '', array('class' => 'col-xs-12','placeholder' => 'Enter Post Title', 'required'=>'required')) !!}
                 @foreach($errors->get('title') as $message)
-                {!! $message !!}
+                {{ $message }}
                 @endforeach
                 </div>
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
                     Add Description
                 </h3>
                 <div class="col-xs-12">
-                {!! Form::textarea('description', '', array('style' => 'min-width:100%;','class' => 'form-group','placeholder' => 'Enter Description of the Job')) !!}
+                {!! Form::textarea('description', '', array('style' => 'min-width:100%;','class' => 'form-group','placeholder' => 'Enter Description of the Job', 'required'=>'required')) !!}
                 @foreach($errors->get('description') as $message)
-                {!! $message !!}
+                {{ $message }}
                 @endforeach
                 </div>
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
@@ -177,26 +178,24 @@
                 <div class="col-xs-12">
                 {!! Form::file('file', '', array('class' => 'form-group','placeholder' => 'Upload Image')) !!}
                 @foreach($errors->get('file') as $message)
-                {!! $message !!}
+                {{ $message }}
                 @endforeach
                 </div>
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
                     Add Tags (Separated by Comma)
                 </h3>
                 <div class="col-xs-12">
-                {!! Form::text('tags[]', '', array('placeholder' => 'Add Tags', 'data-role' => 'tagsinput')) !!}              
-                 @foreach($errors->get('tags') as $message)
-                {!! $message !!}
-                @endforeach
+                {!! Form::text('tags[0]', '', array('placeholder' => 'Add Tags', 'data-role' => 'tagsinput', 'required'=>'required')) !!}              
+                
                 </div>
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
                     Add Start Date     
                 </h3>
                 <div class="col-xs-12">
-                {!! Form::text('start_date', '', array('id' => 'datepicker','class' => 'form-control', 'placeholder' => 'Event starting')) !!}                        
+                {!! Form::text('start_date', '', array('id' => 'datepicker','class' => 'form-control', 'placeholder' => 'Event starting', 'required'=>'required')) !!}                        
                                                   
 
-                                                  @foreach($errors->get('birthday') as $message)
+                                                  @foreach($errors->get('start_date') as $message)
                                                     {{ $message }}
                                                     @endforeach
                 </div>
@@ -204,10 +203,10 @@
                     Add End Date     
                 </h3>
                 <div class="col-xs-12">
-               {!! Form::text('end_date', '', array('id' => 'datepicker2','class' => 'form-control', 'placeholder' => 'Event ending')) !!}                        
+               {!! Form::text('end_date', '', array('id' => 'datepicker2','class' => 'form-control', 'placeholder' => 'Event ending', 'required'=>'required')) !!}                        
                                                   
 
-                                                  @foreach($errors->get('birthday') as $message)
+                                                  @foreach($errors->get('end_date') as $message)
                                                     {{ $message }}
                                                     @endforeach
                 </div>
@@ -215,9 +214,9 @@
                     Add Budget      
                 </h3>
                 <div class="col-xs-12">
-                {!! Form::text('budget', '', array('placeholder' => 'Enter Budget', 'class' => 'form-group')) !!}              
+                {!! Form::text('budget', '', array('placeholder' => 'Enter Budget', 'class' => 'form-group', 'required'=>'required')) !!}              
                 @foreach($errors->get('budget') as $message)
-                {!! $message !!}
+                {{ $message }}
                 @endforeach
                 </div>
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
@@ -225,9 +224,6 @@
                 </h3>
                 <div class="col-xs-12">
                 {!! Form::select('rate', array('Fixed Price' => 'Fixed Price', 'Hourly Rate' => 'Hourly')) !!}
-                @foreach($errors->get('rate') as $message)
-                {!! $message !!}
-                @endforeach
                 </div>
                 <div class="modal-footer">
                 {!! Form::submit('Save Changes', array('class' => 'btn btn-info')) !!}  
@@ -289,7 +285,7 @@
 </section>
     <!-- jQuery -->
     <script src="../../vendor/jquery/jquery.min.js"></script>
-
+     <script src="../../js/jquery-1.10.2.js"></script>
     <!-- Bootstrap Core JavaScript -->
     <script src="../../vendor/bootstrap/js/bootstrap.min.js"></script>
 
@@ -303,15 +299,20 @@
     <script src="../../js/carousel.js"></script>
     <script src="../../js/bootstrap-tagsinput.js"></script>
     <script src="../../js/bootstrap-tagsinput-angular.js"></script>
-     <script src="../../js/jquery-1.10.2.js"></script>
   <script src="../../js/jquery-ui.js"></script>
   <script src="../../js/jquery-ui-timepicker-addon.js"></script>
     <script>
   $(function() {
     $( "#datepicker" ).datetimepicker({ dateFormat: 'yy-mm-dd'});
     $( "#datepicker2" ).datetimepicker({ dateFormat: 'yy-mm-dd'});
+    
     });
   </script>
+  @if(count($errors)>0)
+          <script>
+              $('#modal-container-403917').modal('show');
+          </script>
+  @endif
 </body>
 
 </html>

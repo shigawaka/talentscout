@@ -90,5 +90,5 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     {
         $this->friends()->detach($user->id);
     }
-
+    
 }

@@ -288,8 +288,10 @@ class ComposerStaticInit8d383489c3ffa154b59662c03ad27f86
     public static $classMap = array (
         'CreateFailedJobsTable' => __DIR__ . '/../..' . '/database/migrations/2016_10_03_223626_create_failed_jobs_table.php',
         'CreateJobsTable' => __DIR__ . '/../..' . '/database/migrations/2016_10_01_164740_create_jobs_table.php',
+        'CreateNotificationTable' => __DIR__ . '/../..' . '/database/migrations/2016_12_04_151628_CreateNotificationTable.php',
         'CreateScoutTable' => __DIR__ . '/../..' . '/database/migrations/2016_09_09_053401_create_scout_table.php',
         'CreateTalentTable' => __DIR__ . '/../..' . '/database/migrations/2016_09_08_211711_create_talent_table.php',
+        'CreateUsersTable' => __DIR__ . '/../..' . '/database/migrations/2016_12_06_131445_create_users_table.php',
         'DatabaseSeeder' => __DIR__ . '/../..' . '/database/seeds/DatabaseSeeder.php',
         'File_Iterator' => __DIR__ . '/..' . '/phpunit/php-file-iterator/src/Iterator.php',
         'File_Iterator_Facade' => __DIR__ . '/..' . '/phpunit/php-file-iterator/src/Facade.php',
