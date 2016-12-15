@@ -110,12 +110,12 @@
             </li>
             @endif
           </ul>
-          {!! Form::open(['url'=>'/search', 'class' => 'navbar-form navbar-left']) !!}
+          {!! Form::open(['url'=>'/search', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
           
-            <div class="form-group">
+            
           {!! Form::text('search', '', array('placeholder' => 'Search talent', 'class' => 'form-control', 'style' => 'width:70%;')) !!}              
           {!! Form::submit('Search', array('class' => 'btn btn-default')) !!}   
-            </div>
+            
             {!! Form::close() !!}
           <ul class="nav navbar-nav navbar-right">
             <li>
@@ -275,14 +275,41 @@
                 {!! $message !!}
                 @endforeach
                 </div>
+                <h1 class="form-group" style="padding: 15px;border-bottom: 1px solid #e5e5e5" id="myModalLabel">
+                    Talent Specification    
+                </h1>
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
                     Talent's Rate    
                 </h3>
                 <div class="col-xs-12">
-                {!! Form::select('rate', array('fixed' => 'Fixed Price', 'hourly' => 'Hourly')) !!}
+                {!! Form::select('rate', array('fixed' => 'Fixed Price', 'hourly' => 'Hourly'), $posts['rate']) !!}
                 @foreach($errors->get('rate') as $message)
                 {!! $message !!}
                 @endforeach
+                </div>
+                <h3 class="form-group" style="padding-left: 17px;padding-top:25px" id="myModalLabel">
+                    Age Minimum Requirement    
+                </h3>
+                <div class="col-xs-12">
+                {!! Form::select('age',array('0' => 'Any Age', '1' => 'Between 5 - 17 years old', '2' => '18 years old and above'), $posts['age']) !!}
+                </div>
+                <h3 class="form-group" style="padding-left: 17px;padding-top:25px" id="myModalLabel">
+                    Gender    
+                </h3>
+                <div class="col-xs-12">
+                {!! Form::select('gender', array('any' => 'Any gender', 'male' => 'Male only', 'female' => 'Female only'), $posts['gender']) !!}
+                </div>
+                <h3 class="form-group" style="padding-left: 17px;padding-top:25px" id="myModalLabel">
+                    Characteristic    
+                </h3>
+                <div class="col-xs-12">
+                {!! Form::select('group', array('0' => 'Group and Individual', '1' => 'Group only', '2' => 'Individual Only'), $posts['group']) !!}
+                </div>
+                <h3 class="form-group" style="padding-left: 17px;padding-top:25px" id="myModalLabel">
+                    Number of Talent(s)    
+                </h3>
+                <div class="col-xs-12">
+                {!! Form::number('hire_number', $posts['hire_number'], array('class' => 'form-control', 'placeholder' => 'Your Contact Number', 'required'=>'required', 'min'=>'1', 'max'=>'25')) !!}
                 </div>
                 <div class="modal-footer">
                 {!! Form::submit('Save Changes', array('class' => 'btn btn-info')) !!}  
@@ -425,7 +452,7 @@
                     Add Description of yourself
                 </h3>
                 <div class="col-xs-12">
-                {!! Form::textarea('body', '', array('style' => 'min-width:100%;','class' => 'form-group','placeholder' => 'Enter Description of yourself and why you think you are perfect for this job')) !!}
+                {!! Form::textarea('body', '', array('style' => 'min-width:100%;resize:none;','class' => 'form-group','placeholder' => 'Enter Description of yourself and why you think you are perfect for this job')) !!}
                 @foreach($errors->get('body') as $message)
                 {!! $message !!}
                 @endforeach
@@ -476,7 +503,7 @@
                     Add Description of yourself
                 </h3>
                 <div class="col-xs-12">
-                {!! Form::textarea('body', $proposal['body'], array('style' => 'min-width:100%;','class' => 'form-group','placeholder' => 'Enter Description of yourself and why you think you are perfect for this job')) !!}
+                {!! Form::textarea('body', $proposal['body'], array('style' => 'min-width:100%;resize:none;','class' => 'form-group','placeholder' => 'Enter Description of yourself and why you think you are perfect for this job')) !!}
                 @foreach($errors->get('body') as $message)
                 {!! $message !!}
                 @endforeach
@@ -597,6 +624,11 @@
                   <div class="panel panel-default">
                   <div class="panel-heading">
                   <strong>{!! $val['username'] !!}</strong> <span class="text-muted">commented {!! $val['date_posted'] !!} ago</span>
+                  @if(Session::get('username') == $val['username'])
+                  <a class="close" title="Delete Comment" href="{{ URL::to('/deletecomment').'/'.Session::get('id').'/'.$posts['id'] }}">
+                    ×
+                  </a>
+                  @endif
                   </div>
                   <div class="panel-body">
                   {!! $val['body'] !!}

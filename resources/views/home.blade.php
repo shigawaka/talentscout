@@ -41,7 +41,7 @@
             <div class="navbar-header">
                 
                 <a class="navbar-brand page-scroll" href="#page-top"><img src="img/logo.png" class="logo"></a>
-                <div class="col-sm-10 col-md-offset-9">
+                <div class="col-sm-10 col-md-offset-5">
                     Already have an account? <a href="{{ URL::to('/login') }}">Log In</a>
                 </div>
             </div>

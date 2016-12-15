@@ -85,6 +85,7 @@ Route::get('/logout', 'Auth\AuthController@getLogout');
 Route::post('/talentregister', 'RegistrationController@store');
 Route::post('/talentregisterGroup', 'RegistrationController@storeGroup');
 Route::post('/scoutregister', 'RegistrationController@storeScout');
+Route::get('/sendinvitation', 'ChikkaController@send');
 //group
 Route::group(array('before' => 'auth'), function()
 {	
@@ -130,6 +131,7 @@ Route::get('/view', function () {
 });
 //comment
 Route::post('/addComment', 'HomeController@addComment');
+Route::get('/deletecomment/{id}/{postid}', 'HomeController@deleteComment');
 //proposal
 Route::post('/addProposal', 'HomeController@addProposal');
 Route::post('/editProposal', 'HomeController@editProposal');

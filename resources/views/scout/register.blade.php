@@ -120,7 +120,10 @@
                       <div class="form-group">
                        
                         <div class="col-sm-10">
+                        <div class="input-group">
+                          <div class="input-group-addon">+63</div>
                           {!! Form::number('contact', '', array('class' => 'form-control', 'placeholder' => 'Your Contact Number', 'required'=>'required')) !!}
+                          </div>
                           <!-- <input type="text" class="form-control" name="contactno" id="contactno" placeholder="Enter email"> -->
                                                 
 

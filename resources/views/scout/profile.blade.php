@@ -115,17 +115,13 @@
             {!! Form::text('firstname', ucfirst($user['firstname']), array('class' => 'validate','placeholder' => 'Enter Firstname', 'disabled' => 'disabled')) !!}
               <!-- <input  value="Frete" id="firstname" type="text" class="validate"> -->
               <label for="firstname">First Name</label>
-              @foreach($errors->get('firstname') as $message)
-                {!! $message !!}
-                @endforeach
+
             </div>
             <div class="input-field col s6">
             {!! Form::text('lastname', ucfirst($user['lastname']), array('class' => 'validate','placeholder' => 'Enter Firstname', 'disabled' => 'disabled')) !!}
               <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
               <label for="lastname">Last Name</label>
-              @foreach($errors->get('lastname') as $message)
-                {!! $message !!}
-                @endforeach
+
             </div>
             <div class="input-field col s6">
             {!! Form::text('birthday', $user['birthday'], array('class' => 'datepicker','placeholder' => 'Enter date of birth')) !!}
@@ -136,20 +132,30 @@
                 @endforeach
             </div>
             <div class="input-field col s6">
-            {!! Form::text('contactno', $user['contactno'], array('class' => 'validate','placeholder' => 'Enter contact number')) !!}
+            {!! Form::text('contact', $user['contactno'], array('class' => 'validate','placeholder' => 'Enter contact number')) !!}
               <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
               <label for="lastname">Contact Number</label>
-              @foreach($errors->get('contactno') as $message)
+              @foreach($errors->get('contact') as $message)
                 {!! $message !!}
                 @endforeach
             </div>
             <div class="input-field col s6">
-            {!! Form::text('email', $user['emailaddress'], array('class' => 'validate','placeholder' => 'Enter contact number')) !!}
+            {!! Form::email('emailaddress', $user['emailaddress'], array('class' => 'validate','placeholder' => 'Enter contact number')) !!}
               <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
               <label for="lastname">Email address</label>
-              @foreach($errors->get('email') as $message)
+              @foreach($errors->get('emailaddress') as $message)
                 {!! $message !!}
                 @endforeach
+            </div>
+            <div class="input-field col s6">
+            {!! Form::password('password', '', array('class' => 'validate','placeholder' => 'Enter new password')) !!}
+              <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
+              <label for="password">Change Password</label>
+            </div>
+            <div class="input-field col s6">
+            {!! Form::text('gender', ucfirst($user['gender']), array('class' => 'validate','placeholder' => 'Enter Firstname', 'disabled' => 'disabled')) !!}
+              <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
+              <label for="lastname">Gender</label>
             </div>
                <div class="input-field col s12">
             {!! Form::text('address', $user['address'], array('class' => 'validate','placeholder' => 'Enter your address')) !!}
@@ -159,7 +165,6 @@
                 {!! $message !!}
                 @endforeach
             </div>
-
             <div class="input-field col s12" style="padding-bottom: 35px;">
               <label for="image">Change Profile Picture</label>
             {!! Form::file('image', '', array('class' => 'validate','placeholder' => 'Upload Image')) !!}
@@ -209,15 +214,18 @@
                <div class="col s12 m7">
       
               <div class="card-panel horizontal">
-                  <h4>Personal Details</h4>
+                  <h2>Personal Details</h2>
 
 
                     <div class="card-stacked">
-                       <h6><i class="material-icons">perm_contact_calendar</i>{!! $user['birthday'] !!}</h6>
+                    <i class="material-icons md-48">perm_contact_calendar</i>DATE OF BIRTH
+                       <h5>{!! $user['birthday'] !!}</h5>
                     </div>
                    
                     <div class="card-stacked">
-                       <h6> <i class="material-icons">contact_phone</i> {!! $user['contactno'] !!}</h6>
+                    <i class="material-icons">contact_phone</i> CONTACT 
+                       <h5>  {!! $user['contactno'] !!}</h5>
+                       <h5>  {!! $user['emailaddress'] !!}</h5>
                     </div>
                     <div class="card-stacked">
                        <h6> <i class="material-icons">group_work</i>Not a member of any group</h6>

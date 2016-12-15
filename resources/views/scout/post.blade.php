@@ -82,12 +82,12 @@
             @endif
           </ul>
           
-          {!! Form::open(['url'=>'/search', 'class' => 'navbar-form navbar-left']) !!}
+          {!! Form::open(['url'=>'/search', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
           
-            <div class="form-group">
+            
           {!! Form::text('search', '', array('placeholder' => 'Search talent', 'class' => 'form-control', 'style' => 'width:70%;')) !!}              
           {!! Form::submit('Search', array('class' => 'btn btn-default')) !!}   
-            </div>
+            
             {!! Form::close() !!}
           
           <ul class="nav navbar-nav navbar-right">
@@ -160,7 +160,7 @@
                 <div class="col-xs-12">
                 {!! Form::text('title', '', array('class' => 'col-xs-12','placeholder' => 'Enter Post Title', 'required'=>'required')) !!}
                 @foreach($errors->get('title') as $message)
-                {{ $message }}
+                <div class="alert alert-danger text-center">{{ $message }}</div>
                 @endforeach
                 </div>
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
@@ -169,16 +169,17 @@
                 <div class="col-xs-12">
                 {!! Form::textarea('description', '', array('style' => 'min-width:100%;','class' => 'form-group','placeholder' => 'Enter Description of the Job', 'required'=>'required')) !!}
                 @foreach($errors->get('description') as $message)
-                {{ $message }}
+                <div class="alert alert-danger text-center">{{ $message }}</div>
                 @endforeach
                 </div>
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
                     Attach File
                 </h3>
                 <div class="col-xs-12">
-                {!! Form::file('file', '', array('class' => 'form-group','placeholder' => 'Upload Image')) !!}
+                {!! Form::file('file', '', array('class' => 'form-group','placeholder' => 'Upload Image/Video', 'required'=>'required')) !!}
+                
                 @foreach($errors->get('file') as $message)
-                {{ $message }}
+                <div class="alert alert-danger text-center">{{ $message }}</div>
                 @endforeach
                 </div>
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
@@ -196,7 +197,7 @@
                                                   
 
                                                   @foreach($errors->get('start_date') as $message)
-                                                    {{ $message }}
+                                                    <div class="alert alert-danger text-center">{{ $message }}</div>
                                                     @endforeach
                 </div>
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
@@ -207,7 +208,7 @@
                                                   
 
                                                   @foreach($errors->get('end_date') as $message)
-                                                    {{ $message }}
+                                                    <div class="alert alert-danger text-center">{{ $message }}</div>
                                                     @endforeach
                 </div>
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
@@ -216,14 +217,41 @@
                 <div class="col-xs-12">
                 {!! Form::text('budget', '', array('placeholder' => 'Enter Budget', 'class' => 'form-group', 'required'=>'required')) !!}              
                 @foreach($errors->get('budget') as $message)
-                {{ $message }}
+                <div class="alert alert-danger text-center">{{ $message }}</div>
                 @endforeach
                 </div>
-                <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
+                <h1 class="form-group" style="padding: 15px;border-bottom: 1px solid #e5e5e5" id="myModalLabel">
+                    Talent Specification    
+                </h1>
+                <h3 class="form-group" style="padding-left: 17px;" id="myModalLabel">
                     Talent's Rate    
                 </h3>
                 <div class="col-xs-12">
                 {!! Form::select('rate', array('Fixed Price' => 'Fixed Price', 'Hourly Rate' => 'Hourly')) !!}
+                </div>
+                <h3 class="form-group" style="padding-left: 17px;padding-top:25px" id="myModalLabel">
+                    Age Minimum Requirement    
+                </h3>
+                <div class="col-xs-12">
+                {!! Form::select('age', array('0' => 'Any Age', '1' => 'Between 5 - 17 years old', '2' => '18 years old and above')) !!}
+                </div>
+                <h3 class="form-group" style="padding-left: 17px;padding-top:25px" id="myModalLabel">
+                    Gender    
+                </h3>
+                <div class="col-xs-12">
+                {!! Form::select('gender', array('any' => 'Any gender', 'male' => 'Male only', 'female' => 'Female only')) !!}
+                </div>
+                <h3 class="form-group" style="padding-left: 17px;padding-top:25px" id="myModalLabel">
+                    Characteristic    
+                </h3>
+                <div class="col-xs-12">
+                {!! Form::select('group', array('0' => 'Group and Individual', '1' => 'Group only', '2' => 'Individual Only')) !!}
+                </div>
+                <h3 class="form-group" style="padding-left: 17px;padding-top:25px" id="myModalLabel">
+                    Number of Talent(s)    
+                </h3>
+                <div class="col-xs-12">
+                {!! Form::number('hire_number', '', array('class' => 'form-control', 'placeholder' => 'Number of Talents Needed', 'required'=>'required', 'min'=>'1', 'max'=>'25')) !!}
                 </div>
                 <div class="modal-footer">
                 {!! Form::submit('Save Changes', array('class' => 'btn btn-info')) !!}  
@@ -255,6 +283,13 @@
             {!! $post['description'] !!}
 
           </p>
+          @if(strpos($post['file'],'.mp4') == true)
+          <video style="width: 100%;" width="400" controls>
+              <source src="{!! URL::to('/files').'/'.$post['file'] !!}" type="video/mp4">
+          </video>
+          @else
+          <img class="img-responsive" style="height: 300px; width: 450px;" src="{!! URL::to('/files').'/'.$post['file'] !!}" alt="Chania">
+          @endif
           <p>
             @if($post['status'] == 0)
            <span class="label label-primary">Status: Ongoing</span>

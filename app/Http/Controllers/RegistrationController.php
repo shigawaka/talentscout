@@ -52,8 +52,8 @@ class RegistrationController extends Controller
         $rules = array(
             'lastname' => 'required|regex:/^[\pL\s\-]+$/u',
             'firstname' => 'required|regex:/^[\pL\s\-]+$/u',
-            'birthday' => 'required|date',
-            'contact' => 'required|numeric|digits:11',
+            'birthday' => 'required|date|before:2011-01-01',
+            'contact' => 'required|numeric|regex:/(09)[0-9]{9}/',
             'emailaddress' => 'required|unique:users',
             'username' => 'required|unique:users|min:5',
             'password' => 'required|alphaNum|min:6',
@@ -71,6 +71,7 @@ class RegistrationController extends Controller
             'email.required' => 'Required',
             'username.required' => 'Required',
             'password.required' => 'Required',
+            'birthday.before' => 'You must be 5 years older and above!',
         );
 
         $validation = Validator::make($data, $rules, $message);
@@ -79,7 +80,6 @@ class RegistrationController extends Controller
             if(User::where('username', $data['username'])->first()) {
                 return back()->withInput();
             } else {
-                
                 $detail = new User;
                 $detail->id =null;
                 $detail->roleID =1;
@@ -91,7 +91,8 @@ class RegistrationController extends Controller
                 $now = Carbon::now(); 
                 $detail->age = $created->diffInYears($now);
                 $detail->gender = strtolower($data['gender']);
-                $detail->contactno =$data['contact'];
+                $changecontact = preg_replace('/^0/','63',$data['contact']);
+                $detail->contactno =$changecontact;
                 $detail->emailaddress =$data['emailaddress'];
                 $detail->username =strtolower($data['username']);
                 $detail->password = Hash::make($data['password']);
@@ -110,6 +111,8 @@ class RegistrationController extends Controller
                     ->subject('Verify your email address');
                 });
                 Session::flash('message', 'Thanks for signing up! Please check your email to activate your account.');
+                $chikkadata = array('number'=> $changecontact, 'message'=> 'Thank you for signing up in Talent Scout!'.ucfirst($detail->firstname).' '.ucfirst($detail->lastname).'.This is where your path to stardom begins!');
+                ChikkaController::send($chikkadata);
                 return Redirect::to('http://localhost:8000/login');
             }
         } else {
@@ -123,7 +126,7 @@ class RegistrationController extends Controller
         $rules = array(
             'groupname' => 'regex:/^[\pL\s\-]+$/u',
             'founded' => 'required|date',
-            'contactgroup' => 'required|numeric|digits:11',
+            'contactgroup' => 'required|numeric|regex:/(09)[0-9]{9}/',
             'emailaddressg' => 'required|unique:group',
             'user_name' => 'required|unique:group|min:5',
             'passwordg' => 'required|alphaNum|min:6',
@@ -145,23 +148,24 @@ class RegistrationController extends Controller
             if(Group::where('user_name', $data['user_name'])->first()) {
                 return back()->withInput();
             } else {
+                $changecontact = preg_replace('/^0/','63',$data['contactgroup']);
                 $detail = new Group;
                 $detail->id =null;
                 $detail->groupname =strtolower($data['groupname']);
                 $detail->founded =$data['founded'];
-                $detail->contactno =$data['contactgroup'];
+                $detail->contactno =$changecontact;
                 $detail->emailaddressg =$data['emailaddressg'];
                 $detail->user_name =strtolower($data['user_name']);
                 $detail->password = Hash::make($data['passwordg']);
                 $confirmation_code = str_random(30);
                 $detail->confirmation_code = $confirmation_code;
                 $detail->save();
-                if(!Mail::send('emails.emailactivation', ['confirmation_code' => $confirmation_code], function($message) {
-                $message->to(Request::get('emailaddressg'), Request::get('user_name'))
+                Mail::send('emails.emailactivation', ['confirmation_code' => $confirmation_code], function($message) {
+                $message->to(Request::get('emailaddress'), Request::get('username'))
                     ->subject('Verify your email address');
-                })) {
-                    dd('test');
-                } 
+                });
+                $chikkadata = array('number'=> $changecontact, 'message'=> 'Thank you for signing up in Talent Scout!'.ucfirst($detail->firstname).' '.ucfirst($detail->lastname).'.This is where your path to stardom begins!');
+                ChikkaController::send($chikkadata);
                 Session::flash('message', 'Thanks for signing up! Please check your email.');
                 return Redirect::to('http://localhost:8000/login');
             }
@@ -224,7 +228,7 @@ class RegistrationController extends Controller
             'firstname' => 'required|regex:/^[\pL\s\-]+$/u',
             'lastname' => 'required|regex:/^[\pL\s\-]+$/u',
             'birthday' => 'required|date',
-            'contact' => 'required|numeric|digits:11',
+            'contact' => 'required|numeric|regex:/(09)[0-9]{9}/',
             'emailaddress' => 'required|unique:users',
             'username' => 'required|unique:users|min:5',
             'password' => 'required|alphaNum|min:6',
@@ -250,6 +254,7 @@ class RegistrationController extends Controller
             if(User::where('username', $data['username'])->first()) {
                 return back()->withInput();
             } else {
+                $changecontact = preg_replace('/^0/','63',$data['contact']);
                 $detail = new User;
 
                 $detail->id =null;
@@ -262,7 +267,7 @@ class RegistrationController extends Controller
                 $now = Carbon::now(); 
                 $detail->age = $created->diffInYears($now);
                 $detail->gender = strtolower($data['gender']);
-                $detail->contactno =$data['contact'];
+                $detail->contactno =$changecontact;
                 $detail->emailaddress =$data['emailaddress'];
                 $detail->username =strtolower($data['username']);
                 $detail->password = Hash::make($data['password']);
@@ -281,6 +286,8 @@ class RegistrationController extends Controller
                 $message->to(Request::get('emailaddress'), Request::get('username'))
                     ->subject('Verify your email address');
                 });
+                $chikkadata = array('number'=> $changecontact, 'message'=> 'Thank you for signing up in Talent Scout!'.ucfirst($detail->firstname).' '.ucfirst($detail->lastname).'.Hope you find the right talented person fit for your needs!');
+                ChikkaController::send($chikkadata);
                 Session::flash('message', 'Thanks for signing up! We have sent an activation code to your email.');
                 return Redirect::to('http://localhost:8000/login');
             }

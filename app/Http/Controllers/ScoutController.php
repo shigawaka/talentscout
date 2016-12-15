@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Request;
 use Redirect;
 use Validator;
+// use Storage;
+
 
 use App\User;
 use App\Post;
@@ -289,6 +291,7 @@ class ScoutController extends Controller
             'title' => 'required|unique:post',
             'description' => 'required',
             'budget' => 'required|numeric',
+            'file' => 'required|max:200000|mimes:png,jpeg,jpg,mp4,ogg,mkv,avi',
         );
         $message = array(
             'title.required' => 'Required',
@@ -319,6 +322,10 @@ class ScoutController extends Controller
                 $detail->tags =$tags;
                 $detail->budget =$data['budget'];
                 $detail->rate = $data['rate'];
+                $detail->age = $data['age'];
+                $detail->gender = $data['gender'];
+                $detail->group = $data['group'];
+                $detail->hire_number = $data['hire_number'];
                 $detail->date_posted = date('Y-m-d H:i:s');
                 $detail->start_date = $data['start_date'];
                 $detail->end_date = $data['end_date'];

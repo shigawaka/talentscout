@@ -78,12 +78,12 @@
             </li>
             @endif
           </ul>
-          {!! Form::open(['url'=>'/search', 'class' => 'navbar-form navbar-left']) !!}
+          {!! Form::open(['url'=>'/search', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
           
-            <div class="form-group">
+            
           {!! Form::text('search', '', array('placeholder' => 'Search talent', 'class' => 'form-control', 'style' => 'width:70%;')) !!}              
           {!! Form::submit('Search', array('class' => 'btn btn-default')) !!}   
-            </div>
+            
             {!! Form::close() !!}
           <ul class="nav navbar-nav navbar-right">
             <li>
@@ -143,18 +143,18 @@
         </div>
         @if(!empty($result))
         @foreach($result as $res)
-        <div class="col-md-3" style="width: 250px;">
-          <div class="thumbnail" style="height: 450px;">
+        <div class="col-md-3" style="width: 250px;height:500px;">
+          <div class="thumbnail" style="height: 100%;">
             <img alt="Bootstrap Thumbnail First" src="{!! URL::to('/files').'/'.$res['profile_image'] !!}" />
             <div class="caption">
-              <h3>
+              <h4>
                 <b>{!! ucfirst($res['firstname']).' '.ucfirst($res['lastname']) !!}</b>
-              </h3>
+              </h4>
               <p style="font-size: 13px;">
                 <i>{!! $res['profile_description'] !!}</i><br>
               </p>
               <p>
-                <a class="btn btn-primary" href="#">Endorse</a> <a class="btn" href="#">View</a>@if(!empty($res['fee']))<span class="label label-default"> Talent Fee:  {!! $res['fee'] !!} @endif 
+                <a class="btn btn-primary" href="#">Endorse</a> <a class="btn" href="{{ URL::to('/profile').'/'.$res['id'] }}">View</a>@if(!empty($res['fee']))<span class="label label-default"> Talent Fee:  {!! $res['fee'] !!} @endif 
                 </span>
                 </br>
                 @if($res['rank'] <= 1000)

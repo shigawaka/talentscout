@@ -78,12 +78,12 @@
             </li>
             @endif
           </ul>
-          {!! Form::open(['url'=>'/searchscout', 'class' => 'navbar-form navbar-left']) !!}
+          {!! Form::open(['url'=>'/searchscout', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
           
-            <div class="form-group">
+            
           {!! Form::text('search', '', array('placeholder' => 'Search...', 'class' => 'form-control', 'style' => 'width:70%;')) !!}              
           {!! Form::submit('Search', array('class' => 'btn btn-default')) !!}   
-            </div>
+            
             {!! Form::close() !!}
           <ul class="nav navbar-nav navbar-right">
             <li>

@@ -68,7 +68,11 @@
             <ul class="left">
                  <li><a href="#" class="active">Overview</a></li>
                  <li><a href="/portfolio">Portfolio</a></li>
-                 <li><a href="{!! URL::to('/invitation').'/'.$user['id'] !!}">Invitation</a></li>
+                 <li>
+                 @if(Session::get('id') == $user['id'])
+                 <a href="{!! URL::to('/invitation').'/'.$user['id'] !!}">Invitation</a>
+                 @endif
+                 </li>
                  <li><a href="#">Connections</a></li>
 
             </ul>
@@ -230,12 +234,14 @@
                   <h4>Personal Details</h4>
 
 
-                    <div class="card-stacked">
-                       <h6><i class="material-icons">perm_contact_calendar</i>{!! $user['birthday'] !!}</h6>
+                   <div class="card-stacked">
+                    <i class="material-icons">perm_contact_calendar</i> DATE OF BIRTH
+                       <h6>{!! $user['birthday'] !!}</h6>
                     </div>
                    
                     <div class="card-stacked">
-                       <h6> <i class="material-icons">contact_phone</i> {!! $user['contactno'] !!}</h6>
+                    <i class="material-icons">contact_phone</i> CONTACT NO.
+                       <h6>  {!! $user['contactno'] !!}</h6>
                     </div>
                     <div class="card-stacked">
                        <h6> <i class="material-icons">group_work</i>Not a member of any group</h6>

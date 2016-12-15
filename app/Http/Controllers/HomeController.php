@@ -212,6 +212,12 @@ if ($validator->fails()) {
             return Redirect::back()->withInput()->withErrors($validation);
         }
     }
+    public function deleteComment($user_id, $post_id){
+        Comment::where('user_id', '=', $user_id)
+                ->where('post_id', '=', $post_id)->delete();
+                Session::flash('message', 'Comment successfully deleted!');
+                return Redirect::back();
+    }
     public function addProposal(){
         $data = Request::all();
         $rules = array(
@@ -315,7 +321,40 @@ if ($validator->fails()) {
     public function editProfile($user_id){
         $data = Request::except('_token');
         $new_profile = User::find($user_id);
-        if(!empty($new_profile)){
+
+        $rules = array(
+            'lastname' => 'required|regex:/^[\pL\s\-]+$/u',
+            'firstname' => 'required|regex:/^[\pL\s\-]+$/u',
+            'birthday' => 'required|date|before:2011-01-01',
+            'contact' => 'required|numeric|regex:/(09)[0-9]{9}/',
+            'emailaddress' => 'required|unique:users',
+            'username' => 'required|unique:users|min:5',
+            'password' => 'required|alphaNum|min:6',
+            'image' => 'max:1500|mimes:png,jpeg,jpg',
+        );
+
+        $message = array(
+            'lastname.required' => 'Required',
+            'lastname.regex' => 'Letters only',
+            'firstname.required' => 'Required',
+            'firstname.regex' => 'Letters only',
+            'birthday.required' => 'Required',
+            'birthday.date' => 'Date',
+            'contact.required' => 'Required',
+            'contact.numeric' => 'Numbers only',
+            'email.required' => 'Required',
+            'username.required' => 'Required',
+            'password.required' => 'Required',
+            'birthday.before' => 'You must be 5 years older and above!',
+        );
+
+        $validation = Validator::make($data, $rules, $message);
+
+        if($validation->passes()) {
+            if(User::find($user_id)){
+                return back()->withInput();
+            }
+            else {
             $new_profile->address = $data['address'];
             $new_profile->contactno = $data['contactno'];
             $new_profile->emailaddress = $data['email'];
@@ -324,10 +363,11 @@ if ($validator->fails()) {
             if( Request::hasFile('image') ) {
                         $destinationPath = public_path().'/files/';
                         $file = Request::file('image');
-                        $filename = $file->getClientOriginalName();
+                        $filename = str_random(10).".".$file->getClientOriginalExtension();
                         $file->move($destinationPath, $filename);
                         $new_profile->profile_image = $filename;
                     }
+            $new_profile->password = Hash::make($data['password']);
             $new_profile->save();
             $new_fee = Talent::find($user_id);
             if(!empty($new_fee)){
@@ -342,10 +382,13 @@ if ($validator->fails()) {
                 $new_fee->save();
             }
             return Redirect::back();
+        
+            }
         }
         else {
-            return Redirect::back();
+            return Redirect::back()->withInput()->withErrors($validation);
         }
+            
     }
     public function addTalent($user_id){
         $data = Request::except('_token');
@@ -586,9 +629,9 @@ if ($validator->fails()) {
         $searchUser = User::all();
         $arr = array();
         $counter = 0;
-        if(!empty($data['search']) && $data['category'] !== null && $data['category'] === 'post'){
+        // if(!empty($data['search']) && $data['category'] !== null && $data['category'] === 'post'){
             
-        }
+        // }
 
         if(!empty($data['search']) && !empty($data['category'])) {
             foreach ($searchUser as $key => $value) {
