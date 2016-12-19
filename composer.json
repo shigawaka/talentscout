@@ -47,6 +47,7 @@
     },
     "require": {
         "laravelcollective/html": "5.1",
-        "ronaldborla/chikka": "@dev"
+        "ronaldborla/chikka": "@dev",
+        "maddhatter/laravel-fullcalendar": "^1.2"
     }
 }

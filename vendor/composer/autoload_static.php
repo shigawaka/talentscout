@@ -249,6 +249,10 @@ class ComposerStaticInit8d383489c3ffa154b59662c03ad27f86
             array (
                 0 => __DIR__ . '/..' . '/mockery/mockery/library',
             ),
+            'MaddHatter\\LaravelFullcalendar' => 
+            array (
+                0 => __DIR__ . '/..' . '/maddhatter/laravel-fullcalendar/src',
+            ),
         ),
         'J' => 
         array (
@@ -290,6 +294,7 @@ class ComposerStaticInit8d383489c3ffa154b59662c03ad27f86
         'CreateJobsTable' => __DIR__ . '/../..' . '/database/migrations/2016_10_01_164740_create_jobs_table.php',
         'CreateNotificationTable' => __DIR__ . '/../..' . '/database/migrations/2016_12_04_151628_CreateNotificationTable.php',
         'CreateScoutTable' => __DIR__ . '/../..' . '/database/migrations/2016_09_09_053401_create_scout_table.php',
+        'CreateTableSchedule' => __DIR__ . '/../..' . '/database/migrations/2016_12_19_144522_create_table_schedule.php',
         'CreateTalentTable' => __DIR__ . '/../..' . '/database/migrations/2016_09_08_211711_create_talent_table.php',
         'CreateUsersTable' => __DIR__ . '/../..' . '/database/migrations/2016_12_06_131445_create_users_table.php',
         'DatabaseSeeder' => __DIR__ . '/../..' . '/database/seeds/DatabaseSeeder.php',
@@ -729,6 +734,7 @@ class ComposerStaticInit8d383489c3ffa154b59662c03ad27f86
         'PHP_Token_STRING' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_STRING_CAST' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_STRING_VARNAME' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
+        'PHP_Token_SUPER' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_SWITCH' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_Stream' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token/Stream.php',
         'PHP_Token_Stream_CachingFactory' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token/Stream/CachingFactory.php',
@@ -743,6 +749,7 @@ class ComposerStaticInit8d383489c3ffa154b59662c03ad27f86
         'PHP_Token_UNSET' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_UNSET_CAST' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_USE' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
+        'PHP_Token_USE_FUNCTION' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_VAR' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_VARIABLE' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_WHERE' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',

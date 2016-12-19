@@ -172,7 +172,29 @@
           <p><span class="glyphicon glyphicon-info-sign"></span>  {!! $posts['rate'] !!}</p>
         </div>
         <div class="col-sm-4" style="padding-top: 10px;">
-          <p><strong>BUDGET</strong> ₱{!! $posts['budget'] !!}</p>
+          <p><strong>BUDGET</strong><br /> ₱{!! $posts['budget'] !!}</p>
+        </div>
+        <div class="col-sm-4" style="padding-top: 10px;">
+          <p><strong>AGE</strong> </br>
+          @if( $posts['age'] == '0')
+          No Age Limit
+          @elseif( $posts['age'] == '1')
+          5 - 17 years old only!
+          @elseif( $posts['age'] == '2')
+          18 and above only!
+          @endif
+          </p>
+        </div>
+        <div class="col-sm-4" style="padding-top: 10px;">
+          <p><strong>Gender</strong> </br>
+          @if( $posts['gender'] == 'any')
+          No gender specified
+          @elseif( $posts['gender'] == 'male')
+          Male performers only!
+          @elseif( $posts['gender'] == 'female')
+          Female performers only!
+          @endif
+          </p>
         </div>
         </div>
           <div class="form-group">
@@ -187,10 +209,16 @@
           <div class="form-group">
             <div class="col-md-10" style="border-top: 2px solid;">
               <h2>Recommended Profiles!</h2>
+              {!! $recommended->render() !!}
             @if (Session::has('invite'))
             <label class="label label-danger">{!! Session::get('invite') !!}!</label>
             @endif
             </div>
+            @if($recommended->total() == 0)
+            <div class="col-md-10" style="border-top: 2px solid;">
+            <h3>NONE FOR NOW</h3>
+            </div>
+            @endif
             @foreach($recommended as $recom)
             <div class="col-md-5">
               <div class="card">
@@ -613,6 +641,8 @@
  -->                  </div><!-- /panel-body -->
                   </div><!-- /panel panel-default -->
                   </div><!-- /col-sm-5 -->
+
+                  <div id="comment" style="height:auto;">
                   @foreach($comments as $comment => $val)
                   <div class="col-sm-1">
                   <div class="thumbnail">
@@ -625,7 +655,7 @@
                   <div class="panel-heading">
                   <strong>{!! $val['username'] !!}</strong> <span class="text-muted">commented {!! $val['date_posted'] !!} ago</span>
                   @if(Session::get('username') == $val['username'])
-                  <a class="close" title="Delete Comment" href="{{ URL::to('/deletecomment').'/'.Session::get('id').'/'.$posts['id'] }}">
+                  <a class="close" title="Delete Comment" href="{{ URL::to('/deletecomment').'/'.$val['commentID'] }}">
                     ×
                   </a>
                   @endif
@@ -636,6 +666,7 @@
                   </div><!-- /panel panel-default -->
                   </div><!-- /col-sm-5 -->
                   @endforeach
+                  </div><!-- /ajax -->
                   
         <!-- end of comment area -->
         <!-- right row -->
@@ -671,6 +702,15 @@
     <script src="../../js/carousel.js"></script>
     <script src="../../js/bootstrap-tagsinput.js"></script>
     <script src="../../js/bootstrap-tagsinput-angular.js"></script>
+  //   <script>
+  //   $(document).on('click','.pagination a', function (event) {
+  //       event.preventDefault();
+  //       if ( $(this).attr('href') != '#' ) {
+  //           $("html, body").animate({ scrollTop: 0 }, "fast");
+  //           $('#ajax').load($(this).attr('href')+' #ajax');
+  //       }
+  //   });
+  // </script>
 </body>
 
 </html>

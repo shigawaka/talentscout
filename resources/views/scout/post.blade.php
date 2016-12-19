@@ -176,7 +176,7 @@
                     Attach File
                 </h3>
                 <div class="col-xs-12">
-                {!! Form::file('file', '', array('class' => 'form-group','placeholder' => 'Upload Image/Video', 'required'=>'required')) !!}
+                {!! Form::file('file', ['id'=>'ifile','class' => 'form-group','placeholder' => 'Upload Image/Video', 'required'=>'required']) !!}
                 
                 @foreach($errors->get('file') as $message)
                 <div class="alert alert-danger text-center">{{ $message }}</div>
@@ -348,6 +348,21 @@
               $('#modal-container-403917').modal('show');
           </script>
   @endif
+  <script>
+    $("document").ready(function(){
+
+    $("#ifile").change(function() {
+        var fsize = $('#ifile')[0].files[0].size;
+        
+        if(fsize>200000000) //do something if file size more than 1 mb (1048576)
+        {
+            alert("Too big!\n File Size limit: 200mb!");
+            $("#ifile").val('');
+        }
+    });
+});
+  </script>
+
 </body>
 
 </html>

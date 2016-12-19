@@ -22,6 +22,8 @@ use Auth;
 use Session;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class ScoutController extends Controller
 {
@@ -196,6 +198,7 @@ class ScoutController extends Controller
                 $fullcomm[$i]['username'] = $user['username'];
                 $fullcomm[$i]['date_posted'] = $date_comm;
                 $fullcomm[$i]['body'] = $comment['body'];
+                $fullcomm[$i]['commentID'] = $comment['id'];
                 $i++;
             }
          }
@@ -276,10 +279,25 @@ class ScoutController extends Controller
          $one_dimension = array_map("serialize", $recommended);
             $unique_one_dimension = array_unique($one_dimension);
             $unique_multi_dimension = array_map("unserialize", $unique_one_dimension);
+            //pagination for recommended profile
+            $currentPage = LengthAwarePaginator::resolveCurrentPage();
+            $col = new Collection($unique_multi_dimension);
+            $perPage = 4;
+            $currentPageSearchResults = $col->slice(($currentPage - 1) * $perPage, $perPage)->all();
+            $entries = new LengthAwarePaginator($currentPageSearchResults, count($col), $perPage);
+            $entries->setpath('');
+            // //pagination for comments
+            // $currentPage = LengthAwarePaginator::resolveCurrentPage('comm');
+            // $col = new Collection($fullcomm);
+            // $perPage = 4;
+            // $currentPageSearchResults = $col->slice(($currentPage - 1) * $perPage, $perPage)->all();
+            // $comm = new LengthAwarePaginator($currentPageSearchResults, count($col), $perPage);
+            // $comm->setpath('');
+            // $comm->setPageName('comm');
          return view('scout.viewpost')
          ->with('posts', $posts)
          ->with('proposal', $exists)
-         ->with('recommended', $unique_multi_dimension)
+         ->with('recommended', $entries)
          ->with('fullproposals', $fullproposals)
          ->with('comments', $fullcomm)
          ->with('tag', json_decode($posts['tags'], true));

@@ -138,6 +138,7 @@ return [
         Illuminate\View\ViewServiceProvider::class,
          Collective\Html\HtmlServiceProvider::class,
          Borla\Chikka\Service::class,
+         MaddHatter\LaravelFullcalendar\ServiceProvider::class,
         /*
          * Application Service Providers...
          */
@@ -198,6 +199,7 @@ return [
         'Form' => Collective\Html\FormFacade::class,
       'HTML' => Collective\Html\HtmlFacade::class,
       'Chikka' => Borla\Chikka\Support\Facades\Chikka::class,
+      'Calendar' => MaddHatter\LaravelFullcalendar\Facades\Calendar::class,
     ],
 
 ];

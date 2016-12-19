@@ -107,6 +107,9 @@ Route::post('/profile/edit/{id}', 'HomeController@editProfile');
 //invitation
 Route::get('/invitation/{id}', 'HomeController@showInvitations');
 Route::get('/invitation/accept/{id}', 'HomeController@acceptInvitation');
+//schedule
+Route::get('/schedule/{id}', 'HomeController@showSchedule');
+Route::post('/addschedule/{id}', 'HomeController@addSchedule');
 //rate scout
 Route::post('/ratescout/{id}/{postid}', 'HomeController@rateScout');
 //add talent
@@ -131,7 +134,7 @@ Route::get('/view', function () {
 });
 //comment
 Route::post('/addComment', 'HomeController@addComment');
-Route::get('/deletecomment/{id}/{postid}', 'HomeController@deleteComment');
+Route::get('/deletecomment/{id}', 'HomeController@deleteComment');
 //proposal
 Route::post('/addProposal', 'HomeController@addProposal');
 Route::post('/editProposal', 'HomeController@editProposal');

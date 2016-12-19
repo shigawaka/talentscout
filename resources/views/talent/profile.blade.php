@@ -68,11 +68,14 @@
             <ul class="left">
                  <li><a href="#" class="active">Overview</a></li>
                  <li><a href="/portfolio">Portfolio</a></li>
-                 <li>
                  @if(Session::get('id') == $user['id'])
+                 <li>
                  <a href="{!! URL::to('/invitation').'/'.$user['id'] !!}">Invitation</a>
-                 @endif
                  </li>
+                 <li>
+                 <a href="{!! URL::to('/schedule').'/'.$user['id'] !!}">Schedule</a>
+                 </li>
+                 @endif
                  <li><a href="#">Connections</a></li>
 
             </ul>
@@ -235,13 +238,14 @@
 
 
                    <div class="card-stacked">
-                    <i class="material-icons">perm_contact_calendar</i> DATE OF BIRTH
-                       <h6>{!! $user['birthday'] !!}</h6>
+                    <i class="material-icons md-48">perm_contact_calendar</i>DATE OF BIRTH
+                       <h5>{!! $user['birthday'] !!}</h5>
                     </div>
                    
                     <div class="card-stacked">
-                    <i class="material-icons">contact_phone</i> CONTACT NO.
-                       <h6>  {!! $user['contactno'] !!}</h6>
+                    <i class="material-icons">contact_phone</i> CONTACT 
+                       <h5>  {!! $user['contactno'] !!}</h5>
+                       <h5>  {!! $user['emailaddress'] !!}</h5>
                     </div>
                     <div class="card-stacked">
                        <h6> <i class="material-icons">group_work</i>Not a member of any group</h6>
@@ -383,7 +387,7 @@
 
         <div class="footer-copyright">
           <div class="container" align="center">
-    Talent Scout||All rights reserved||2016
+    Talent Scout|   All rights reserved |   2016
           </div>
         </div>
       </footer>
@@ -405,6 +409,7 @@
       selectMonths: true, // Creates a dropdown to control month
       selectYears: 100 // Creates a dropdown of 15 years to control year
     });
+    
   </script>
 
 

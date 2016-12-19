@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Request;
 use Redirect;
 use Validator;
+use Calendar;
 
 use App\Scout;
 use App\User;
@@ -14,6 +15,7 @@ use App\Rating;
 use App\Comment;
 use App\Proposal;
 use App\Invitation;
+use App\EventModel;
 use Hash;
 use Auth;
 use Session;
@@ -212,9 +214,8 @@ if ($validator->fails()) {
             return Redirect::back()->withInput()->withErrors($validation);
         }
     }
-    public function deleteComment($user_id, $post_id){
-        Comment::where('user_id', '=', $user_id)
-                ->where('post_id', '=', $post_id)->delete();
+    public function deleteComment($id){
+        Comment::where('id', '=', $id)->delete();
                 Session::flash('message', 'Comment successfully deleted!');
                 return Redirect::back();
     }
@@ -477,6 +478,137 @@ if ($validator->fails()) {
                         ->with('postDetails', $temparr)
                         ->with('talent', json_decode($tal['talents'], true));
             
+    }
+    public function showSchedule($user_id) {
+                $user = User::find($user_id);
+                $events = [];
+
+                $event = EventModel::where('user_id', '=', $user_id)->get();
+                foreach ($event as $eve) {
+                    if($eve->isAllDay == 0) {
+                        $eve->isAllDay = true;
+                    } 
+                    else {
+                        $eve->isAllDay = false;
+                    }
+                  $events[] = \Calendar::event(
+                  $eve->title, //event title
+                  $eve->isAllDay, //full day event?
+                  $eve->start_date, //start time (you can also use Carbon instead of DateTime)
+                  $eve->end_date, //end time (you can also use Carbon instead of DateTime)
+                  $eve->id //optionally, you can specify an event ID
+                  );
+                }
+
+                // $eloquentEvent = EventModel::first(); //EventModel implements MaddHatter\LaravelFullcalendar\Event
+
+                $calendar = \Calendar::addEvents($events) //add an array with addEvents
+                    ->setOptions([ //set fullcalendar options
+                        'firstDay' => 1
+                    ])->setCallbacks([ //set fullcalendar callback options (will not be JSON encoded)
+                        'eventClick' => 'function(event) { 
+                            id= event.id; 
+                            $("#dialog").dialog({
+                                  resizable: false,
+                                  draggable: false,
+                                  height:200,
+                                  width:500,
+                                  modal: true,
+                                  title: "test",
+                                  buttons: {
+                                             CLOSE: function() {
+                                                 $("#dialog").dialog( "close" );
+                                             },
+                                             "DELETE": function() {
+                                                //do the ajax request?
+                                             }
+                                           }
+
+                            });
+
+
+                        }',
+                        // "eventRender" => "function(event, element) { 
+
+                        //     element.append( '<span class=".'closeon'.">X</span>'); 
+                        //     element.find('.closeon').click(function() {
+                        //     alert('otin');
+                        //     });
+
+                        // }",
+
+
+                        
+                    ]); 
+                return view('talent.schedule', compact('calendar'))
+                        ->with('user', $user);
+            
+    }
+    public function addSchedule(Request $request, $user_id){
+        $data = Request::all();
+        $start_date = $data['start_date']." ".$data['start_time'];
+        $start_date = Carbon::parse($start_date);
+        
+        $rules = array(
+            'title' => 'required|regex:/^[\pL\s\-]+$/u',
+            'start_date' => 'required|date|before:now',
+            'contact' => 'required|numeric',
+            'email' => 'required',
+            'username' => 'required',
+            'password' => 'required',
+        );
+
+        $message = array(
+            'firstname.required' => 'Required',
+            'firstname.regex' => 'Letters only',
+            'lastname.required' => 'Required',
+            'lastname.regex' => 'Letters only',
+            'start_date.required' => 'Required',
+            'start_date.before' => 'aaaaaaaaaaaa',
+            'contact.required' => 'Required',
+            'contact.numeric' => 'Numbers only',
+            'email.required' => 'Required',
+            'username.required' => 'Required',
+            'password.required' => 'Required',
+        );
+
+        $validation = Validator::make($data, $rules, $message);
+
+        if($validation->passes()) {
+            if(User::where('username', $data['username'])->first()) {
+                return back()->withInput();
+            } else {
+                $detail = new User;
+
+                $detail->id =null;
+                $detail->roleID =0;
+                $detail->firstname =$data['firstname'];
+                $detail->lastname =$data['lastname'];
+                $detail->birthday =$data['birthday'];
+                $detail->contactno =$data['contact'];
+                $detail->emailaddress =$data['email'];
+                $detail->username =$data['username'];
+                $detail->password = Hash::make($data['password']);
+                $detail->profile_image ='avatar.png';
+                $detail->profile_description =' ';
+                $detail->save();
+
+                $scout = new Scout;
+                $scout->id = $detail->id;
+                $scout->score = 0;
+                $scout->demerit = 0;
+                $scout->save();
+                Session::flash('message', 'Successfully registered!');
+                Mail::send('emails.invitation', ['user' => $data['email']], function ($m) use ($findTalent) {
+                $m->from('TalentScout.com', 'Talent Scout');
+
+                $m->to($data['email'])->subject('Invitation!');
+            });
+                return Redirect::to('http://localhost:8000/login');
+            }
+        } else {
+            return Redirect::back()->withInput()->withErrors($validation);
+        }
     }
     public function acceptInvitation($post_id) {
         $invited = Invitation::where('post_id', '=', $post_id)

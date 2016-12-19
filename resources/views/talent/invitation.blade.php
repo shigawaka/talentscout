@@ -70,6 +70,9 @@
                  <li><a href="{!! URL::to('/profile').'/'.$user['id'] !!}">Overview</a></li>
                  <li><a href="/portfolio">Portfolio</a></li>
                  <li><a href="{!! URL::to('/invitation').'/'.$user['id'] !!}" class="active">Invitation</a></li>
+                 <li>
+                 <a href="{!! URL::to('/schedule').'/'.$user['id'] !!}">Schedule</a>
+                 </li>
                  <li><a href="#">Connections</a></li>
 
             </ul>
@@ -215,7 +218,7 @@
 
         <div class="footer-copyright">
           <div class="container" align="center">
-    Talent Scout||All rights reserved||2016
+    Talent Scout|   All rights reserved |   2016
           </div>
         </div>
       </footer>
