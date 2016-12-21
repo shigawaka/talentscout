@@ -110,6 +110,7 @@ Route::get('/invitation/accept/{id}', 'HomeController@acceptInvitation');
 //schedule
 Route::get('/schedule/{id}', 'HomeController@showSchedule');
 Route::post('/addschedule/{id}', 'HomeController@addSchedule');
+Route::post('/deleteschedule', 'HomeController@deleteSchedule');
 //rate scout
 Route::post('/ratescout/{id}/{postid}', 'HomeController@rateScout');
 //add talent

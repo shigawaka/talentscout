@@ -480,6 +480,10 @@ if ($validator->fails()) {
             
     }
     public function showSchedule($user_id) {
+            if($user_id != Session::get('id')){
+                return Redirect::to('home');
+            }
+            else
                 $user = User::find($user_id);
                 $events = [];
 
@@ -514,13 +518,22 @@ if ($validator->fails()) {
                                   height:200,
                                   width:500,
                                   modal: true,
-                                  title: "test",
+                                  title: event.title,
                                   buttons: {
                                              CLOSE: function() {
                                                  $("#dialog").dialog( "close" );
                                              },
                                              "DELETE": function() {
-                                                //do the ajax request?
+                                                $.ajax({
+                                                            method: "POST", // Type of response and matches what we said in the route
+                                                            url: "/deleteschedule", // This is the url we gave in the route
+                                                            data: {id : id}, // a JSON object to send back
+                                                            success: function(response){ // What to do if we succeed
+                                                                console.log(id);
+                                                                alert("Successfully Deleted Event!");
+                                                                location.reload();
+                                                            }
+                                                        });
                                              }
                                            }
 
@@ -528,14 +541,9 @@ if ($validator->fails()) {
 
 
                         }',
-                        // "eventRender" => "function(event, element) { 
-
-                        //     element.append( '<span class=".'closeon'.">X</span>'); 
-                        //     element.find('.closeon').click(function() {
-                        //     alert('otin');
-                        //     });
-
-                        // }",
+                        "dayClick" => "function() { 
+                             $('#modal1').openModal();
+                        }",
 
 
                         
@@ -544,67 +552,55 @@ if ($validator->fails()) {
                         ->with('user', $user);
             
     }
+    public function deleteSchedule(Request $request){
+        $eventID = Request::all('id');
+        EventModel::where('id', '=', $eventID)->delete();
+        Session::flash('message', 'Successfully deleted event!');
+        return Redirect::to('/schedule/'.Session::get('id'));
+    }
     public function addSchedule(Request $request, $user_id){
         $data = Request::all();
-        $start_date = $data['start_date']." ".$data['start_time'];
-        $start_date = Carbon::parse($start_date);
-        
+        $start_date = Carbon::parse($data['start_date'].$data['start_time']);
+        $end_date = Carbon::parse($data['end_date'].$data['end_time']);
+
         $rules = array(
             'title' => 'required|regex:/^[\pL\s\-]+$/u',
-            'start_date' => 'required|date|before:now',
-            'contact' => 'required|numeric',
-            'email' => 'required',
-            'username' => 'required',
-            'password' => 'required',
+            'start_date' => 'required|date|before:tomorrow',
+            'start_time' => 'required',
+            'end_date' => 'required|date|before:tomorrow',
+            'end_time' => 'required|after:start_time',
         );
 
         $message = array(
-            'firstname.required' => 'Required',
-            'firstname.regex' => 'Letters only',
-            'lastname.required' => 'Required',
-            'lastname.regex' => 'Letters only',
-            'start_date.required' => 'Required',
-            'start_date.before' => 'aaaaaaaaaaaa',
-            'contact.required' => 'Required',
-            'contact.numeric' => 'Numbers only',
-            'email.required' => 'Required',
-            'username.required' => 'Required',
-            'password.required' => 'Required',
+            'start_date.before' => 'Invalid date input!',
+            'end_date.before' => 'Invalid date input!',
+            'end_time.after' => 'Invalid end time input!',
         );
 
         $validation = Validator::make($data, $rules, $message);
 
         if($validation->passes()) {
-            if(User::where('username', $data['username'])->first()) {
+            if(EventModel::where('start_date', $start_date)->first()) {
                 return back()->withInput();
             } else {
-                $detail = new User;
+                $detail = new EventModel;
 
                 $detail->id =null;
-                $detail->roleID =0;
-                $detail->firstname =$data['firstname'];
-                $detail->lastname =$data['lastname'];
-                $detail->birthday =$data['birthday'];
-                $detail->contactno =$data['contact'];
-                $detail->emailaddress =$data['email'];
-                $detail->username =$data['username'];
-                $detail->password = Hash::make($data['password']);
-                $detail->profile_image ='avatar.png';
-                $detail->profile_description =' ';
+                $detail->user_id =$user_id;
+                if($data['allday'] == 'true'){
+                    $data['allday'] = 0;
+                }
+                else {
+                    $data['allday'] = 1;
+                }
+                $detail->isAllDay =$data['allday'];
+                $detail->title =$data['title'];
+                $detail->start_date =$start_date->format('Y-m-d G:i:s');
+                $detail->end_date =$end_date->format('Y-m-d G:i:s');
                 $detail->save();
 
-                $scout = new Scout;
-                $scout->id = $detail->id;
-                $scout->score = 0;
-                $scout->demerit = 0;
-                $scout->save();
-                Session::flash('message', 'Successfully registered!');
-                Mail::send('emails.invitation', ['user' => $data['email']], function ($m) use ($findTalent) {
-                $m->from('TalentScout.com', 'Talent Scout');
-
-                $m->to($data['email'])->subject('Invitation!');
-            });
-                return Redirect::to('http://localhost:8000/login');
+                Session::flash('message', 'Successfully added Event!');
+                return Redirect::back();
             }
         } else {
             return Redirect::back()->withInput()->withErrors($validation);

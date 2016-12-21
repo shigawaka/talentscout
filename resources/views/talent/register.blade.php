@@ -130,7 +130,7 @@
                         <div class="col-sm-10">
                         <div class="input-group">
                         <div class="input-group-addon">+63</div>
-                        {!! Form::number('contact', '', array('class' => 'form-control', 'placeholder' => 'Your Contact Number', 'required'=>'required')) !!}
+                        {!! Form::number('contact', '', array('class' => 'form-control','style'=>'z-index:0', 'placeholder' => 'Your Contact Number', 'required'=>'required')) !!}
                           </div>
                           <!-- <input type="text" class="form-control" name="contactno" id="contactno" placeholder="Enter email"> -->
                                                 
@@ -230,7 +230,7 @@
                         <div class="col-sm-10">
                         <div class="input-group">
                         <div class="input-group-addon">+63</div>
-                        {!! Form::number('contactgroup', '', array('class' => 'form-control', 'placeholder' => 'Group Contact Number', 'required'=>'required')) !!}
+                        {!! Form::number('contactgroup', '', array('class' => 'form-control','style'=>'z-index:0', 'placeholder' => 'Group Contact Number', 'required'=>'required')) !!}
                         </div>
                           <!-- <input type="text" class="form-control" name="contactno" id="contactno" placeholder="Enter email"> -->
                                                 

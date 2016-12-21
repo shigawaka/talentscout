@@ -213,18 +213,18 @@
             </div>
                    <div class="card-panel grey lighten-3"><h6><i>Talent Fee: ₱{!! $fee['fee'] !!}</i></h6></div>
                        @if($fee['score'] <= 1000)
-                       <div class="card-panel orange lighten-2"><img style="width: 50px;font-family: 'Quasiparticles';"class="responsive-img" src="{!! URL::to('/files') !!}/newbie.png"><h6><i>New Talent</i></h6></div>
+                       <div class="card-panel orange lighten-2"><img style="width: 50px;font-family: 'Quasiparticles';"class="responsive-img" src="{!! URL::to('/files') !!}/newbie.png"><h6>New Talent</h6></div>
                        @elseif($fee['score'] >= 1500)
                        <div class="card-panel blue lighten-2"><img style="width: 50px;"class="responsive-img" src="{!! URL::to('/files') !!}/risingtalent.png"><h4><i>Rising Talent</i></h4></div>
                        @elseif($fee['score'] >= 2000)
                        <div class="card-panel gold lighten-2"><img style="width: 50px;"class="responsive-img" src="{!! URL::to('/files') !!}/startalent.png"><h4><i>Star Talent</i></h4></div>
                        @endif
                         @if($fee['demerit'] <= 1000)
-                      <div class="card-panel orange lighten-2" > <img style="width: 50px;font-family: 'Quasiparticles';"class="responsive-img" src="{!! URL::to('/files') !!}/neutral.png"><h6><i>Demerit: {!! $fee['demerit'] !!}</i></h6></div>
+                      <div class="card-panel orange lighten-2" > <h6><i><i class="large material-icons light-blue-text">sentiment_neutral</i><br />Demerit: {!! $fee['demerit'] !!}</i></h6></div>
                        @elseif($fee['score'] >= 1500)
-                       <div class="card-panel blue lighten-2" ><img style="width: 50px;"class="responsive-img" src="{!! URL::to('/files') !!}/bad.png"><h4><i>Demerit: {!! $fee['demerit'] !!}</i></h4></div>
+                       <div class="card-panel blue lighten-2" ><h4><i><i class="large material-icons light-blue-text">sentiment_dissatisfied</i><br />Demerit: {!! $fee['demerit'] !!}</i></h4></div>
                        @elseif($fee['score'] >= 2000)
-                       <div class="card-panel gold lighten-2" ><img style="width: 50px;"class="responsive-img" src="{!! URL::to('/files') !!}/sad.png"><h4><i>Demerit: {!! $fee['demerit'] !!}</i></h4></div>
+                       <div class="card-panel gold lighten-2" ><h4><i class="large material-icons light-blue-text">sentiment_very_dissatisfied</i><br /><i>Demerit: {!! $fee['demerit'] !!}</i></h4></div>
                        @endif
                  </div>
           </div>
@@ -233,22 +233,39 @@
 
                <div class="col s12 m7">
       
-              <div class="card-panel horizontal">
+              <div class="card horizontal">
                   <h4>Personal Details</h4>
 
 
                    <div class="card-stacked">
-                    <i class="material-icons md-48">perm_contact_calendar</i>DATE OF BIRTH
-                       <h5>{!! $user['birthday'] !!}</h5>
+                   <div class="card-content">
+                    <i class="material-icons cyan-text darken-text">date_range</i>Birthday
+                       <h6>{!! $user['birthday'] !!}</h6>
                     </div>
-                   
-                    <div class="card-stacked">
-                    <i class="material-icons">contact_phone</i> CONTACT 
-                       <h5>  {!! $user['contactno'] !!}</h5>
-                       <h5>  {!! $user['emailaddress'] !!}</h5>
+                    </div>
+                   <div class="card-stacked">
+                   <div class="card-content">
+                    <i class="material-icons cyan-text darken-text md-48">perm_contact_calendar</i>AGE
+                       <h6>{!! $user['age'] !!}</h6>
+                    </div>
                     </div>
                     <div class="card-stacked">
-                       <h6> <i class="material-icons">group_work</i>Not a member of any group</h6>
+                    <div class="card-content">
+                    <i class="material-icons cyan-text darken-text">contact_phone</i> CONTACT 
+                       <h6>  {!! $user['contactno'] !!}</h6>
+                       <h6>  {!! $user['emailaddress'] !!}</h6>
+                    </div>
+                    </div>
+                    <div class="card-stacked">
+                    <div class="card-content">
+                    <i class="material-icons cyan-text darken-text">person</i> GENDER 
+                       <h6>  {!! ucfirst($user['gender']) !!}</h6>
+                    </div>
+                    </div>
+                    <div class="card-stacked">
+                    <div class="card-content">
+                       <h6> <i class="material-icons cyan-text darken-text">group</i>Group</h6>
+                    </div>
                     </div>
                 
 

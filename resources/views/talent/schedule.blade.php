@@ -20,6 +20,7 @@
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black">
         <meta name="apple-mobile-web-app-title" content="Material Design Lite">
+        <meta name="_token" content="{!! csrf_token() !!}"/>
         <link rel="apple-touch-icon-precomposed" href="images/ios-desktop.png">
 
         <!-- Tile icon for Win8 (144x144 + tile color) -->
@@ -102,6 +103,13 @@
       </nav>
 
       <div class="row">
+      @if (Session::has('message'))
+        <div id="card-alert" class="card green">
+        <div class="card-content white-text">
+        <p><i class="mdi-navigation-check"></i> {{ Session::get('message') }}</p>
+        </div>
+        </div>
+      @endif
         <!-- Modal Trigger -->
     <a class="waves-effect waves-light btn modal-trigger" href="#modal1">Add Event</a>
           
@@ -111,11 +119,16 @@
               <h4>Add Event</h4>
               {!! Form::open(['url'=>'/addschedule/'.$user['id'].'']) !!}
                   <div class="input-field col s6">
-            {!! Form::text('Title', '', array('class' => 'validate','placeholder' => 'Enter Title Event')) !!}
+            {!! Form::text('title', '', array('class' => 'validate','placeholder' => 'Enter Title Event')) !!}
               <!-- <input  value="Frete" id="firstname" type="text" class="validate"> -->
               <label for="firstname">Title Event</label>
               @foreach($errors->get('title') as $message)
-                {!! $message !!}
+              <div id="card-alert" class="card red">
+              <div class="card-content white-text">
+              <p><i class="mdi-navigation-check"></i> {!! $message !!}</p>
+              </div>
+              </div>
+                
                 @endforeach
                 
                   </div>
@@ -128,7 +141,11 @@
                         {!! Form::label('false', 'False') !!}
                         </p>
               @foreach($errors->get('allday') as $message)
-                {!! $message !!}
+                <div id="card-alert" class="card red">
+              <div class="card-content white-text">
+              <p><i class="mdi-navigation-check"></i> {!! $message !!}</p>
+              </div>
+              </div>
                 @endforeach
                   </div>
                   <div class="input-field col s12">
@@ -136,7 +153,11 @@
               <!-- <input  value="Frete" id="firstname" type="text" class="validate"> -->
               <label for="firstname">Start Date</label>
               @foreach($errors->get('start_date') as $message)
-                {!! $message !!}
+                <div id="card-alert" class="card red">
+              <div class="card-content white-text">
+              <p><i class="mdi-navigation-check"></i> {!! $message !!}</p>
+              </div>
+              </div>
                 @endforeach
                 
                   </div>
@@ -145,7 +166,11 @@
               <!-- <input  value="Frete" id="firstname" type="text" class="validate"> -->
               <label for="firstname">Start Time</label>
               @foreach($errors->get('start_time') as $message)
-                {!! $message !!}
+                <div id="card-alert" class="card red">
+              <div class="card-content white-text">
+              <p><i class="mdi-navigation-check"></i> {!! $message !!}</p>
+              </div>
+              </div>
                 @endforeach
                 
                   </div>
@@ -154,7 +179,11 @@
                   <!-- <input  value="Frete" id="firstname" type="text" class="validate"> -->
                   <label for="firstname">End Date</label>
                   @foreach($errors->get('end_date') as $message)
-                {!! $message !!}
+                <div id="card-alert" class="card red">
+              <div class="card-content white-text">
+              <p><i class="mdi-navigation-check"></i> {!! $message !!}</p>
+              </div>
+              </div>
                 @endforeach
                   </div>
                   <div class="input-field col s12">
@@ -162,7 +191,11 @@
               <!-- <input  value="Frete" id="firstname" type="text" class="validate"> -->
               <label for="firstname">End Time</label>
               @foreach($errors->get('end_time') as $message)
-                {!! $message !!}
+                <div id="card-alert" class="card red">
+              <div class="card-content white-text">
+              <p><i class="mdi-navigation-check"></i> {!! $message !!}</p>
+              </div>
+              </div>
                 @endforeach
                 
                   </div>
@@ -196,6 +229,7 @@
           $(document).ready(function(){
     // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
     $('.modal-trigger').leanModal();
+
   });
 
         </script>
@@ -216,7 +250,8 @@
   });
     $('.datepicker2').pickadate({
       selectMonths: true, // Creates a dropdown to control month
-      selectYears: 100 // Creates a dropdown of 15 years to control year
+      selectYears: 100, // Creates a dropdown of 15 years to control year
+      format: 'mmmm dd, yyyy',
     });
     $('.timepicker2').pickatime({
     twelvehour: false,
@@ -232,7 +267,11 @@
               $('#modal1').openModal();
           </script>
   @endif
-                
+                <script type="text/javascript">
+$.ajaxSetup({
+   headers: { 'X-CSRF-Token' : $('meta[name=_token]').attr('content') }
+});
+</script>
     
 
       </body>
