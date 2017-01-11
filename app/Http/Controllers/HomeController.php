@@ -6,8 +6,10 @@ use Request;
 use Redirect;
 use Validator;
 use Calendar;
+use Response;
 
 use App\Scout;
+use App\Featured;
 use App\User;
 use App\Talent;
 use App\Post;
@@ -16,6 +18,7 @@ use App\Comment;
 use App\Proposal;
 use App\Invitation;
 use App\EventModel;
+use App\Group;
 use Hash;
 use Auth;
 use Session;
@@ -64,20 +67,52 @@ class HomeController extends Controller
      */
     public function show()
     {
-        if(Session::get('roleID') == 1){
+        if(Session::get('roleID') == 1 || Session::get('roleID') == 2){
             $posts = Post::where('status', '=', 0)->orderBy('date_posted', 'desc')->get();
             $succ = Post::where('status', 1)->get();
+            $slideshow = Featured::where('isFeedback', '=', 1)->get();
             return view('talent.home')
+                ->with('posts',$posts)
+                ->with('succ',$succ)
+                ->with('slideshow', $slideshow);
+        }
+        elseif(Session::get('roleID') == 3) {
+            $posts = Post::where('status', '=', 0)->orderBy('date_posted', 'desc')->get();
+            $succ = Post::where('status', 1)->get();
+            return view('admin.home')
                 ->with('posts',$posts)
                 ->with('succ',$succ);
         }
         else {
         $posts = Post::where('scout_id', Auth::user()->id)->orderBy('status', 'asc')->get();
         $succ = Post::where('status', 1)->get();
+        $profile = Featured::where('isProfile','=',1)->get();
+        $profilearray = array();
+        $i = 0;
+        foreach ($profile as $key => $value) {
+            $userdetail = User::find($value['profile_id']);
+            $checkexpiration = Carbon::parse($value['end_date']);
+            if(!Carbon::now()->gte($checkexpiration)){
+            $profilearray[$i]['id'] = $value['profile_id'];
+            $profilearray[$i]['profile_image'] = $userdetail['profile_image'];
+            $profilearray[$i]['firstname'] = $userdetail['firstname'];
+            $profilearray[$i]['lastname'] = $userdetail['lastname'];
+            $profilearray[$i]['profile_description'] = $userdetail['profile_description'];
+            $profilearray[$i]['start_date'] = $value['start_date'];
+            $profilearray[$i]['end_date'] = $value['end_date'];
+            $i++;
+            }
+            else {
+                //remove from db
+            }
+        }
+        // dd($profilearray);
+
         // dd($succ);
         return view('scout.home')
                 ->with('posts',$posts)
-                ->with('succ',$succ);
+                ->with('succ',$succ)
+                ->with('profilearray', $profilearray);
         }
     }
 
@@ -151,6 +186,11 @@ if ($validator->fails()) {
         foreach ($creds as $cred) {
         Session::set('id', $cred['id']);
         Session::set('roleID', $cred['roleID']);
+        if($cred['roleID'] == '2') {
+            $groupcred = Group::where('id', '=', $cred['id'])->first();
+            Session::set('groupname', $groupcred['groupname']);
+            }
+        else {
         Session::set('firstname', $cred['firstname']);
         Session::set('lastname', $cred['lastname']);
         Session::set('birthday', $cred['birthday']);
@@ -161,12 +201,16 @@ if ($validator->fails()) {
         Session::set('username', $cred['username']);
         Session::set('profile_image', $cred['profile_image']);
         Session::set('profile_description', $cred['profile_description']);
+            }
         }
         $tf = Talent::find(Auth::user()->id);
         if(!empty($tf)){
         Session::set('talentfee', $tf['fee']);
         }
-        if($cred['roleID'] == 1){
+        if($cred['roleID'] == 1 || $cred['roleID'] == 2){
+        return Redirect::to('http://localhost:8000/hometalent');
+        }
+        elseif($cred['roleID'] == 3) {
         return Redirect::to('http://localhost:8000/hometalent');
         }
         else {
@@ -263,8 +307,20 @@ if ($validator->fails()) {
     public function showProfile($user_id){
             $findUser = User::find($user_id);
             $role = $findUser['roleID'];
-            if($role == 1){
+            if($role == 1 ){
                 $user = User::find($user_id);
+                $user['contactno'] = preg_replace('/^63/','0',$user['contactno']);
+                //finding group of the user
+                $grouparray = array();
+                $groups = json_decode($user['group'], true);
+                for ($i=0; $i < count($groups); $i++) { 
+                    $searchgroup = Group::find($groups[$i]);
+                    $searchusergroup = User::find($groups[$i]);
+                    $grouparray[$i]['id'] = $searchgroup['id'];
+                    $grouparray[$i]['groupname'] = $searchgroup['groupname'];
+                    $grouparray[$i]['profile_image'] = $searchusergroup['profile_image'];
+                }
+                //end finding group
                 $birthday = date("F d,Y", strtotime($user['birthday']));
                 $user['birthday'] = $birthday;
                 $rating = Rating::where('user_id' , '=', $user_id)->get();
@@ -290,6 +346,52 @@ if ($validator->fails()) {
                 return view('talent.profile')
                         ->with('rating', $rating)
                         ->with('user', $user)
+                        ->with('fee', $tal)
+                        ->with('grouparray', $grouparray)
+                        ->with('talent', json_decode($tal['talents'], true));
+            }
+            elseif ($role == 2) {
+                $user = User::find($user_id);
+                
+                $user['contactno'] = preg_replace('/^63/','0',$user['contactno']);
+                $groupdetails = Group::find($user_id);
+                $birthday = date("F d,Y", strtotime($user['birthday']));
+                $user['birthday'] = $birthday;
+                //finding group of the user
+                $grouparray = array();
+                $groups = json_decode($groupdetails['member'], true);
+                for ($i=0; $i < count($groups); $i++) { 
+                    $searchusergroup = User::find($groups[$i]);
+                    $grouparray[$i]['id'] = $searchusergroup['id'];
+                    $grouparray[$i]['fullname'] = $searchusergroup['firstname'].' '.$searchusergroup['lastname'];
+                    $grouparray[$i]['profile_image'] = $searchusergroup['profile_image'];
+                }
+                //end finding group
+                $rating = Rating::where('user_id' , '=', $user_id)->get();
+                $tal = Talent::find($user_id);
+                $finalscore = 0;
+                $finaldemerit = 0;
+                if(!empty($rating)){
+                    foreach ($rating as $key => $value) {
+                        $finalscore += $value['score'];
+                        $finaldemerit += $value['demerit'];
+                    }
+                }
+                if(!empty($tal)) {
+
+                    if($tal['score'] !== $finalscore){
+                        $tal->score = $finalscore;
+                    }
+                    if($tal['demerit'] !== $finaldemerit){
+                        $tal->demerit = $finaldemerit;
+                    }
+                    $tal->save();
+                }
+                return view('talent.profilegroup')
+                        ->with('rating', $rating)
+                        ->with('user', $user)
+                        ->with('groupdetails', $groupdetails)
+                        ->with('grouparray', $grouparray)
                         ->with('fee', $tal)
                         ->with('talent', json_decode($tal['talents'], true));
             }
@@ -322,25 +424,37 @@ if ($validator->fails()) {
     public function editProfile($user_id){
         $data = Request::except('_token');
         $new_profile = User::find($user_id);
+        $old_profile = User::find($user_id);
+        if($new_profile['roleID'] == '2'){
+                $rules = array(
+                    'lastname' => 'regex:/^[\pL\s\-]+$/u',
+                    'firstname' => 'regex:/^[\pL\s\-]+$/u',
+                    'birthday' => 'required',
+                    'contact' => 'numeric|regex:/(09)[0-9]{9}/',
+                    'emailaddress' => 'unique:users',
+                    'username' => 'unique:users|min:5',
+                    'password' => 'alphaNum|min:6',
+                    'image' => 'max:1500|mimes:png,jpeg,jpg',
+                );
+        }
+        else {
 
         $rules = array(
-            'lastname' => 'required|regex:/^[\pL\s\-]+$/u',
-            'firstname' => 'required|regex:/^[\pL\s\-]+$/u',
-            'birthday' => 'required|date|before:2011-01-01',
-            'contact' => 'required|numeric|regex:/(09)[0-9]{9}/',
-            'emailaddress' => 'required|unique:users',
-            'username' => 'required|unique:users|min:5',
-            'password' => 'required|alphaNum|min:6',
+            'lastname' => 'regex:/^[\pL\s\-]+$/u',
+            'firstname' => 'regex:/^[\pL\s\-]+$/u',
+            'birthday' => 'before:2011-01-01',
+            'contact' => 'numeric|regex:/(09)[0-9]{9}/',
+            'emailaddress' => 'unique:users',
+            'username' => 'unique:users|min:5',
+            'password' => 'alphaNum|min:6',
             'image' => 'max:1500|mimes:png,jpeg,jpg',
         );
+        }
 
         $message = array(
-            'lastname.required' => 'Required',
             'lastname.regex' => 'Letters only',
-            'firstname.required' => 'Required',
             'firstname.regex' => 'Letters only',
             'birthday.required' => 'Required',
-            'birthday.date' => 'Date',
             'contact.required' => 'Required',
             'contact.numeric' => 'Numbers only',
             'email.required' => 'Required',
@@ -352,13 +466,20 @@ if ($validator->fails()) {
         $validation = Validator::make($data, $rules, $message);
 
         if($validation->passes()) {
-            if(User::find($user_id)){
-                return back()->withInput();
-            }
-            else {
             $new_profile->address = $data['address'];
             $new_profile->contactno = $data['contactno'];
-            $new_profile->emailaddress = $data['email'];
+            if($new_profile['username'] !== $data['username'] &&  !empty($data['username'])){
+            $new_profile->username = $data['username'];
+            }
+            else {
+                $old_profile->username = $old_profile['username'];
+            }
+            if($new_profile['emailaddress'] !== $data['emailaddress'] &&  !empty($data['emailaddress'])) {
+            $new_profile->emailaddress = $data['emailaddress'];
+            }
+            else {
+                $old_profile->username = $old_profile['emailaddress'];
+            }
             $new_profile->profile_description = $data['description'];
             $new_profile->birthday = date("Y-m-d", strtotime($data['birthday']));
             if( Request::hasFile('image') ) {
@@ -368,7 +489,9 @@ if ($validator->fails()) {
                         $file->move($destinationPath, $filename);
                         $new_profile->profile_image = $filename;
                     }
+            if(!empty($data['password'])) {
             $new_profile->password = Hash::make($data['password']);
+            }
             $new_profile->save();
             $new_fee = Talent::find($user_id);
             if(!empty($new_fee)){
@@ -382,9 +505,10 @@ if ($validator->fails()) {
                 $new_fee->fee = $data['fee'];
                 $new_fee->save();
             }
+            Session::flash('message', 'Successfully edited profile!');
             return Redirect::back();
         
-            }
+            
         }
         else {
             return Redirect::back()->withInput()->withErrors($validation);
@@ -431,9 +555,25 @@ if ($validator->fails()) {
                 $rating = Rating::find($user_id);
                 $tal = Talent::find($user_id);
                 $invitation = Invitation::where('talent_id', '=', $user_id)->get();
+                //group invitation
+                $groupinvitation = array();
+                $counter = 0;
+                foreach ($invitation as $k => $v) {
+                    if($v['post_id'] == null){
+                        $groupdetails = Group::where('id', '=', $v['inviter_id'])->first();
+                        $groupdetails2 = User::where('id', '=', $v['inviter_id'])->first();
+                        $groupinvitation[$counter]['id'] = $groupdetails['id'];
+                        $groupinvitation[$counter]['groupname'] = $groupdetails['groupname'];
+                        $groupinvitation[$counter]['picture'] = $groupdetails2['profile_image'];
+                        $groupinvitation[$counter]['description'] = $groupdetails2['profile_description'];
+                        $counter++;
+                    }
+                }
+                //end group invitation
                 $counter = 0;
                 $temparr = array();
                 $userdetails = array();
+                //post invitation
                 foreach ($invitation as $key => $val) {
                     $postDetails = Post::where('id', '=', $val['post_id'])->get();
                     foreach ($postDetails as $key => $value) {
@@ -469,12 +609,13 @@ if ($validator->fails()) {
                         $counter++;
                     }
                 }
-                // dd($temparr);
+                // end post invitation;
                 return view('talent.invitation')
                         ->with('rating', $rating)
                         ->with('user', $user)
                         ->with('fee', $tal)
                         ->with('hired', $hired)
+                        ->with('group', $groupinvitation)
                         ->with('postDetails', $temparr)
                         ->with('talent', json_decode($tal['talents'], true));
             
@@ -548,7 +689,7 @@ if ($validator->fails()) {
 
                         
                     ]); 
-                return view('talent.schedule', compact('calendar'))
+                return view('schedule', compact('calendar'))
                         ->with('user', $user);
             
     }
@@ -628,7 +769,30 @@ if ($validator->fails()) {
             // $hire->hire_id = json_encode(explode(',', $talent_id[0]));
             $hire->save();
             return Redirect::back();
+            
         }
+    }
+    public function acceptGroupInvitation($id){
+        $group = Group::where('id', '=', $id)->first();
+        $user = User::where('id', '=', Session::get('id'))->first();
+        if(empty($group['member']) || empty($user['group'])){
+            $member = json_encode(explode(',', Session::get('id')));
+            $group->member = $member;
+            $user->group = json_encode(explode(',', $id));
+        }
+        else {
+            $member = json_decode($group['member'], true);
+            array_push($member, Session::get('id'));
+            $group->member = json_encode($member);
+            $groupmember = json_decode($user['group'], true);
+            array_push($groupmember, $id);
+            $user->group = json_encode($groupmember);
+        }
+        $group->save();
+        $user->save();
+        $invitation = Invitation::where('inviter_id', '=', $id)->delete();
+        Session::flash('message', 'Successfully joined group!');
+        return Redirect::back();
     }
     public function searchTalent(){
         $data = Request::except('_token');
@@ -858,6 +1022,210 @@ if ($validator->fails()) {
         arsort($arr);
         // dd($arr);
         return view('talent.searchscout')->with('result', $arr);
+    }
+
+    public function addMember(){
+        $term = Request::get('q');
+    
+        $results = array();
+        $queries = User::where('firstname', 'like', '%'.$term.'%')
+        ->where('roleID', '=', 1)
+            ->orWhere('lastname', 'like', '%'.$term.'%')
+            ->take(5)->get();
+        foreach ($queries as $query)
+        {
+            $invitation = Invitation::where('talent_id', '=', $query->id)
+                                    ->where('inviter_id', '=', Session::get('id'))
+                                    ->first();
+            if(empty($invitation)){
+                $results[] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image, 'invited' => 'Already invited' ];
+            }
+            else {
+            $results[] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image ];
+            }
+        }
+        if(count($results))
+            return Response::json($results);
+        else
+            $results[] = [ 'id' => '', 'value' => 'No Result Found' ];
+            return Response::json($results);
+    }
+    public function searchUserFeaturedProfile() {
+        $term = Request::get('q');
+        
+        $results = array();
+        $queries = User::where('firstname', 'like', '%'.$term.'%')
+        ->where('roleID', '=', 1)
+            ->orWhere('lastname', 'like', '%'.$term.'%')
+            ->take(5)->get();
+        foreach ($queries as $query)
+        {
+            
+            $results[] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image ];
+            
+        }
+        if(count($results))
+            return Response::json($results);
+        else
+            $results[] = [ 'id' => '', 'value' => 'No Result Found' ];
+            return Response::json($results);
+    }
+    public function removeMember($id){
+        $group = Group::find(Session::get('id'));
+        $member = json_decode($group['member'], true);
+        foreach($member as $key => $value) {
+               if($value == $id) {
+                unset($member[$key]);
+               }
+            }
+        if(empty($member)){
+            $member = null;
+        }
+        else {
+            $member = json_encode($member);
+        }
+        $group->member = $member;
+        $group->save();
+        //user leaves the group
+        $user = User::find($id);
+        $member = json_decode($user['group'], true);
+        foreach($member as $key => $value) {
+               if($value == Session::get('id')) {
+                unset($member[$key]);
+               }
+            }
+        if(empty($member)){
+            $member = null;
+        }
+        else {
+            $member = json_encode($member);
+        }
+        $user->group = $member;
+        $user->save();
+        Session::flash('message', 'Member removed!');
+        return Redirect::back();
+    }
+    public function leaveGroup($id){
+        $user = User::find($id);
+        $member = json_decode($user['group'], true);
+            foreach($member as $key => $value) {
+                   if($value == Session::get('id')) {
+                    unset($member[$key]);
+                   }
+                }
+            if(empty($member)){
+                $member = null;
+            }
+            else {
+                $member = json_encode($member);
+            }
+            $user->group = $member;
+            $user->save();
+        //remove the user from group
+
+        $group = Group::find($id);
+        $member = json_decode($group['member'], true);
+        foreach($member as $key => $value) {
+               if($value == $id) {
+                unset($member[$key]);
+               }
+            }
+        if(empty($member)){
+            $member = null;
+        }
+        else {
+            $member = json_encode($member);
+        }
+        $group->member = $member;
+        $group->save();
+        Session::flash('message', 'You successfully left the group!');
+        return Redirect::back();
+    }
+    public function saveMember($user_id){
+            $sendinvitation =  new Invitation;
+            $sendinvitation->id = null;
+            $sendinvitation->post_id = null;
+            $sendinvitation->talent_id = $user_id;
+            $sendinvitation->inviter_id = Session::get('id');
+            $sendinvitation->status = 0;
+            $sendinvitation->save();
+            Session::flash('message', 'User successfully invited!');
+            return Redirect::back();
+    }
+    public function showFeatured(){
+    $profile = Featured::where('isProfile','=',1)->get();
+    $profilearray = array();
+    $i = 0;
+    foreach ($profile as $key => $value) {
+        $userdetail = User::find($value['profile_id']);
+        $profilearray[$i]['id'] = $value['profile_id'];
+        $profilearray[$i]['profile_image'] = $userdetail['profile_image'];
+        $profilearray[$i]['firstname'] = $userdetail['firstname'];
+        $profilearray[$i]['lastname'] = $userdetail['lastname'];
+        $profilearray[$i]['start_date'] = $value['start_date'];
+        $profilearray[$i]['end_date'] = $value['end_date'];
+        $i++;
+    }
+    $feedbacks = Featured::where('isFeedback','=',1)->get();
+    // dd($feedbacks);
+
+    return view('admin.adminpanel')
+            ->with('profile',$profile)
+            ->with('feedbacks', $feedbacks)
+            ->with('profilearray',$profilearray);
+    }
+    public function addFeaturedProfile(){
+        $data = Request::all();
+        dd($data['invisible']);
+        $start_date = Carbon::parse($data['start_date']);
+        $end_date = Carbon::parse($data['end_date']);
+        $checkstartdate = Carbon::now()->gt($start_date);
+        $checkendate = $end_date->lt($start_date);
+        if($checkstartdate || $checkendate){
+            return Redirect::back()->withInput()->withErrors('Error input!');
+        }
+        else {
+            $details = new Featured;
+            $details->id = null;
+            $details->isProfile = 1;
+            $details->isFeedback = 0;
+            $details->image = null;
+            $details->profile_id = $data['invisible'];
+            $details->start_date = $data['start_date'];
+            $details->end_date = $data['end_date'];
+            $details->save();
+            Session::flash('message', 'Successfully added!');
+            return Redirect::back();
+        }
+    }
+    public function addFeaturedFeedback(){
+        $detail = new Featured;
+        $detail->id = null;
+        $detail->isProfile = 0;
+        $detail->isFeedback = 1;
+        if( Request::hasFile('file') ) {
+                        $destinationPath = public_path().'/files/';
+                        $file = Request::file('file');
+                        $filename = str_random(10).".".$file->getClientOriginalExtension();
+                        $file->move($destinationPath, $filename);
+                        $detail->image = $filename;
+        }
+        $detail->profile_id = null;
+        $details->start_date = null;
+        $details->end_date = null;
+        $detail->save();
+        Session::flash('message', 'Successfully added!');
+        return Redirect::back();
+    }
+    public function removeFeaturedProfile($id){
+        Featured::where('profile_id','=', $id)->delete();
+         Session::flash('message', 'Successfully deleted!');
+         return Redirect::back();
+    }
+    public function removeFeaturedFeedback($id){
+        Featured::where('id','=', $id)->delete();
+         Session::flash('message', 'Successfully deleted!');
+         return Redirect::back();
     }
     public function rateScout($scout_id, $post_id){
         $data = Request::except('_token');

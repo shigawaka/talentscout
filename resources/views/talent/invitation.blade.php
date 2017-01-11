@@ -93,6 +93,13 @@
       </nav>
 
       <div class="row">
+       @if (Session::has('message'))
+                  <div id="card-alert" class="card green">
+                  <div class="card-content white-text">
+                  <p><i class="mdi-navigation-check"></i> {{ Session::get('message') }}</p>
+                  </div>
+                  </div>
+                @endif
       @foreach($postDetails as $fullprop => $details)
         <div class="col s12 m3">
   <div class="card">
@@ -209,6 +216,25 @@
     </div>
   </div>
         </div>
+        @endforeach
+        @foreach($group as $g => $details)
+        <div class="col s12 m7">
+            <h2 class="header">Group Invitation</h2>
+            <div class="card horizontal">
+              <div class="card-image">
+                <img style="width:150px;" src="{{ URL::to('/files/').'/'.$details['picture'] }}">
+              </div>
+              <div class="card-stacked">
+                <div class="card-content">
+                  <p>Group Name: {{ $details['groupname'] }}</p>
+                  <p>Group Description: {{ $details['description'] }}</p>
+                </div>
+                <div class="card-action">
+                  <a href="{{ URL::to('/groupinvitation/accept').'/'.$details['id'] }}">Accept Invitation</a>
+                </div>
+              </div>
+            </div>
+          </div>
         @endforeach
       </div>
             

@@ -11,6 +11,7 @@ use App\Talent;
 use Hash;
 use Auth;
 use Session;
+use App\Featured;
 use App\Scout;
 use App\Group;
 use Carbon\Carbon;
@@ -124,11 +125,11 @@ class RegistrationController extends Controller
         $data = Request::all();
         
         $rules = array(
-            'groupname' => 'regex:/^[\pL\s\-]+$/u',
+            'groupname' => 'regex:([\w ]+)|unique:group',
             'founded' => 'required|date',
             'contactgroup' => 'required|numeric|regex:/(09)[0-9]{9}/',
-            'emailaddressg' => 'required|unique:group',
-            'user_name' => 'required|unique:group|min:5',
+            'emailaddress' => 'unique:users',
+            'username' => 'unique:users|min:5',
             'passwordg' => 'required|alphaNum|min:6',
         );
 
@@ -140,32 +141,53 @@ class RegistrationController extends Controller
             'email-address.required' => 'Required',
             'user_name.required' => 'Required',
             'passwordg.required' => 'Required',
+            'groupname.unique' => 'This name is already taken. Please choose another one.',
         );
 
         $validation = Validator::make($data, $rules, $message);
 
         if($validation->passes()) {
-            if(Group::where('user_name', $data['user_name'])->first()) {
+            if(User::where('username', $data['username'])->first()) {
                 return back()->withInput();
             } else {
                 $changecontact = preg_replace('/^0/','63',$data['contactgroup']);
-                $detail = new Group;
+                $detail = new User;
                 $detail->id =null;
-                $detail->groupname =strtolower($data['groupname']);
-                $detail->founded =$data['founded'];
+                $detail->roleID =2;
+                //using Carbon package for easier date
+                $created = Carbon::createFromFormat('Y-m-d', $data['founded']);
+                $now = Carbon::now(); 
+                $detail->birthday = $data['founded'];
+                $detail->age = $created->diffInYears($now);
                 $detail->contactno =$changecontact;
-                $detail->emailaddressg =$data['emailaddressg'];
-                $detail->user_name =strtolower($data['user_name']);
+                $detail->emailaddress =$data['emailaddress'];
+                $detail->username =strtolower($data['username']);
                 $detail->password = Hash::make($data['passwordg']);
+                $detail->profile_image ='avatar.png';
+                $detail->profile_description =' ';
                 $confirmation_code = str_random(30);
                 $detail->confirmation_code = $confirmation_code;
                 $detail->save();
+                $talent = new Talent;
+                $talent->id = $detail->id;
+                $talent->talents = null;
+                $talent->fee = 0;
+                $talent->save();
+
+
+                $group = new Group;
+                $group->id =$detail->id;
+                $group->groupname =strtolower($data['groupname']);
+                $group->founded =$data['founded'];
+                $group->contactno =$changecontact;
+                $group->emailaddressg =$data['emailaddress'];
+                $group->save();
                 Mail::send('emails.emailactivation', ['confirmation_code' => $confirmation_code], function($message) {
                 $message->to(Request::get('emailaddress'), Request::get('username'))
                     ->subject('Verify your email address');
                 });
-                $chikkadata = array('number'=> $changecontact, 'message'=> 'Thank you for signing up in Talent Scout!'.ucfirst($detail->firstname).' '.ucfirst($detail->lastname).'.This is where your path to stardom begins!');
-                ChikkaController::send($chikkadata);
+                $chikkadata = array('number'=> $changecontact, 'message'=> 'Thank you for signing up in Talent Scout!'.ucfirst($detail->groupname).'.This is where your path to stardom begins!');
+                // ChikkaController::send($chikkadata);
                 Session::flash('message', 'Thanks for signing up! Please check your email.');
                 return Redirect::to('http://localhost:8000/login');
             }

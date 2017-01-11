@@ -107,17 +107,28 @@ Route::post('/profile/edit/{id}', 'HomeController@editProfile');
 //invitation
 Route::get('/invitation/{id}', 'HomeController@showInvitations');
 Route::get('/invitation/accept/{id}', 'HomeController@acceptInvitation');
+Route::get('/groupinvitation/accept/{id}', 'HomeController@acceptGroupInvitation');
 //schedule
 Route::get('/schedule/{id}', 'HomeController@showSchedule');
 Route::post('/addschedule/{id}', 'HomeController@addSchedule');
 Route::post('/deleteschedule', 'HomeController@deleteSchedule');
 //rate scout
 Route::post('/ratescout/{id}/{postid}', 'HomeController@rateScout');
+//add group member
+Route::get('/addmembers/', 'HomeController@addMember');
+Route::get('/savemember/{id}', 'HomeController@saveMember');
+//remove/leave member/group 
+Route::get('/removeMember/{id}', 'HomeController@removeMember');
+Route::get('/leaveGroup/{id}', 'HomeController@leaveGroup');
 //add talent
 Route::post('/addtalent/{id}', 'HomeController@addTalent');
 //homepage
 Route::get('/homescout', 'HomeController@show');
 Route::get('/hometalent', 'HomeController@show');
+//about
+Route::get('/about', function () {
+    return view('about');
+});
 //email
 Route::get('/send', 'EmailController@send');
 
@@ -139,6 +150,20 @@ Route::get('/deletecomment/{id}', 'HomeController@deleteComment');
 //proposal
 Route::post('/addProposal', 'HomeController@addProposal');
 Route::post('/editProposal', 'HomeController@editProposal');
+
+
+
+
+
+
+
+//admin
+Route::get('/featured', 'HomeController@showFeatured');
+Route::get('/removefeaturedprofile/{id}', 'HomeController@removeFeatureProfile');
+Route::get('/removefeaturedfeedback/{id}', 'HomeController@removeFeatureFeedback');
+Route::get('/searchUserFeaturedProfile/', 'HomeController@searchUserFeaturedProfile');
+Route::post('/addFeaturedProfile', 'HomeController@addFeaturedProfile');
+Route::post('/addFeaturedFeedback', 'HomeController@addFeaturedFeedback');
 });
 
 Route::filter('auth', function()

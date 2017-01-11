@@ -70,7 +70,7 @@
               <a href="{!! URL::to('/profile').'/'.Session::get('id') !!}">Profile</a>
             </li>
             <li>
-              <a href="#">About</a>
+              <a href="{!! URL::to('/about') !!}">About</a>
             </li>
             @if(Session::get('roleID') == 0)
             <li>
@@ -115,54 +115,24 @@
         </h1>
       </div>
       <div class="row">
+      @foreach($profilearray as $value)
         <div class="col-md-4 text-center">
           <div class="thumbnail">
-            <img style="height:200px; width:250px;"  alt="Bootstrap Thumbnail First" src="{!! URL::to('/') !!}/img/rand2.jpg" />
+            <img style="height:200px; width:250px;"  alt="Bootstrap Thumbnail First" src="{!! URL::to('/files').'/'.$value['profile_image'] !!}" />
             <div class="caption">
               <h3>
-                Mimi Reyes
+                {!! ucfirst($value['firstname']).' '.ucfirst($value['lastname']) !!}
               </h3>
               <p>
-              Aspiring Singer and Dancer
+              {!! $value['profile_description'] !!}
               </p>
               <p>
-                <a class="btn btn-primary" href="#">View</a>
+                <a class="btn btn-primary" href="{{ URL::to('/profile').'/'.$value['id'] }}">View</a>
               </p>
             </div>
           </div>
         </div>
-        <div class="col-md-4 text-center">
-          <div class="thumbnail">
-            <img style="height:200px; width:250px;" alt="Bootstrap Thumbnail Second" src="{!! URL::to('/') !!}/img/rand1.jpg" />
-            <div class="caption">
-              <h3>
-                Mike Umpad
-              </h3>
-              <p>
-              Bass player and professional drummer for 5 years
-              </p>
-              <p>
-                <a class="btn btn-primary" href="#">View</a>
-              </p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4 text-center">
-          <div class="thumbnail">
-            <img style="height:200px; width:250px;" alt="Bootstrap Thumbnail Third" src="{!! URL::to('/') !!}/images/3.png" />
-            <div class="caption">
-              <h3>
-                Dabyen Barba
-              </h3>
-              <p>
-              Comedian and aspiring singer. Visit my profile for more of my performances!
-              </p>
-              <p>
-                <a class="btn btn-primary" href="#">View</a>
-              </p>
-            </div>
-          </div>
-        </div>
+      @endforeach
       </div>
       <div class="page-header" style="background-color: #EB9532; padding-top: 5px;">
         <h1 style="text-align:center;">
@@ -252,12 +222,10 @@
     
 
 <section class="bg-dark">
-
-<div class="col-lg-12 text-center">
-                    <p>Talent Scout.</br>
-                        All Rights Reserved.</br>
-                        2016</p>
-                </div>
+                    <p class="text-center">Talent Scout.</br>
+                        All Rights Reserved. 2016 </br>
+                        <small style="color: gray;">Contact Talent scout: talentscoutphil@gmail.com</small>
+                        </p>
 </section>
     <!-- jQuery -->
     <script src="../../vendor/jquery/jquery.min.js"></script>

@@ -244,11 +244,11 @@
                         
                         <div class="col-sm-10"> 
                         <!-- {!! Form::email('email', '', array('class' => 'form-control', 'placeholder' => 'Your Email Address')) !!} -->
-                        {!! Form::email('emailaddressg', '', ['class' => 'form-control', 'placeholder' => 'Group Email Address', 'required'=>'required']); !!}
+                        {!! Form::email('emailaddress', '', ['class' => 'form-control', 'placeholder' => 'Group Email Address', 'required'=>'required']); !!}
                             <!-- <input type="input" class="form-control" name="email" id="email" placeholder="Enter Email address"> -->
                                                 
 
-                                                  @foreach($errors->get('emailaddressg') as $message)
+                                                  @foreach($errors->get('emailaddress') as $message)
                                                     {{ $message }}
                                                     @endforeach
                         </div>
@@ -256,13 +256,13 @@
                       <div class="form-group">
                         
                         <div class="col-sm-10"> 
-                        {!! Form::text('user_name', '', array('class' => 'form-control', 'placeholder' => 'Your username', 'required'=>'required')) !!}
+                        {!! Form::text('username', '', array('class' => 'form-control', 'placeholder' => 'Your username', 'required'=>'required')) !!}
                           <!-- <input type="input" class="form-control" name="username" id="username" placeholder="Enter username"> -->
                                                 
 
-                                                  @foreach($errors->get('user_name') as $message)
+                                                  @foreach($errors->get('username') as $message)
                                                     {{ $message }}
-                                                    @endforeach
+                                                  @endforeach
                         </div>
                       </div>               
                       <div class="form-group">
@@ -351,12 +351,10 @@
   $(function() {
     $( "#datepicker" ).datepicker({ dateFormat: 'yy-mm-dd',
       changeMonth: true,
-      changeYear: true,
-      yearRange: '1960:2001'  });
+      changeYear: true });
     $( "#datepicker2" ).datepicker({ dateFormat: 'yy-mm-dd',
       changeMonth: true,
-      changeYear: true,
-      yearRange: '1960:2016'  });
+      changeYear: true  });
   });
   </script>
 </body>

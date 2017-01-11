@@ -73,7 +73,7 @@
               <a href="{!! URL::to('/profile').'/'.Session::get('id') !!}">Profile</a>
             </li>
             <li>
-              <a href="#">About</a>
+              <a href="{!! URL::to('/about') !!}">About</a>
             </li>
             @if(Session::get('roleID') == 0)
             <li  class="active">
@@ -311,12 +311,10 @@
     
 
 <section class="bg-dark">
-
-<div class="col-lg-12 text-center">
-                    <p>Talent Scout.</br>
-                        All Rights Reserved.</br>
-                        2016</p>
-                </div>
+                    <p class="text-center">Talent Scout.</br>
+                        All Rights Reserved. 2016 </br>
+                        <small style="color: gray;">Contact Talent scout: talentscoutphil@gmail.com</small>
+                        </p>
 </section>
     <!-- jQuery -->
     <script src="../../vendor/jquery/jquery.min.js"></script>

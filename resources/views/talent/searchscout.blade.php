@@ -70,7 +70,7 @@
               <a href="{!! URL::to('/profile').'/'.Session::get('id') !!}">Profile</a>
             </li>
             <li>
-              <a href="#">About</a>
+              <a href="{!! URL::to('/about') !!}">About</a>
             </li>
             @if(Session::get('roleID') == 0)
             <li>

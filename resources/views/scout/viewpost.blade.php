@@ -102,7 +102,7 @@
               <a href="{!! URL::to('/profile').'/'.Session::get('id') !!}">Profile</a>
             </li>
             <li>
-              <a href="#">About</a>
+              <a href="{!! URL::to('/about') !!}">About</a>
             </li>
             @if(Session::get('roleID') == 0)
             <li>
@@ -193,6 +193,31 @@
           Male performers only!
           @elseif( $posts['gender'] == 'female')
           Female performers only!
+          @endif
+          </p>
+        </div>
+        <div class="col-sm-4" style="padding-top: 10px;">
+          <p><strong>Number of talent needed</strong> </br>
+          {!! $posts['hire_number'] !!}
+          </p>
+        </div>
+        <div class="col-sm-4" style="padding-top: 10px;">
+          <p><strong>Hired</strong> </br>
+          @if(empty($posts['hire_id']))
+          0
+          @else
+          {{ count(json_decode($posts['hire_id'], true)) }}
+          @endif
+          </p>
+        </div>
+        <div class="col-sm-4" style="padding-top: 10px;">
+          <p><strong>Talent Characteristic</strong> </br>
+          @if($posts['hire_id'] == '0')
+          Group and Individual <br /><small style="color: gray;">Any talent group or individual are entertained</small>
+          @elseif($posts['hire_id'] == '1')
+          Group only! <br /><small style="color: gray;">Only talent groups are entertained</small>
+          @else
+          Individual only! <br /><small style="color: gray;">Only individual talents are entertained</small>
           @endif
           </p>
         </div>
@@ -371,7 +396,7 @@
                   </h1>
                 </div>
                 
-                @foreach($fullproposals as $fullprop => $val)
+                @foreach($fullclosedeals as $fullprop => $val)
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
                     {!! $val['firstname'] , ' ',  $val['lastname'] !!}
                 </h3>
@@ -583,7 +608,7 @@
                 @foreach($fullproposals as $fullprop => $val)
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
                     {!! $val['firstname'] , ' ',  $val['lastname'] !!}
-                    @if(!empty($val['hired']))
+                    @if(!empty($val['hired']))f
                       @if($val['user_id'] === $val['hired'])
                       <a disabled class="btn btn-success" href="{!! URL::to('/hire').'/'.$val['user_id'] !!}">Hired</a>
                       @else

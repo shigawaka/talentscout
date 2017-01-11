@@ -17,7 +17,7 @@
     <!-- Custom Fonts -->
     <link href="../../vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <!-- <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'> -->
-    <link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
 
     <!-- Plugin CSS -->
     <link href="vendor/magnific-popup/magnific-popup.css" rel="stylesheet">
@@ -42,7 +42,7 @@
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
                 
-                <a class="navbar-brand page-scroll" href="../../index.php"><img src="../../img/logo.png" class="logo"></a>
+                <a class="navbar-brand page-scroll" href="{!! URL::to('/home') !!}"><img src="../../img/logo.png" class="logo"></a>
 
            
             </div>
@@ -63,13 +63,13 @@
       <nav class="navbar navbar-inverse" role="navigation">
         <div class="collapse navbar-collapse"  id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
-            <li  class="active">
+            <li >
               <a href="{!! URL::to('/home') !!}">Home</a>
             </li>
             <li>
               <a href="{!! URL::to('/profile').'/'.Session::get('id') !!}">Profile</a>
             </li>
-            <li>
+            <li class="active">
               <a href="{!! URL::to('/about') !!}">About</a>
             </li>
             @if(Session::get('roleID') == 0)
@@ -78,10 +78,10 @@
             </li>
             @endif
           </ul>
-          {!! Form::open(['url'=>'/search', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
+          {!! Form::open(['url'=>'/searchscout', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
           
             
-          {!! Form::text('search', '', array('placeholder' => 'Search talent', 'class' => 'form-control', 'style' => 'width:70%;')) !!}              
+          {!! Form::text('search', '', array('id' => 'q','placeholder' => 'Search...', 'class' => 'form-control', 'style' => 'width:70%;')) !!}              
           {!! Form::submit('Search', array('class' => 'btn btn-default')) !!}   
             
             {!! Form::close() !!}
@@ -90,26 +90,22 @@
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               <span class="glyphicon glyphicon-bell"></span>
               </a>
-              <ul class="dropdown-menu">
-                <li>
-                  <a href="#">Action</a>
-                </li>
-                <li>
-                  <a href="#">Another action</a>
-                </li>
-                <li>
-                  <a href="#">Something else here</a>
-                </li>
-                <li class="divider">
-                </li>
-                <li>
-                  <a href="#">Separated link</a>
-                </li>
-              </ul>
+              {{-- @foreach($unreadNotifications as $notification)
+              <div class="notification {{ $notification->type }}">    
+                  <p class="subject">{{ $notification->subject }}</p>
+                  <p class="body">{{ $notification->body }}</p>
+              </div>
+              @endforeach --}}
             </li>
+            @if(Session::get('roleID') == 2)
+            <li>
+              <a href="#">Welcome {!! ucfirst(Session::get('groupname'))  !!} !</a>
+            </li>
+            @else
             <li>
               <a href="#">Welcome {!! ucfirst(Session::get('firstname')),' ', ucfirst(Session::get('lastname'))  !!} !</a>
             </li>
+            @endif
              <li>
               <a href="{!! URL::to('/logout') !!}">Logout</a>
             </li>
@@ -117,61 +113,12 @@
         </div>
         
       </nav>
-      <div class="row">
-        <div class="col-xs-3" style="height:900px;">
-        <div class="form-group">
-        <div class="col-sm-10">
-          <h3>Search Criteria</h3>
-          </div>
-          {!! Form::open(['url'=>'/search', 'files' => true]) !!}
-          <div class="col-sm-10">
-          {!! Form::text('search', '', array('class' => 'form-control','placeholder' => 'Enter the Keywords')) !!}
-          <!-- <input class="form-control" type="text" name="keyword" placeholder="Enter the Keywords"> --><br>
-          </div>
-          <div class="col-sm-10">
-          {!! Form::number('fee', '', array('class' => 'form-control','placeholder' => 'Minimum Rates')) !!}
-          <!-- <input class="form-control" type="text" name="keyword" placeholder="Minimum Rates"> --><br>
-          </div>
-          <div class="col-sm-10">
-          <label for="sel1">By Talent Category:</label>
-          {!! Form::select('category', ['' => 'Select category','guitar' => 'Guitar', 'bass' => 'Bass', 'dancing' => 'Dancing', 'drum' => 'Drum', 'vocalist' => 'Vocalist'], null, ['class' => 'form-control']) !!}
-          <br>
-          </div>
-        </div>
-           {!! Form::submit('Search',['class'=>'btn btn-success btn-lg btn-block', 'placeholder' =>'Search']) !!}
-          {!! Form::close() !!}
-        </div>
-        @if(!empty($result))
-        @foreach($result as $res)
-        <div class="col-md-3" style="width: 250px;height:500px;">
-          <div class="thumbnail" style="height: 100%;">
-            <img alt="Bootstrap Thumbnail First" src="{!! URL::to('/files').'/'.$res['profile_image'] !!}" />
-            <div class="caption">
-              <h4>
-                <b>{!! ucfirst($res['firstname']).' '.ucfirst($res['lastname']) !!}</b>
-              </h4>
-              <p style="font-size: 13px;">
-                <i>{!! $res['profile_description'] !!}</i><br>
-              </p>
-              <p>
-                <a class="btn btn-primary" href="#">Endorse</a> <a class="btn" href="{{ URL::to('/profile').'/'.$res['id'] }}">View</a>@if(!empty($res['fee']))<span class="label label-default"> Talent Fee:  {!! $res['fee'] !!} @endif 
-                </span>
-                </br>
-                @if($res['rank'] <= 1000)
-                <span class="label label-success">Profile Rank: Newbie</span>
-                @elseif($res['rank'] >= 1500)
-                <span class="label label-success">Profile Rank: Rising Talent</span>
-                @else
-                 <span class="label label-success">Profile Rank: Star Talent</span>
-                @endif
-              </p>
-            </div>
-          </div>
-        </div>
-        <!-- end of col -->
-        @endforeach
-        @endif
-      </div>
+    </div>
+    <div class="col-md-12">
+        <h1>About Talent Scout</h1>
+        <p>There are many various kinds of social gathering; it could be a birthday or an event in the community or a concert. The success of any social gathering can be determined by the number of people that actually enjoyed the event; this includes the performance of the individual showcasing one’s talent resulting in adding the latter’s and event manager’s portfolio. Everything seems smooth however one of the common problems for hosting/managing an event is finding talents or icebreakers to entertain the crowds; this could take days or weeks for contacting and verifying the talents which is inconvenient. Talent Scout is the One-Stop web application available for finding events which one can showcase his/her talents and could rise to Stardom or are you finding someone perfect for your event; instead of asking someone if they know someone that can sing or dance, etc. One can find it in Talent Scout. </p>
+        <h1>Want your profile to be featured?</h1>
+        <p>with our payment system tbc</p>
     </div>
   </div>
 </div>
@@ -180,16 +127,15 @@
     
 
 <section class="bg-dark">
-
-<div class="col-lg-12 text-center">
-                    <p>Talent Scout.</br>
-                        All Rights Reserved.</br>
-                        2016</p>
-                </div>
+                    <p class="text-center">Talent Scout.</br>
+                        All Rights Reserved. 2016 </br>
+                        <small style="color: gray;">Contact Talent scout: talentscoutphil@gmail.com</small>
+                        </p>
 </section>
     <!-- jQuery -->
     <script src="../../vendor/jquery/jquery.min.js"></script>
-
+    <script src="../../js/jquery-ui.js"></script>
+<link rel="stylesheet" href="../../css/jquery-ui.css">
     <!-- Bootstrap Core JavaScript -->
     <script src="../../vendor/bootstrap/js/bootstrap.min.js"></script>
 
@@ -201,7 +147,6 @@
     <!-- Theme JavaScript -->
     <script src="../../js/creative.min.js"></script>
     <script src="../../js/carousel.js"></script>
-
 </body>
 
 </html>

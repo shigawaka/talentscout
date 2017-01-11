@@ -10,7 +10,7 @@ use Validator;
 
 use Illuminate\Support\Facades\Auth;
 use Input;
-
+use App\Featured;
 class AuthController extends Controller {
 
   /*
@@ -25,7 +25,7 @@ class AuthController extends Controller {
   */
 
 
-  private $redirectTo = '/addpatient';
+  // private $redirectTo = '/featured';
 protected $loginPath = '/login';
   /**
    * Create a new authentication controller instance.
@@ -69,13 +69,6 @@ public function getLogin(){
 
     return view('/login');
 }
-  public function postLogin(){
-
-
-    
-              return Redirect::to('/addpatient');
-       
-}
   
   public function getLogout()
     {
@@ -83,5 +76,6 @@ public function getLogin(){
  
         return Redirect::to('/home');
     }
+  
 
 }

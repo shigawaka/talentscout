@@ -148,6 +148,11 @@
                 @endforeach
             </div>
             <div class="input-field col s6">
+            {!! Form::text('username', $user['username'], array('class' => 'validate','placeholder' => 'Enter new username')) !!}
+              <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
+              <label for="password">Change Username</label>
+            </div>
+            <div class="input-field col s6">
             {!! Form::password('password', '', array('class' => 'validate','placeholder' => 'Enter new password')) !!}
               <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
               <label for="password">Change Password</label>
@@ -213,23 +218,39 @@
 
                <div class="col s12 m7">
       
-              <div class="card-panel horizontal">
-                  <h2>Personal Details</h2>
+              <div class="card horizontal">
 
 
-                    <div class="card-stacked">
-                    <i class="material-icons md-48">perm_contact_calendar</i>DATE OF BIRTH
-                       <h5>{!! $user['birthday'] !!}</h5>
+                   <div class="card-stacked">
+                   <div class="card-content">
+                    <i class="material-icons cyan-text darken-text">date_range</i>Birthday
+                       <h6>{!! $user['birthday'] !!}</h6>
                     </div>
-                   
-                    <div class="card-stacked">
-                    <i class="material-icons">contact_phone</i> CONTACT 
-                       <h5>  {!! $user['contactno'] !!}</h5>
-                       <h5>  {!! $user['emailaddress'] !!}</h5>
+                    </div>
+                   <div class="card-stacked">
+                   <div class="card-content">
+                    <i class="material-icons cyan-text darken-text md-48">perm_contact_calendar</i>AGE
+                       <h6>{!! $user['age'] !!}</h6>
+                    </div>
                     </div>
                     <div class="card-stacked">
-                       <h6> <i class="material-icons">group_work</i>Not a member of any group</h6>
+                    <div class="card-content">
+                    <i class="material-icons cyan-text darken-text">contact_phone</i> CONTACT 
+                       <h6>  {!! $user['contactno'] !!}</h6>
+                       <h6>  {!! $user['emailaddress'] !!}</h6>
                     </div>
+                    </div>
+                    <div class="card-stacked">
+                    <div class="card-content">
+                    <i class="material-icons cyan-text darken-text">person</i> GENDER 
+                       <h6>  {!! ucfirst($user['gender']) !!}</h6>
+                    </div>
+                    </div>
+                    <!-- <div class="card-stacked">
+                    <div class="card-content">
+                       <h6> <i class="material-icons cyan-text darken-text">group</i>Group</h6>
+                    </div>
+                    </div> -->
                 
 
                  
@@ -359,7 +380,10 @@
 
         <div class="footer-copyright">
           <div class="container" align="center">
-    Talent Scout||All rights reserved||2016
+     <p class="text-center">Talent Scout.</br>
+                        All Rights Reserved. 2016 </br>
+                        <small style="color: gray;">Contact Talent scout: talentscoutphil@gmail.com</small>
+                        </p>
           </div>
         </div>
       </footer>

@@ -67,7 +67,7 @@
               <a href="{!! URL::to('/home') !!}">Home</a>
             </li>
             <li>
-              <a href="{!! URL::to('/profile').'/'.Session::get('id') !!}">Profile</a>
+              <a href="{!! URL::to('/featured') !!}">Administrator Panel</a>
             </li>
             <li>
               <a href="{!! URL::to('/about') !!}">About</a>
@@ -126,25 +126,25 @@
   <!-- Indicators -->
   <ol class="carousel-indicators">
     <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-    @for($i = 1; $i < count($slideshow); $i++)
-    <li data-target="#myCarousel" data-slide-to="{{ $i }}"></li>
-    @endfor
-    <!-- <li data-target="#myCarousel" data-slide-to="2"></li> -->
+    <li data-target="#myCarousel" data-slide-to="1"></li>
+    <li data-target="#myCarousel" data-slide-to="2"></li>
   </ol>
 
   <!-- Wrapper for slides -->
   <div class="carousel-inner" role="listbox">
     <div class="item active">
-      <img style="width:1280px; height:380px;" src="{!! URL::to('/img').'/'.$slideshow[0]['image'] !!}" alt="Chania">
+      <img style="width:1280px; height:380px;" src="img/testi1.jpg" alt="Chania">
     </div>
 
-    @foreach($slideshow as $key => $show)
-    @if($key !== 0)
     <div class="item">
-      <img style="width:1280px; height:380px;" src="{!! URL::to('/img').'/'.$show['image'] !!}" alt="Chania">
+      <img class="img-responsive" style="width:79%; height:380px;" src="img/testi2.jpg" alt="Chania">
     </div>
-    @endif
-    @endforeach
+
+    <div class="item">
+      <img style="width:1280px; height:380px;" src="img/header.jpg" alt="Chania">
+    </div>
+
+   
   </div>
 
   <!-- Left and right controls -->

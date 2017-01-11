@@ -231,7 +231,7 @@
   $(function() {
     $( "#datepicker" ).datepicker({ dateFormat: 'yy-mm-dd',changeMonth: true,
       changeYear: true,
-      yearRange: '1960:1998'});
+      yearRange: '1960:1999'});
   });
   </script>
 </body>

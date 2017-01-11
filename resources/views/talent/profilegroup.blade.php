@@ -41,11 +41,14 @@
      
 
     <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/jquery-ui.js"></script>
     <!-- Compiled and minified CSS -->
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/css/materialize.min.css"> -->
+    <link rel="stylesheet" href="../../css/jquery-ui.css">
     <link rel="stylesheet" href="../../materialize/css/materialize.min.css">
     <link rel="stylesheet" href="../../materialize/materialize-tags.css">
     <!-- Compiled and minified JavaScript -->
+    
     <script src="../../materialize/js/materialize.min.js"></script>
     <script src="../../materialize/materialize-tags.js"></script>    
         <style>
@@ -59,7 +62,6 @@
           z-index: 900;
         }
         </style>
-
       </head>
 
           <nav class="red lighten-1" role="navigation">
@@ -112,6 +114,13 @@
                 </button>
                   @endif
                 </div>
+                @if (Session::has('message'))
+                  <div id="card-alert" class="card green">
+                  <div class="card-content white-text">
+                  <p><i class="mdi-navigation-check"></i> {{ Session::get('message') }}</p>
+                  </div>
+                  </div>
+                @endif
                   <div id="modal" class="modal modal-fixed-footer">
                        <div class="modal-content">
                        <h4>Edit Profile</h4>
@@ -120,18 +129,10 @@
                         <div class="row">
                         {!! Form::open(['url'=>'/profile/edit/'.$user['id'].'', 'files' => true]) !!}
                           <div class="input-field col s6">
-            {!! Form::text('firstname', ucfirst($user['firstname']), array('class' => 'validate','placeholder' => 'Enter Firstname', 'disabled' => 'disabled')) !!}
+            {!! Form::text('groupname', ucfirst($groupdetails['groupname']), array('class' => 'validate','placeholder' => 'Enter Firstname', 'disabled' => 'disabled')) !!}
               <!-- <input  value="Frete" id="firstname" type="text" class="validate"> -->
-              <label for="firstname">First Name</label>
-              @foreach($errors->get('firstname') as $message)
-                {!! $message !!}
-                @endforeach
-            </div>
-            <div class="input-field col s6">
-            {!! Form::text('lastname', ucfirst($user['lastname']), array('class' => 'validate','placeholder' => 'Enter Firstname', 'disabled' => 'disabled')) !!}
-              <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
-              <label for="lastname">Last Name</label>
-              @foreach($errors->get('lastname') as $message)
+              <label for="firstname">Groupname</label>
+              @foreach($errors->get('groupname') as $message)
                 {!! $message !!}
                 @endforeach
             </div>
@@ -139,70 +140,94 @@
             <div class="input-field col s6">
             {!! Form::text('birthday', $user['birthday'], array('class' => 'datepicker','placeholder' => 'Enter date of birth')) !!}
               <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
-              <label for="lastname">Date of Birth</label>
+              <label for="lastname">Date Founded</label>
               @foreach($errors->get('birthday') as $message)
-                {!! $message !!}
+                <div id="card-alert" class="card red">
+              <div class="card-content white-text">
+              <p><i class="mdi-navigation-check"></i> {!! $message !!}</p>
+              </div>
+              </div>
                 @endforeach
             </div>
             <div class="input-field col s6">
-            {!! Form::text('contact', $user['contactno'], array('class' => 'validate','placeholder' => 'Enter contact number')) !!}
+            {!! Form::text('contactno', $user['contactno'], array('class' => 'validate','placeholder' => '')) !!}
               <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
               <label for="lastname">Contact Number</label>
               @foreach($errors->get('contact') as $message)
-                {!! $message !!}
+               <div id="card-alert" class="card red">
+              <div class="card-content white-text">
+              <p><i class="mdi-navigation-check"></i> {!! $message !!}</p>
+              </div>
+              </div>
                 @endforeach
             </div>
             <div class="input-field col s6">
-            {!! Form::text('emailaddress', $user['emailaddress'], array('class' => 'validate','placeholder' => 'Enter contact number')) !!}
+            {!! Form::text('emailaddress', '', array('class' => 'validate','placeholder' => $user['emailaddress'])) !!}
               <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
               <label for="lastname">Email address</label>
               @foreach($errors->get('email') as $message)
-                {!! $message !!}
+                <div id="card-alert" class="card red">
+              <div class="card-content white-text">
+              <p><i class="mdi-navigation-check"></i> {!! $message !!}</p>
+              </div>
+              </div>
                 @endforeach
             </div>
             <div class="input-field col s12">
-            {!! Form::textarea('description', $user['profile_description'], array('style' => 'min-width:100%;resize:none;')) !!}
+            {!! Form::textarea('description', $user['profile_description'], array('style' => 'min-width:100%;resize:none;', 'placeholder' => '')) !!}
               <!-- <input value="Basak Cebu" id="address" type="text" class="validate"> -->
               <label for="address">Personal Description</label>
                @foreach($errors->get('description') as $message)
-                {!! $message !!}
+                <div id="card-alert" class="card red">
+              <div class="card-content white-text">
+              <p><i class="mdi-navigation-check"></i> {!! $message !!}</p>
+              </div>
+              </div>
                 @endforeach
             </div>
                <div class="input-field col s12">
-            {!! Form::text('address', $user['address'], array('class' => 'validate','placeholder' => 'Enter your address')) !!}
+            {!! Form::text('address', $user['address'], array('class' => 'validate','placeholder' => '')) !!}
               <!-- <input value="Basak Cebu" id="address" type="text" class="validate"> -->
               <label for="address">Address</label>
               @foreach($errors->get('address') as $message)
-                {!! $message !!}
+                <div id="card-alert" class="card red">
+              <div class="card-content white-text">
+              <p><i class="mdi-navigation-check"></i> {!! $message !!}</p>
+              </div>
+              </div>
                 @endforeach
             </div>
-            <div class="input-field col s6">
-            {!! Form::text('username', $user['username'], array('class' => 'validate','placeholder' => 'Enter new username')) !!}
+             <div class="input-field col s6">
+            {!! Form::text('username', '', array('class' => 'validate','placeholder' => $user['username'])) !!}
               <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
-              <label for="password">Change Username</label>
+              <label for="username">Change Username</label>
             </div>
             <div class="input-field col s6">
             {!! Form::password('password', '', array('class' => 'validate','placeholder' => 'Enter new password')) !!}
               <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
               <label for="password">Change Password</label>
             </div>
-            <div class="input-field col s6">
-            {!! Form::text('gender', ucfirst($user['gender']), array('class' => 'validate','placeholder' => 'Enter Firstname', 'disabled' => 'disabled')) !!}
-              <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
-              <label for="lastname">Gender</label>
-            </div>
+
             <div class="input-field col s12" style="padding-bottom: 35px;">
               <label for="image">Change Profile Picture</label>
             {!! Form::file('image', '', array('class' => 'validate','placeholder' => 'Upload Image')) !!}
-                @foreach($errors->get('image') as $message)
-                {!! $message !!}
+                @foreach($errors->all() as $message)
+                <div id="card-alert" class="card red">
+              <div class="card-content white-text">
+              <p><i class="mdi-navigation-check"></i> {!! $message !!}</p>
+              </div>
+              </div>
                 @endforeach
             </div>
               <div class="input-field col s3">
             {!! Form::text('fee', $fee['fee'], array('class' => 'validate','placeholder' => 'Enter your rate')) !!}
               <label for="rate" class="left-align">Talent Fee (₱)</label>
               @foreach($errors->get('rate') as $message)
-                {!! $message !!}
+                <div id="card-alert" class="card red">
+              <div class="card-content white-text">
+              <p><i class="mdi-navigation-check"></i> {!! $message !!}</p>
+              </div>
+              </div>
                 @endforeach
             </div>
 
@@ -220,8 +245,7 @@
                     <!-- <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Save</a> -->
                     </div>
               </div>
-                  <h2><b>{!! ucfirst($user['firstname']) .' '. ucfirst($user['lastname']) !!}</b></h2>
-                   <h5>{!! $user['address'] !!}</h5>
+                  <h2><b>{!! ucfirst($groupdetails['groupname']) !!}</b></h2>
                    <div class="card-action">
               <blockquote><h4><i>{!! $user['profile_description'] !!}</i></h4></blockquote>
             </div>
@@ -248,48 +272,71 @@
                <div class="col s12 m7">
       
               <div class="card horizontal">
+                  
 
 
                    <div class="card-stacked">
                    <div class="card-content">
-                    <i class="material-icons cyan-text darken-text">date_range</i>Birthday
+                    <i class="material-icons cyan-text darken-text">date_range</i>Date founded
                        <h6>{!! $user['birthday'] !!}</h6>
                     </div>
                     </div>
-                   <div class="card-stacked">
-                   <div class="card-content">
-                    <i class="material-icons cyan-text darken-text md-48">perm_contact_calendar</i>AGE
-                       <h6>{!! $user['age'] !!}</h6>
+                    <div class="card-stacked">
+                    <div class="card-content">
+                    <i class="material-icons cyan-text darken-text">place</i> ADDRESS 
+                       <h6>  {!! $user['address'] !!}</h6>
                     </div>
                     </div>
                     <div class="card-stacked">
                     <div class="card-content">
-                    <i class="material-icons cyan-text darken-text">contact_phone</i> CONTACT 
-                       <h6>  {!! $user['contactno'] !!}</h6>
-                       <h6>  {!! $user['emailaddress'] !!}</h6>
+                    <i class="material-icons cyan-text darken-text">contact_phone</i> CONTACT (MOBILE/EMAIL-ADDRESS) 
+                       <h6>  {!! $user['contactno'] !!} / {!! $user['emailaddress'] !!}</h6>
                     </div>
                     </div>
-                    <div class="card-stacked">
-                    <div class="card-content">
-                    <i class="material-icons cyan-text darken-text">person</i> GENDER 
-                       <h6>  {!! ucfirst($user['gender']) !!}</h6>
-                    </div>
-                    </div>
-                    <div class="card-stacked">
-                    <div class="card-content">
-                       <h6> <i class="material-icons cyan-text darken-text">group</i>Group</h6>
-                       @foreach($grouparray as $ga)
-                       <h6> <a href="{!! URL::to('/leaveGroup').'/'.$ga['id'] !!}"> Leave Group </a></h6>
-                       <img class="circle" src="{!! URL::to('/files').'/'.$ga['profile_image'] !!}" style="width:50px; height:50px; ">
-                       <h6> <a href="{!! URL::to('/profile').'/'.$ga['id'] !!}"> {!! ucfirst($ga['groupname']) !!} </a></h6>
-                       @endforeach
-                    </div>
-                    </div>
-                
 
                  
           
                </div>
+
+              </div>
+
+              <div class="col s12 m7">
+      
+              <div class="card horizontal">
+                  
+                    <div class="card-stacked">
+                    <div class="card-content">
+                    <div class="card2 ">
+                @if($user['id'] == Session::get('id'))
+                   <a class="btn-floating btn-small waves-effect waves-light grey btn modal-trigger" data-target="modaladmem"><i class="material-icons">add members</i></a>
+                @endif
+                </div>  
+             <div id="modaladmem" class="modal modal-fixed-footer">
+              {!! Form::open(['url'=>'/savemember/', 'method' => 'POST']) !!}
+                       <div class="modal-content">
+                       <div class="wrap">
+                        {!! Form::text('q', '', array('id' => 'autocomplete-input','class' => 'autocomplete')) !!}
+                        <div id="mem"></div>
+                        </div>
+                       </div>
+                    <div class="modal-footer">  
+                    {!! Form::close() !!}
+                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Close</a>                    </div>
+              </div>
+                       <h6> <i class="material-icons cyan-text darken-text">group</i> Group Members</h6>
+                       @foreach($grouparray as $ga)
+                       <h6> <a href="{!! URL::to('/removeMember').'/'.$ga['id'] !!}"> Remove member </a></h6>
+                       <img class="circle" src="{!! URL::to('/files').'/'.$ga['profile_image'] !!}" style="width:50px; height:50px; ">
+                       <h6> <a href="{!! URL::to('/profile').'/'.$ga['id'] !!}"> {!! ucfirst($ga['fullname']) !!} </a></h6>
+                       @endforeach
+                    </div>
+                    </div>
+                    
+
+                 
+          
+               </div>
+
               </div>
             </div>
 
@@ -422,7 +469,7 @@
 
         <div class="footer-copyright">
           <div class="container" align="center">
-    Talent Scout|   All rights reserved |   2016
+    Talent Scout |  All rights reserved |   2016
           </div>
         </div>
       </footer>
@@ -442,12 +489,72 @@
   
     $('.datepicker').pickadate({
       selectMonths: true, // Creates a dropdown to control month
-      selectYears: 100 // Creates a dropdown of 15 years to control year
+      selectYears: 100, // Creates a dropdown of 15 years to control year
+      format: 'yyyy-m-d',
     });
     
   </script>
+ @if(count($errors)>0)
+          <script>
+              $('#modal').openModal();
+          </script>
+  @endif
+  <script src="../../js/jquery.materialize-autocomplete.js"></script>
+<script>
+//    $('document').ready(function(){
+// /* $('#search-input').attr('autocomplete', 'on');*/
+// $("#q").autocomplete({
+// source : "{{ URL('/addmembers/') }}",
+// minlength: 1,
 
+//        select: function(event,ui){
 
+//            $('#q').val(ui.item.value);
+
+//             }
+//     });
+// });
+   $(document).ready(function(){
+    $( "#autocomplete-input" ).keyup(function() {
+      var q = $( "#autocomplete-input" ).val();
+     $.ajax({
+                url: "{{ URL('/addmembers/') }}",
+                type: 'GET', // your request type
+                dataType: "json",
+                data: {q : q},
+                success: function(data) {
+                  
+                  // $.each(data, function(index, element) {
+                  //   console.log(element.value); 
+                  //   d = element.id;
+                  //   });
+                  console.log(data[0].picture);
+                  $.each(data,function(index, value){
+                  var name = value.value;
+                  var id = value.id;
+                  var pic = value.picture;
+                  var invited = value.invited;
+                   $("#mem").empty();
+                   if(pic === void(0)) {
+                    //no match found
+                   $("#mem").append("<div class='thumbnail'><div class='caption'><p>"+name+"</p></div></div>");
+                   }
+                   else {
+                    //check if already invited
+                      if(invited === void(0)) {
+                        $("#mem").append("<div class='thumbnail'><img width='120px;' src=http://localhost:8000/files/"+pic+" /><div class='caption'><p>"+name+"</p><a class='btn btn-primary' href='#' disabled>Already invited</a></div></div>");
+                      }
+                      else {
+                      $("#mem").append("<div class='thumbnail'><img width='120px;' src=http://localhost:8000/files/"+pic+" /><div class='caption'><p>"+name+"</p><a class='btn btn-primary' href='http://localhost:8000/savemember/"+id+"'>Invite</a></div></div>");
+                      }
+                   }
+                   // $("#autocomplete-input").val(id);
+                  });
+                }
+            });
+    });
+});
+</script>
     <!--    
      {!! HTML::script('vendor/jquery/jquery.min.js') !!}
      {!! HTML::script('vendor/bootstrap/js/bootstrap.min.js') !!}

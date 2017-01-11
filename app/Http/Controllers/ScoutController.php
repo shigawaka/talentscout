@@ -223,29 +223,49 @@ class ScoutController extends Controller
                     $numhire = count(json_decode($hire['hire_id'], true));
                     $temp = json_decode($hire['hire_id']);
                     // list($temp) = explode(',', implode(',',json_decode($hire['hire_id'], true)));
-                    $fullproposals[$j]['hired'] = $temp[$j++];
+                    // $fullproposals[$j]['hired'] = $temp[$j++];
                     // echo $temp;
-                    for ($i=$j; $i < $numhire; $i++) { 
+                    for ($i=0; $i < $numhire; $i++) { 
                     $otheruser = User::find($temp[$i]);
-                            $fullproposals[$i]['user_id'] = $otheruser['id'];
-                            $fullproposals[$i]['profile_image'] = $otheruser['profile_image'];
-                            $fullproposals[$i]['firstname'] = $otheruser['firstname'];
-                            $fullproposals[$i]['lastname'] = $otheruser['lastname'];
-                            $fullproposals[$i]['body'] = $retrieveprops['body'];
-                            $fullproposals[$i]['proposed_rate'] = $retrieveprops['proposed_rate'];
-                            $fullproposals[$i]['hired'] = $temp[$i];
+                     $fullproposals[$j]['hired'] = $temp[$i];
+                            // $fullproposals[$i]['user_id'] = $otheruser['id'];
+                            // $fullproposals[$i]['profile_image'] = $otheruser['profile_image'];
+                            // $fullproposals[$i]['firstname'] = $otheruser['firstname'];
+                            // $fullproposals[$i]['lastname'] = $otheruser['lastname'];
+                            // $fullproposals[$i]['body'] = $retrieveprops['body'];
+                            // $fullproposals[$i]['proposed_rate'] = $retrieveprops['proposed_rate'];
+                            // $fullproposals[$i]['hired'] = $temp[$i];
                     }
                     // dd($otheruser);
                     }
                     else {
-                    $fullproposals[$j]['hired'] = $temp[$j];
-                    break;
+                    $fullproposals[$j]['hired'] = null;
                     }
                  }
                  $j++;
              }
          }
-         // dd($fullproposals);
+         $fullclosedeals = array();
+         $hired = Post::where('id', '=', $post_id)->get();
+                 foreach($hired as $hire){
+                    if(count(json_decode($hire['hire_id'], true)) > 1) {
+                    $numhire = count(json_decode($hire['hire_id'], true));
+                    $temp = json_decode($hire['hire_id']);
+                    // list($temp) = explode(',', implode(',',json_decode($hire['hire_id'], true)));
+                    // $fullproposals[$j]['hired'] = $temp[$j++];
+                    // echo $temp;
+                    for ($i=0; $i < $numhire; $i++) { 
+                    $otheruser = User::find($temp[$i]);
+                            $fullclosedeals[$i]['user_id'] = $otheruser['id'];
+                            $fullclosedeals[$i]['profile_image'] = $otheruser['profile_image'];
+                            $fullclosedeals[$i]['firstname'] = $otheruser['firstname'];
+                            $fullclosedeals[$i]['lastname'] = $otheruser['lastname'];
+                            $fullclosedeals[$i]['body'] = $retrieveprops['body'];
+                            $fullclosedeals[$i]['proposed_rate'] = $retrieveprops['proposed_rate'];
+                            $fullclosedeals[$i]['hired'] = $temp[$i];
+                        }
+                    }
+                 }
          //finding the recommended profiles for this post
          $recommended = array();
          $k = 0;
@@ -299,6 +319,7 @@ class ScoutController extends Controller
          ->with('proposal', $exists)
          ->with('recommended', $entries)
          ->with('fullproposals', $fullproposals)
+         ->with('fullclosedeals', $fullclosedeals)
          ->with('comments', $fullcomm)
          ->with('tag', json_decode($posts['tags'], true));
     }
