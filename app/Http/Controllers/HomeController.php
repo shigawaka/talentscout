@@ -19,6 +19,7 @@ use App\Proposal;
 use App\Invitation;
 use App\EventModel;
 use App\Group;
+use App\Endorse;
 use Hash;
 use Auth;
 use Session;
@@ -706,9 +707,9 @@ if ($validator->fails()) {
 
         $rules = array(
             'title' => 'required|regex:/^[\pL\s\-]+$/u',
-            'start_date' => 'required|date|before:tomorrow',
+            'start_date' => 'required|date', //before:tomorrow
             'start_time' => 'required',
-            'end_date' => 'required|date|before:tomorrow',
+            'end_date' => 'required|date', //before:tomorrow
             'end_time' => 'required|after:start_time',
         );
 
@@ -750,9 +751,32 @@ if ($validator->fails()) {
     public function acceptInvitation($post_id) {
         $invited = Invitation::where('post_id', '=', $post_id)
                               ->where('talent_id', '=', Session::get('id'))->first();
+        $postDetails = Post::find($post_id);
+            $postStartdate = Carbon::parse($postDetails['start_date']);
+            $postEnddate = Carbon::parse($postDetails['end_date']);
+        $schedule = EventModel::where('user_id','=', Session::get('id'))->get();
+        foreach ($schedule as $key => $value) {
+            $schedStartdate = Carbon::parse($value['start_date']);
+            $schedEnddate = Carbon::parse($value['end_date']);
+            if(!$postStartdate->gte($schedEnddate)){
+                Session::flash('message', 'You are not available in that event day!');
+                return Redirect::back();
+            }
+            elseif($postStartdate->eq($schedStartdate)){ //check same day
+                if($value['isAllDay'] == '0'){
+                Session::flash('message', 'You are not available in that event day!');
+                return Redirect::back();
+                }
+            }
+        }
         if(!empty($invited)){
             $invited->status = 1;
             $invited->save();
+            $newSchedule = new EventModel;
+            $newSchedule->id = null;
+            $newSchedule->user_id = Session::get('id');
+            $newSchedule->isAllDay = 0;
+
             $hire = Post::find($post_id);
             if(empty($hire['hire_id'])){
                 $hire->hire_id = json_encode(explode(',', Session::get('id')));
@@ -768,9 +792,14 @@ if ($validator->fails()) {
             }
             // $hire->hire_id = json_encode(explode(',', $talent_id[0]));
             $hire->save();
+
             return Redirect::back();
             
         }
+    }
+    public function declinePostInvitation($post_id){
+        $data = Invitation::where('post_id', '=', $post_id)->delete();
+        return Redirect::back();
     }
     public function acceptGroupInvitation($id){
         $group = Group::where('id', '=', $id)->first();
@@ -1070,6 +1099,9 @@ if ($validator->fails()) {
             $results[] = [ 'id' => '', 'value' => 'No Result Found' ];
             return Response::json($results);
     }
+    public function showPortfolio($id){
+        dd($id);
+    }
     public function removeMember($id){
         $group = Group::find(Session::get('id'));
         $member = json_decode($group['member'], true);
@@ -1226,6 +1258,68 @@ if ($validator->fails()) {
         Featured::where('id','=', $id)->delete();
          Session::flash('message', 'Successfully deleted!');
          return Redirect::back();
+    }
+    public function showConnection($id){
+        $yourEndorsement = array(); //people you endorsed
+        $gotEndorse = array(); //people that endorsed you
+        $i = 0;
+        $user = User::find($id);
+            $endorsed = Endorse::where('endorsed_id','=',$id)->get();
+            foreach ($endorsed as $key => $value) {
+                $userdetails = User::find($value['endorser_id']);
+                if($userdetails['roleID'] == '2'){
+                    $groupname = Group::find($userdetails['id']);
+                    $gotEndorse[$i]['id'] = $userdetails['id'];
+                    $gotEndorse[$i]['groupname'] = $groupname['firstname'];
+                    $gotEndorse[$i]['profile_image'] = $userdetails['profile_image'];
+                }
+                else{
+                    $gotEndorse[$i]['id'] = $userdetails['id'];
+                    $gotEndorse[$i]['firstname'] = $userdetails['firstname'];
+                    $gotEndorse[$i]['lastname'] = $userdetails['lastname'];
+                    $gotEndorse[$i]['profile_image'] = $userdetails['profile_image'];
+                }
+                $i++;
+            }
+            $i = 0;
+            $endorser = Endorse::where('endorser_id','=',$id)->get();
+            foreach ($endorser as $key => $value) {
+                $userdetails = User::find($value['endorsed_id']);
+                if($userdetails['roleID'] == '2'){
+                    $groupname = Group::find($userdetails['id']);
+                    $yourEndorsement[$i]['id'] = $userdetails['id'];
+                    $yourEndorsement[$i]['groupname'] = $groupname['firstname'];
+                    $yourEndorsement[$i]['profile_image'] = $userdetails['profile_image'];
+                }
+                else{
+                    $yourEndorsement[$i]['id'] = $userdetails['id'];
+                    $yourEndorsement[$i]['firstname'] = $userdetails['firstname'];
+                    $yourEndorsement[$i]['lastname'] = $userdetails['lastname'];
+                    $yourEndorsement[$i]['profile_image'] = $userdetails['profile_image'];
+                }
+                $i++;
+            }
+            return view('connection')
+                        ->with('endorsed', $gotEndorse)
+                        ->with('endorser', $yourEndorsement)
+                        ->with('user', $user);
+
+    }
+    public function removeEndorsement($id) {
+        $user = Endorse::where('endorsed_id','=', $id)
+                        ->where('endorser_id','=', Session::get('id'))
+                        ->delete();
+        Session::flash('message', 'Successfully unendorsed!');
+        return Redirect::back();
+    }
+    public function endorseUser($id){
+        $endorse = new Endorse;
+        $endorse->id = null;
+        $endorse->endorsed_id = $id;
+        $endorse->endorser_id = Session::get('id');
+        $endorse->save();
+        Session::flash('message', 'Successfully endorse!');
+        return Redirect::back();
     }
     public function rateScout($scout_id, $post_id){
         $data = Request::except('_token');

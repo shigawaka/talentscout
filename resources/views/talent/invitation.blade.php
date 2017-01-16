@@ -73,7 +73,7 @@
                  <li>
                  <a href="{!! URL::to('/schedule').'/'.$user['id'] !!}">Schedule</a>
                  </li>
-                 <li><a href="#">Connections</a></li>
+                 <li><a href="{!! URL::to('/connection').'/'.$user['id'] !!}">Connections</a></li>
 
             </ul>
 
@@ -118,6 +118,7 @@
         @if($details['status'] == 0)
           @if(!in_array($hired,json_decode($details['hire_id'])))
           <p><a href="{!! URL::to('/invitation/accept').'/'.$details['id'] !!}">Accept Invitation</a></p>
+          <p><a href="{!! URL::to('/invitation/decline').'/'.$details['id'] !!}">Decline Invitation</a></p>
           @else
               <div class="card-panel blue lighten-3 align center">HIRED</div>
           @endif
@@ -207,6 +208,7 @@
         @endif
       @else
         <p><a href="{!! URL::to('/invitation/accept').'/'.$details['id'] !!}">Accept Invitation</a></p>
+        <p><a href="{!! URL::to('/invitation/decline').'/'.$details['id'] !!}">Decline Invitation</a></p>
       @endif
       <p><a href="{!! URL::to('/post').'/'.$details['id'] !!}">View Post</a></p>
     </div>

@@ -86,7 +86,7 @@ Route::post('/talentregister', 'RegistrationController@store');
 Route::post('/talentregisterGroup', 'RegistrationController@storeGroup');
 Route::post('/scoutregister', 'RegistrationController@storeScout');
 Route::get('/sendinvitation', 'ChikkaController@send');
-//group
+//group to prevent links being visited by guest users
 Route::group(array('before' => 'auth'), function()
 {	
 
@@ -104,9 +104,13 @@ Route::get('/hire/{id}', 'ScoutController@hire');
 Route::get('/profile/invite/{id}', 'ScoutController@inviteTalent');
 Route::get('/profile/{id}', 'HomeController@showProfile');
 Route::post('/profile/edit/{id}', 'HomeController@editProfile');
+//endorse
+Route::get('/connection/{id}', 'HomeController@showConnection');
+Route::get('/removeEndorsement/{id}', 'HomeController@removeEndorsement');
 //invitation
 Route::get('/invitation/{id}', 'HomeController@showInvitations');
 Route::get('/invitation/accept/{id}', 'HomeController@acceptInvitation');
+Route::get('/invitation/decline/{id}', 'HomeController@declinePostInvitation');
 Route::get('/groupinvitation/accept/{id}', 'HomeController@acceptGroupInvitation');
 //schedule
 Route::get('/schedule/{id}', 'HomeController@showSchedule');
@@ -151,7 +155,8 @@ Route::get('/deletecomment/{id}', 'HomeController@deleteComment');
 Route::post('/addProposal', 'HomeController@addProposal');
 Route::post('/editProposal', 'HomeController@editProposal');
 
-
+//portfolio
+Route::get('/portfolio/{id}', 'HomeController@showPortfolio');
 
 
 
@@ -164,7 +169,7 @@ Route::get('/removefeaturedfeedback/{id}', 'HomeController@removeFeatureFeedback
 Route::get('/searchUserFeaturedProfile/', 'HomeController@searchUserFeaturedProfile');
 Route::post('/addFeaturedProfile', 'HomeController@addFeaturedProfile');
 Route::post('/addFeaturedFeedback', 'HomeController@addFeaturedFeedback');
-});
+}); //end group route
 
 Route::filter('auth', function()
 {

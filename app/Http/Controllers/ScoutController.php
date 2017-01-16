@@ -248,7 +248,7 @@ class ScoutController extends Controller
          $fullclosedeals = array();
          $hired = Post::where('id', '=', $post_id)->get();
                  foreach($hired as $hire){
-                    if(count(json_decode($hire['hire_id'], true)) > 1) {
+                    if(count(json_decode($hire['hire_id'], true)) >= 1) {
                     $numhire = count(json_decode($hire['hire_id'], true));
                     $temp = json_decode($hire['hire_id']);
                     // list($temp) = explode(',', implode(',',json_decode($hire['hire_id'], true)));

@@ -79,11 +79,15 @@
             <ul class="left">
                  <li><a href="{!! URL::to('/profile').'/'.$user['id'] !!}">Overview</a></li>
                  <li><a href="/portfolio">Portfolio</a></li>
-                 <li><a href="{!! URL::to('/invitation').'/'.$user['id'] !!}">Invitation</a></li>
+                 @if(Session::get('id') == $user['id'])
                  <li>
-                 <a href="{!! URL::to('/schedule').'/'.$user['id'] !!}" class="active">Schedule</a>
+                 <a href="{!! URL::to('/invitation').'/'.$user['id'] !!}">Invitation</a>
                  </li>
-                 <li><a href="#">Connections</a></li>
+                 <li class="active">
+                 <a href="{!! URL::to('/schedule').'/'.$user['id'] !!}">Schedule</a>
+                 </li>
+                 @endif
+                 <li><a href="{!! URL::to('/connection').'/'.$user['id'] !!}">Connections</a></li>
 
             </ul>
 

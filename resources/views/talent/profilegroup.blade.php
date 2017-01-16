@@ -68,7 +68,7 @@
         <div class="container">
           <div class="nav-wrapper">
             <ul class="left">
-                 <li><a href="#" class="active">Overview</a></li>
+                 <li><a href="{!! URL::to('/profile').'/'.$user['id'] !!}" class="active">Overview</a></li>
                  <li><a href="/portfolio">Portfolio</a></li>
                  @if(Session::get('id') == $user['id'])
                  <li>

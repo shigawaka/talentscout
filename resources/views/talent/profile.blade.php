@@ -66,8 +66,8 @@
         <div class="container">
           <div class="nav-wrapper">
             <ul class="left">
-                 <li><a href="#" class="active">Overview</a></li>
-                 <li><a href="/portfolio">Portfolio</a></li>
+                 <li class="active"><a href="{!! URL::to('/profile').'/'.$user['id'] !!}" >Overview</a></li>
+                 <li><a href="{!! URL::to('/portfolio').'/'.$user['id'] !!}">Portfolio</a></li>
                  @if(Session::get('id') == $user['id'])
                  <li>
                  <a href="{!! URL::to('/invitation').'/'.$user['id'] !!}">Invitation</a>
@@ -76,7 +76,7 @@
                  <a href="{!! URL::to('/schedule').'/'.$user['id'] !!}">Schedule</a>
                  </li>
                  @endif
-                 <li><a href="#">Connections</a></li>
+                 <li><a href="{!! URL::to('/connection').'/'.$user['id'] !!}">Connections</a></li>
 
             </ul>
 
@@ -112,6 +112,13 @@
                 </button>
                   @endif
                 </div>
+                @if (Session::has('message'))
+                  <div id="card-alert" class="card green">
+                  <div class="card-content white-text">
+                  <p><i class="mdi-navigation-check"></i> {{ Session::get('message') }}</p>
+                  </div>
+                  </div>
+                @endif
                   <div id="modal" class="modal modal-fixed-footer">
                        <div class="modal-content">
                        <h4>Edit Profile</h4>
@@ -145,7 +152,7 @@
                 @endforeach
             </div>
             <div class="input-field col s6">
-            {!! Form::text('contact', $user['contactno'], array('class' => 'validate','placeholder' => 'Enter contact number')) !!}
+            {!! Form::text('contactno', $user['contactno'], array('class' => 'validate','placeholder' => 'Enter contact number')) !!}
               <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
               <label for="lastname">Contact Number</label>
               @foreach($errors->get('contact') as $message)
@@ -153,7 +160,7 @@
                 @endforeach
             </div>
             <div class="input-field col s6">
-            {!! Form::text('emailaddress', $user['emailaddress'], array('class' => 'validate','placeholder' => 'Enter contact number')) !!}
+            {!! Form::text('emailaddress', '', array('class' => 'validate','placeholder' => $user['emailaddress'])) !!}
               <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
               <label for="lastname">Email address</label>
               @foreach($errors->get('email') as $message)
@@ -177,7 +184,7 @@
                 @endforeach
             </div>
             <div class="input-field col s6">
-            {!! Form::text('username', $user['username'], array('class' => 'validate','placeholder' => 'Enter new username')) !!}
+            {!! Form::text('username', '', array('class' => 'validate','placeholder' => $user['username'])) !!}
               <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
               <label for="password">Change Username</label>
             </div>
@@ -438,6 +445,11 @@
       $('.modal-trigger').leanModal();
       });
     </script>
+    @if(count($errors)>0)
+          <script>
+              $('#modal').openModal();
+          </script>
+  @endif
   <script>
   
     $('.datepicker').pickadate({

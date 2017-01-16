@@ -81,7 +81,7 @@
           {!! Form::open(['url'=>'/searchscout', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
           
             
-          {!! Form::text('search', '', array('id' => 'q','placeholder' => 'Search...', 'class' => 'form-control', 'style' => 'width:70%;')) !!}              
+          {!! Form::text('search', '', array('placeholder' => 'Search...', 'class' => 'form-control', 'style' => 'width:70%;')) !!}              
           {!! Form::submit('Search', array('class' => 'btn btn-default')) !!}   
             
             {!! Form::close() !!}
