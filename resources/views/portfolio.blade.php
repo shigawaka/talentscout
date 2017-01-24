@@ -67,7 +67,7 @@
           <div class="nav-wrapper">
             <ul class="left">
                  <li><a href="{!! URL::to('/profile').'/'.$user['id'] !!}">Overview</a></li>
-                 <li><a href="{!! URL::to('/portfolio').'/'.$user['id'] !!}">Portfolio</a></li>
+                 <li class="active"><a href="{!! URL::to('/portfolio').'/'.$user['id'] !!}">Portfolio</a></li>
                  @if(Session::get('id') == $user['id'])
                  <li>
                  <a href="{!! URL::to('/invitation').'/'.$user['id'] !!}">Invitation</a>
@@ -76,7 +76,7 @@
                  <a href="{!! URL::to('/schedule').'/'.$user['id'] !!}">Schedule</a>
                  </li>
                  @endif
-                 <li class="active"><a href="{!! URL::to('/connection').'/'.$user['id'] !!}">Connections</a></li>
+                 <li><a href="{!! URL::to('/connection').'/'.$user['id'] !!}">Connections</a></li>
             </ul>
 
             <ul class="right">
@@ -103,66 +103,65 @@
                   </div>
                 @endif
           <div class="row">
-          @if(empty($endorsed))
+          @if($user['id'] == Session::get('id'))
+            <h3>Add Portfolio</h3>
+            {!! Form::open(['url'=>'/addPortfolio', 'method' => 'POST' ,'files' => true]) !!}
+            <a class="btn-floating btn-small waves-effect waves-light grey btn modal-trigger" data-target="modal3"><i class="material-icons">add</i></a>
+            <div id="modal3" class="modal modal-fixed-footer">
+                             <div class="modal-content">
+                             <h4>Add Portfolio</h4>
+                              <div class="input-field col s6">
+                              {!! Form::text('title', '', array('class' => 'validate','placeholder' => 'Enter Title', 'required'=>'required' )) !!}
+                                <!-- <input  value="Frete" id="firstname" type="text" class="validate"> -->
+                                <label for="title">Event Title</label>
+                              </div>
+                              <div class="input-field col s12">
+                              {!! Form::textarea('description', '', array('style' => 'min-width:100%;resize:none;','class' => 'form-group','placeholder' => 'Enter Description of the Job', 'required'=>'required')) !!}
+                                <!-- <input  value="Frete" id="firstname" type="text" class="validate"> -->
+                                <label for="description">Event Description</label>
+                              </div>
+                              <div class="input-field col s6">
+                              {!! Form::text('event_date', '', array('class' => 'datepicker','placeholder' => 'Enter date of event', 'required'=>'required')) !!}
+                                <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
+                                <label for="event_date">Date of Event</label>
+                              </div>
+                              <div class="input-field col s12" style="padding-bottom: 35px;">
+                              
+                              {!! Form::file('files[]', array('multiple'=>true, 'id'=>'ifile')) !!}
+                                <!-- <label for="image">Add video</label> -->
+                                @foreach($errors->get('files') as $message)
+                                <div id="card-alert" class="card red">
+                                <div class="card-content white-text">
+                                <p><i class="mdi-navigation-check"></i> 
+                                  {!! $message !!}
+                                </div>
+                                </div>
+                                  @endforeach</p>
+                                  
+                              </div>
 
-          @else
-          <h3>List of people {{ $user['firstname'] }} got endorsed by</h3>
-            @foreach($endorsed as $val)
-              <div class="col s3">
-                <div class="card">
-                    <div class="card-image">
-                      <img src="{!! URL::to('/files').'/'.$val['profile_image'] !!}">
-                      <!-- <span class="card-title">Card Title</span> -->
-                    </div>
-                    <div class="card-content">
-                    @if(empty($val['groupname']))
-                      <p>{!! ucfirst($val['firstname']).' '.ucfirst($val['lastname']) !!}</p>
-                    @else
-                      <p>{!! ucfirst($val['groupname']) !!}</p>
-                    @endif
-                    </div>
-                    <div class="card-action">
-                      <a href="{!! URL::to('/profile').'/'.$val['id'] !!}">Visit Profile</a>
-                    </div>
-                </div>
-              </div>
-              @endforeach
-            @endif
-            </div>
-            
-            <div class="row">
-            @if(empty($endorser))
+                          </div>
+                          <div class="modal-footer">
+                         <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Cancel</a>
+                         {!! Form::submit('Add portfolio', array('class' => 'btn btn-info')) !!}
+                          <!-- <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Save</a> -->
+                          </div>
+                         </div>
+              {!! Form::close() !!}
+          @endif
 
-            @else
-            <h3>List of people {{ $user['firstname'] }} endorses</h3>
-               @foreach($endorser as $val)
-            <div class="col s3">
-              <div class="card">
-                  <div class="card-image">
-                    <img src="{!! URL::to('/files').'/'.$val['profile_image'] !!}">
-                    <!-- <span class="card-title">Card Title</span> -->
-                  </div>
-                  <div class="card-content">
-                  @if(empty($val['groupname']))
-                    <p>{!! ucfirst($val['firstname']).' '.ucfirst($val['lastname']) !!}</p>
-                  @else
-                    <p>{!! ucfirst($val['groupname']) !!}</p>
-                  @endif
-                  </div>
-                  <div class="card-action">
-                    <a href="{!! URL::to('/profile').'/'.$val['id'] !!}">Visit Profile</a>
-                    @if(Session::get('id') == $user['id'])
-                    <a href="{!! URL::to('/removeEndorsement').'/'.$val['id'] !!}">Unendorse user</a>
-                    @endif
-                  </div>
+          </div>
+          <div class="row">
+            <div class="col s12 m7">
+              <h3>Past Experience</h3>
+              <div class="divider">
+                
               </div>
             </div>
-              @endforeach
-            @endif
-            </div>
+          </div>
         </div>
       </div>
-
+      
 
 
 
@@ -196,7 +195,27 @@
       selectYears: 100 // Creates a dropdown of 15 years to control year
     });
   </script>
+  @if(count($errors)>0)
+          <script>
+              $('#modal3').openModal();
+          </script>
+  @endif
+<script>
+    $("document").ready(function(){
 
+    $("#ifile").change(function() {
+        var fsize = $('#ifile')[0].files[0].size;
+        var fname = $('#ifile')[0].files[0].name;
+        var fextension = fname.split('.').pop();
+        console.log(fextension);
+        if(fsize>200000000) //do something if file size more than 1 mb (1048576)
+        {
+            alert("Too big!\n File Size limit: 200mb!");
+            $("#ifile").val('');
+        }
+    });
+});
+  </script>
 
     <!--    
      {!! HTML::script('vendor/jquery/jquery.min.js') !!}

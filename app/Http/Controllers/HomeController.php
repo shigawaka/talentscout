@@ -20,6 +20,12 @@ use App\Invitation;
 use App\EventModel;
 use App\Group;
 use App\Endorse;
+use App\Notification;
+use App\Paypalpayment;
+
+
+
+
 use Hash;
 use Auth;
 use Session;
@@ -72,9 +78,23 @@ class HomeController extends Controller
             $posts = Post::where('status', '=', 0)->orderBy('date_posted', 'desc')->get();
             $succ = Post::where('status', 1)->get();
             $slideshow = Featured::where('isFeedback', '=', 1)->get();
+            $unreadNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 0)
+                                            ->limit(6)
+                                            ->get();
+            $readNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 1)
+                                            ->limit(6)
+                                            ->get();
+            // dd(count($posts));
+            if(count($posts) < 0 ){
+                $posts = null;
+            }
             return view('talent.home')
                 ->with('posts',$posts)
                 ->with('succ',$succ)
+                ->with('unreadNotifications', $unreadNotifications)
+                ->with('readNotifications', $readNotifications)
                 ->with('slideshow', $slideshow);
         }
         elseif(Session::get('roleID') == 3) {
@@ -89,6 +109,15 @@ class HomeController extends Controller
         $succ = Post::where('status', 1)->get();
         $profile = Featured::where('isProfile','=',1)->get();
         $profilearray = array();
+        $unreadNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 0)
+                                            ->limit(6)
+                                            ->get();
+
+        $readNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 1)
+                                            ->limit(6)
+                                            ->get();
         $i = 0;
         foreach ($profile as $key => $value) {
             $userdetail = User::find($value['profile_id']);
@@ -107,12 +136,12 @@ class HomeController extends Controller
                 //remove from db
             }
         }
-        // dd($profilearray);
-
-        // dd($succ);
+        // dd($unreadNotifications);
         return view('scout.home')
                 ->with('posts',$posts)
                 ->with('succ',$succ)
+                ->with('unreadNotifications', $unreadNotifications)
+                ->with('readNotifications', $readNotifications)
                 ->with('profilearray', $profilearray);
         }
     }
@@ -160,7 +189,6 @@ $rules = array(
 
 // run the validation rules on the inputs from the form
 $validator = Validator::make(Request::all(), $rules);
-
 // if the validator fails, redirect back to the form
 if ($validator->fails()) {
     return Redirect::to('/login')
@@ -230,6 +258,16 @@ if ($validator->fails()) {
         Auth::logout(); // log the user out of our application
         return Redirect::to('/home'); // redirect the user to the login screen
     }
+    public function readAllNotifications(){
+        $read = Notification::where('user_id', '=', Auth::user()->id)
+                            ->where('is_read','=', '0')
+                            ->get();
+        foreach ($read as $key => $value) {
+            $value->is_read = 1;
+            $value->save();
+        }
+        return Redirect::back();
+    }
     public function addComment(){
         $data = Request::all();
         $rules = array(
@@ -253,6 +291,18 @@ if ($validator->fails()) {
                 $detail->body =$data['comment'];
                 $detail->date_posted = new Carbon();
                 $detail->save();
+
+                $notification = new Notification;
+                $notification->id = null;
+                $getUserID = Post::find(Session::get('post_id'));
+                $notification->user_id = $getUserID['scout_id'];
+                $notification->subject = 'comment';
+                $notification->body = Session::get('username').' has commented on your post. Titled: '.$getUserID['title'];
+                $notification->object_id = Session::get('post_id');
+                $notification->is_read = 0;
+                $notification->sent_at = new Carbon();
+                $notification->save();
+
                 return Redirect::back();
             }
         } else {
@@ -306,6 +356,7 @@ if ($validator->fails()) {
          return Redirect::back();
     }
     public function showProfile($user_id){
+            
             $findUser = User::find($user_id);
             $role = $findUser['roleID'];
             if($role == 1 ){
@@ -368,6 +419,18 @@ if ($validator->fails()) {
                     $grouparray[$i]['profile_image'] = $searchusergroup['profile_image'];
                 }
                 //end finding group
+                //check if talent sent a request to join in the group
+                $checkinvitation = Invitation::where('inviter_id', '=', Session::get('id'))
+                                            ->where('talent_id', '=', $user_id)
+                                            ->get();
+                $request = null;
+                if(count($checkinvitation) >= 1){
+                    $request = true;
+                }
+                else{
+                    $request = false;
+                }
+                //end check sent request
                 $rating = Rating::where('user_id' , '=', $user_id)->get();
                 $tal = Talent::find($user_id);
                 $finalscore = 0;
@@ -541,7 +604,7 @@ if ($validator->fails()) {
                 $talenttags = json_encode(explode(',', $data['talents'][0]));
                 $detail->talents =$talenttags;
                 $detail->save();
-                Session::flash('message', 'Successfully posted!');
+                Session::flash('message', 'Successfully added talent!');
                 return Redirect::back();
             }
         } else {
@@ -683,9 +746,9 @@ if ($validator->fails()) {
 
 
                         }',
-                        "dayClick" => "function() { 
-                             $('#modal1').openModal();
-                        }",
+                        // "dayClick" => "function() { 
+                        //      $('#modal1').openModal();
+                        // }",
 
 
                         
@@ -825,6 +888,14 @@ if ($validator->fails()) {
     }
     public function searchTalent(){
         $data = Request::except('_token');
+        $unreadNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 0)
+                                            ->limit(6)
+                                            ->get();
+            $readNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 1)
+                                            ->limit(6)
+                                            ->get();
         // dd($data);
         $keyword = strtolower($data['search']);
         //categorize talents
@@ -941,7 +1012,10 @@ if ($validator->fails()) {
         }
         arsort($arr);
         // dd($arr);
-        return view('scout.searchtalent')->with('result', $arr);
+        return view('scout.searchtalent')
+                ->with('result', $arr)
+                ->with('unreadNotifications', $unreadNotifications)
+                ->with('readNotifications', $readNotifications);
     }
     public function searchScout(){
         $data = Request::except('_token');
@@ -950,6 +1024,14 @@ if ($validator->fails()) {
         $searchUser = User::all();
         $arr = array();
         $counter = 0;
+        $unreadNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 0)
+                                            ->limit(6)
+                                            ->get();
+            $readNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 1)
+                                            ->limit(6)
+                                            ->get();
         // if(!empty($data['search']) && $data['category'] !== null && $data['category'] === 'post'){
             
         // }
@@ -1050,7 +1132,10 @@ if ($validator->fails()) {
         }
         arsort($arr);
         // dd($arr);
-        return view('talent.searchscout')->with('result', $arr);
+        return view('talent.searchscout')
+                ->with('result', $arr)
+                ->with('unreadNotifications', $unreadNotifications)
+                ->with('readNotifications', $readNotifications);
     }
 
     public function addMember(){
@@ -1067,10 +1152,30 @@ if ($validator->fails()) {
                                     ->where('inviter_id', '=', Session::get('id'))
                                     ->first();
             if(empty($invitation)){
-                $results[] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image, 'invited' => 'Already invited' ];
+                $checkgroup = Group::find(Session::get('id'));
+                $checkgroupmember = json_decode($checkgroup['member'], true);
+                for ($i=0; $i < count($checkgroupmember); $i++) { 
+                    if($checkgroupmember[$i] == $query->id){
+                        $results[] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image, 'invited' => 'Talent is already a member!' ];
+                    }
+                    else {
+                        $results[] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image, 'invited' => 'Already invited' ];
+                    }
+                }
             }
             else {
-            $results[] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image ];
+                $checkgroup = Group::find(Session::get('id'));
+                $checkgroupmember = json_decode($checkgroup['member'], true);
+                for ($i=0; $i < count($checkgroupmember); $i++) { 
+                    if($checkgroupmember[$i] == $query->id){
+                        $results[] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image, 'invited' => 'Talent is already a member!' ];
+                    }
+                    else {
+                        $results[] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image ];
+                    }
+                }
+            
+            
             }
         }
         if(count($results))
@@ -1100,7 +1205,38 @@ if ($validator->fails()) {
             return Response::json($results);
     }
     public function showPortfolio($id){
-        dd($id);
+        //retrieve portfolio in db
+
+        //retrieve past experience in post table (if hired)
+
+        
+
+
+        $user = User::find($id);
+        return view('portfolio')
+               ->with('user', $user);
+    }
+    public function addPortfolio(){
+        $data = Request::all();
+        $rules = array(
+            'files' => 'max:200000|mimes:jpg,jpeg,png,bmp,mp4,ogg,mkv,avi',
+        );
+        
+
+        $message = array(
+            'files.max' => 'Sorry! Maximum upload limit is 200mb!',
+            'files.mimes' => 'File format is not acceptable!',
+        );
+
+        $validation = Validator::make($data, $rules, $message);
+
+        if($validation->passes()){
+
+        }
+        else
+        {
+            return Redirect::back()->withInput()->withErrors($validation);
+        }
     }
     public function removeMember($id){
         $group = Group::find(Session::get('id'));
@@ -1181,7 +1317,40 @@ if ($validator->fails()) {
             $sendinvitation->inviter_id = Session::get('id');
             $sendinvitation->status = 0;
             $sendinvitation->save();
+
+             $notification = new Notification;
+                $notification->id = null;
+                $notification->user_id = $user_id;
+                $notification->subject = 'invitation';
+                $notification->body = Session::get('username').' has invited you to a group';
+                $notification->object_id = Session::get('id');
+                $notification->is_read = 0;
+                $notification->sent_at = new Carbon();
+                $notification->save();
+
             Session::flash('message', 'User successfully invited!');
+            return Redirect::back();
+    }
+    public function joinGroup($group_id){
+        $sendinvitation =  new Invitation;
+            $sendinvitation->id = null;
+            $sendinvitation->post_id = null;
+            $sendinvitation->talent_id = $group_id;
+            $sendinvitation->inviter_id = Session::get('id');
+            $sendinvitation->status = 0;
+            $sendinvitation->save();
+
+             $notification = new Notification;
+                $notification->id = null;
+                $notification->user_id = $group_id;
+                $notification->subject = 'invitation';
+                $notification->body = Session::get('username').' has request to join in your group!';
+                $notification->object_id = Session::get('id');
+                $notification->is_read = 0;
+                $notification->sent_at = new Carbon();
+                $notification->save();
+
+            Session::flash('message', 'You successfully sent a request to join this group!');
             return Redirect::back();
     }
     public function showFeatured(){
@@ -1200,15 +1369,37 @@ if ($validator->fails()) {
     }
     $feedbacks = Featured::where('isFeedback','=',1)->get();
     // dd($feedbacks);
-
+    $payments = Paypalpayment::where('state', '=', 'pending')->get();
+    // dd($payments);
     return view('admin.adminpanel')
             ->with('profile',$profile)
             ->with('feedbacks', $feedbacks)
+            ->with('payments', $payments)
             ->with('profilearray',$profilearray);
+    }
+    public function approvePayment($id){
+        $data = Paypalpayment::find($id);
+        $data->state = 'approved';
+        $data->save();
+        $start_date = Featured::where('profile_id', '=', $data['user_id'])->first();
+
+        $start = Carbon::parse($start_date['start_date'])->format('F d, Y');
+        //notifications
+        $notification = new Notification;
+                $notification->id = null;
+                $notification->user_id = $data['user_id'];
+                $notification->subject = 'comment';
+                $notification->body = 'Your profile is now featured in the Homepage! For '.$data['duration'].' week! Starting '.$start.'';
+                $notification->object_id = null;
+                $notification->is_read = 0;
+                $notification->sent_at = new Carbon();
+                $notification->save();
+            Session::flash('message', 'Successfully approved!');
+            return Redirect::back();
     }
     public function addFeaturedProfile(){
         $data = Request::all();
-        dd($data['invisible']);
+        // dd($data['invisible']);
         $start_date = Carbon::parse($data['start_date']);
         $end_date = Carbon::parse($data['end_date']);
         $checkstartdate = Carbon::now()->gt($start_date);
@@ -1253,6 +1444,23 @@ if ($validator->fails()) {
         Featured::where('profile_id','=', $id)->delete();
          Session::flash('message', 'Successfully deleted!');
          return Redirect::back();
+    }
+    public function deletePost($post_id){
+        $post = Post::find($post_id);
+        $scout_id = $post['scout_id'];
+        Post::find($post_id)->delete();
+        //notify the post
+        $notification = new Notification;
+                $notification->id = null;
+                $notification->user_id = $scout_id;
+                $notification->subject = 'comment';
+                $notification->body = 'Your post has been deleted by a Moderator. Reason(s): Violating Policy of Talent Scout.';
+                $notification->object_id = null;
+                $notification->is_read = 0;
+                $notification->sent_at = new Carbon();
+                $notification->save();
+        Session::flash('message', 'Successfully deleted!');
+        return Redirect::to('/home');
     }
     public function removeFeaturedFeedback($id){
         Featured::where('id','=', $id)->delete();
@@ -1318,6 +1526,20 @@ if ($validator->fails()) {
         $endorse->endorsed_id = $id;
         $endorse->endorser_id = Session::get('id');
         $endorse->save();
+
+        //notifications
+        $notification = new Notification;
+                $notification->id = null;
+                $getUserID = User::find($id);
+                dd($getUserID);
+                $notification->user_id = $id;
+                $notification->subject = 'comment';
+                $notification->body = Session::get('username').' has commented on your post.';
+                $notification->object_id = Session::get('post_id');
+                $notification->is_read = 0;
+                $notification->sent_at = new Carbon();
+                $notification->save();
+
         Session::flash('message', 'Successfully endorse!');
         return Redirect::back();
     }

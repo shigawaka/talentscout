@@ -286,7 +286,9 @@
                     <div class="card-content">
                        <h6> <i class="material-icons cyan-text darken-text">group</i>Group</h6>
                        @foreach($grouparray as $ga)
+                       @if($user['id'] == Session::get('id'))
                        <h6> <a href="{!! URL::to('/leaveGroup').'/'.$ga['id'] !!}"> Leave Group </a></h6>
+                       @endif
                        <img class="circle" src="{!! URL::to('/files').'/'.$ga['profile_image'] !!}" style="width:50px; height:50px; ">
                        <h6> <a href="{!! URL::to('/profile').'/'.$ga['id'] !!}"> {!! ucfirst($ga['groupname']) !!} </a></h6>
                        @endforeach

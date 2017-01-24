@@ -199,6 +199,34 @@
         <!-- end of col -->
         @endforeach
         </div>
+        <!-- payment list -->
+        <div class="col-md-12">
+        <hr style="max-width:inherit;border-width:10px;border-color:#DCC6E0;" />
+          <h1>Payment List</h1>
+        
+        <table class="table">
+              <thead>
+                <tr>
+                  <th>Firstname</th>
+                  <th>Lastname</th>
+                  <th>Duration</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach($payments as $value)
+                <tr>
+                  <td>{{ $value['firstname'] }}</td>
+                  <td>{{ $value['lastname'] }}</td>
+                  <td>{{ $value['duration'] }} week</td>
+                  <td><a href="{{ URL::to('/approvePayment').'/'.$value['id'] }}">Approve</a></td>
+                </tr>
+                @endforeach
+              </tbody>
+            </table>
+            <hr style="max-width:inherit;border-width:10px;border-color:#DCC6E0;" />
+          </div>
+        <!-- end payment list -->
         <!-- begin featured slideshow -->
         <!-- begin modal for adding featured profile -->
     <a id="modal-403918" href="#modal-container-403918" role="button" class="btn btn-success btn-lg" data-toggle="modal">Add Featured Feedbacks</a>

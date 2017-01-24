@@ -78,7 +78,7 @@
           <div class="nav-wrapper">
             <ul class="left">
                  <li><a href="{!! URL::to('/profile').'/'.$user['id'] !!}">Overview</a></li>
-                 <li><a href="/portfolio">Portfolio</a></li>
+                 <li><a href="{!! URL::to('/portfolio').'/'.$user['id'] !!}">Portfolio</a></li>
                  @if(Session::get('id') == $user['id'])
                  <li>
                  <a href="{!! URL::to('/invitation').'/'.$user['id'] !!}">Invitation</a>

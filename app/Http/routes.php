@@ -53,10 +53,10 @@ Route::get('register/verify/{confirmationCode}', [
     'as' => 'confirmation_path',
     'uses' => 'RegistrationController@confirm'
 ]);
-Route::get('register/verify/{confirmationCode}', [
-    'as' => 'confirmation_path',
-    'uses' => 'RegistrationController@confirmGroup'
-]);
+// Route::get('register/verify/{confirmationCode}', [
+//     'as' => 'confirmation_path',
+//     'uses' => 'RegistrationController@confirmGroup'
+// ]);
 //reset password
 Route::post('/resetpassword', 'RegistrationController@resetpassword');
 Route::get('reset/verify/{confirmationCode}', [
@@ -86,6 +86,10 @@ Route::post('/talentregister', 'RegistrationController@store');
 Route::post('/talentregisterGroup', 'RegistrationController@storeGroup');
 Route::post('/scoutregister', 'RegistrationController@storeScout');
 Route::get('/sendinvitation', 'ChikkaController@send');
+//about with policy
+Route::get('/terms', function () {
+    return view('terms');
+});
 //group to prevent links being visited by guest users
 Route::group(array('before' => 'auth'), function()
 {	
@@ -124,6 +128,8 @@ Route::get('/savemember/{id}', 'HomeController@saveMember');
 //remove/leave member/group 
 Route::get('/removeMember/{id}', 'HomeController@removeMember');
 Route::get('/leaveGroup/{id}', 'HomeController@leaveGroup');
+//join group
+Route::get('/joinGroup/{id}', 'HomeController@joinGroup');
 //add talent
 Route::post('/addtalent/{id}', 'HomeController@addTalent');
 //homepage
@@ -157,18 +163,33 @@ Route::post('/editProposal', 'HomeController@editProposal');
 
 //portfolio
 Route::get('/portfolio/{id}', 'HomeController@showPortfolio');
+Route::post('/addPortfolio', 'HomeController@addPortfolio');
+//notification
+Route::get('/readNotifications', 'HomeController@readAllNotifications');
 
-
-
-
-
+//paypal
+Route::post('/payment', array(
+    'as' => 'payment',
+    'uses' => 'PaypalController@postPayment',
+));
+Route::get('/paymentprocess', function () {
+    return view('payment');
+});
+// this is after make the payment, PayPal redirect back to your site
+Route::get('/payment/status', array(
+    'as' => 'payment.status',
+    'uses' => 'PaypalController@getPaymentStatus',
+));
 //admin
 Route::get('/featured', 'HomeController@showFeatured');
 Route::get('/removefeaturedprofile/{id}', 'HomeController@removeFeatureProfile');
+Route::get('/approvePayment/{id}', 'HomeController@approvePayment');
+Route::get('/deletePost/{id}', 'HomeController@deletePost');
 Route::get('/removefeaturedfeedback/{id}', 'HomeController@removeFeatureFeedback');
 Route::get('/searchUserFeaturedProfile/', 'HomeController@searchUserFeaturedProfile');
 Route::post('/addFeaturedProfile', 'HomeController@addFeaturedProfile');
 Route::post('/addFeaturedFeedback', 'HomeController@addFeaturedFeedback');
+
 }); //end group route
 
 Route::filter('auth', function()

@@ -69,7 +69,7 @@
           <div class="nav-wrapper">
             <ul class="left">
                  <li><a href="{!! URL::to('/profile').'/'.$user['id'] !!}" class="active">Overview</a></li>
-                 <li><a href="/portfolio">Portfolio</a></li>
+                 <li><a href="{!! URL::to('/portfolio').'/'.$user['id'] !!}">Portfolio</a></li>
                  @if(Session::get('id') == $user['id'])
                  <li>
                  <a href="{!! URL::to('/invitation').'/'.$user['id'] !!}">Invitation</a>
@@ -325,7 +325,11 @@
               </div>
                        <h6> <i class="material-icons cyan-text darken-text">group</i> Group Members</h6>
                        @foreach($grouparray as $ga)
+                       @if($user['id'] == Session::get('id'))
                        <h6> <a href="{!! URL::to('/removeMember').'/'.$ga['id'] !!}"> Remove member </a></h6>
+                       @else
+                       <h6> <a class="btn" href="{!! URL::to('/joinGroup').'/'.$user['id'] !!}"> Join Group </a></h6>
+                       @endif
                        <img class="circle" src="{!! URL::to('/files').'/'.$ga['profile_image'] !!}" style="width:50px; height:50px; ">
                        <h6> <a href="{!! URL::to('/profile').'/'.$ga['id'] !!}"> {!! ucfirst($ga['fullname']) !!} </a></h6>
                        @endforeach
@@ -534,6 +538,7 @@
                   var id = value.id;
                   var pic = value.picture;
                   var invited = value.invited;
+                  console.log(invited);
                    $("#mem").empty();
                    if(pic === void(0)) {
                     //no match found
@@ -542,7 +547,10 @@
                    else {
                     //check if already invited
                       if(invited === void(0)) {
-                        $("#mem").append("<div class='thumbnail'><img width='120px;' src=http://localhost:8000/files/"+pic+" /><div class='caption'><p>"+name+"</p><a class='btn btn-primary' href='#' disabled>Already invited</a></div></div>");
+                        $("#mem").append("<div class='thumbnail'><img width='120px;' src=http://localhost:8000/files/"+pic+" /><div class='caption'><p>"+name+"</p><a class='btn btn-primary' href='#' disabled>Already invited!</a></div></div>");
+                      }
+                      else if(invited == 'Talent is already a member!'){
+                        $("#mem").append("<div class='thumbnail'><img width='120px;' src=http://localhost:8000/files/"+pic+" /><div class='caption'><p>"+name+"</p><a class='btn btn-primary' href='#' disabled>Already member!</a></div></div>");
                       }
                       else {
                       $("#mem").append("<div class='thumbnail'><img width='120px;' src=http://localhost:8000/files/"+pic+" /><div class='caption'><p>"+name+"</p><a class='btn btn-primary' href='http://localhost:8000/savemember/"+id+"'>Invite</a></div></div>");

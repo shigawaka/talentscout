@@ -15,6 +15,7 @@ use App\Proposal;
 use App\Rating;
 use App\Invitation;
 use App\Talent;
+use App\Notification;
 use Carbon\Carbon;
 use Hash;
 use Mail;
@@ -129,7 +130,18 @@ class ScoutController extends Controller
     public function show()
     {
         $posts = Post::where('scout_id', Auth::user()->id)->orderBy('date_posted', 'desc')->get();
-        return view('scout/post')->with('posts',$posts);
+        $unreadNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 0)
+                                            ->limit(6)
+                                            ->get();
+            $readNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 1)
+                                            ->limit(6)
+                                            ->get();
+        return view('scout/post')
+                ->with('posts',$posts)
+                ->with('unreadNotifications', $unreadNotifications)
+                ->with('readNotifications', $readNotifications);
     }
     public function sortPost(){
         $data = Request::except('_token');
@@ -178,6 +190,14 @@ class ScoutController extends Controller
         //
     }
     public function showPost($post_id){
+        $unreadNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 0)
+                                            ->limit(6)
+                                            ->get();
+            $readNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 1)
+                                            ->limit(6)
+                                            ->get();
             $fullcomm = array();
         Session::set('post_id', $post_id);
         $exists = Proposal::where('user_id', '=', Auth::user()->id)->where('post_id', '=', $post_id)->first();
@@ -274,27 +294,77 @@ class ScoutController extends Controller
                                 ->where('demerit', '<', 1500)
                                 ->get();
             foreach ($getTalent as $key => $value) {
-                
                 if(stripos($value['talents'], $tal) !== false){
                     $findProf = User::find($value['id']);
-                    if(!empty($recommended)){
-                                    $recommended[$k]['id'] = $findProf['id'];
-                                    $recommended[$k]['profile_image'] = $findProf['profile_image'];
-                                    $recommended[$k]['firstname'] = ucfirst($findProf['firstname']);
-                                    $recommended[$k]['lastname'] = ucfirst($findProf['lastname']);
-                                    $k++;
-                    }
-                    else { 
-                            $recommended[$k]['id'] = $findProf['id'];
-                            $recommended[$k]['profile_image'] = $findProf['profile_image'];
-                            $recommended[$k]['firstname'] = ucfirst($findProf['firstname']);
-                            $recommended[$k]['lastname'] = ucfirst($findProf['lastname']);
-                            $k++;
+                    $hires = json_decode($posts['hire_id'], true);
+                    $checkhired = array_search($findProf['id'], $hires);
+                    // dd($checkhired);
+                    if($checkhired == false){
+                    
+                        if(!empty($recommended)){
+                            $user_age = Carbon::parse($findProf['birthday'])->diffInYears();
+                            //check post age specification (5 - 17 years old)
+                            if($posts['age'] == '1'){
+                                if($user_age <= '17'){
+                                    //check post gender specification 
+                                    if($posts['gender'] == 'any'){
+
+                                    }
+                                    elseif ($posts['gender'] == 'male' && $findProf['gender'] == 'male') {
+                                        # code...
+                                    }
+                                    elseif ($posts['gender'] == 'female' && $findProf['gender'] == 'female') {
+                                        # code...
+                                    }
+                                }
+                            }
+                            //check post age specification (18 years above)
+                            elseif ($posts['age'] == '2') {
+                                if($user_age >= '18'){
+                                    //check post gender specification 
+                                    if($posts['gender'] == 'any'){
+
+                                    }
+                                    elseif ($posts['gender'] == 'male' && $findProf['gender'] == 'male') {
+                                        # code...
+                                    }
+                                    elseif ($posts['gender'] == 'female' && $findProf['gender'] == 'female') {
+                                        # code...
+                                    }
+                                }
+                            }
+                            //check post age specification (Age doesn't matter)
+                            elseif ($posts['age'] == '0') {
+                                //check post gender specification 
+                                    if($posts['gender'] == 'any'){
+
+                                    }
+                                    elseif ($posts['gender'] == 'male' && $findProf['gender'] == 'male') {
+                                        # code...
+                                    }
+                                    elseif ($posts['gender'] == 'female' && $findProf['gender'] == 'female') {
+                                        # code...
+                                    }
+                            }
+                            
+                                        $recommended[$k]['id'] = $findProf['id'];
+                                        $recommended[$k]['profile_image'] = $findProf['profile_image'];
+                                        $recommended[$k]['firstname'] = ucfirst($findProf['firstname']);
+                                        $recommended[$k]['lastname'] = ucfirst($findProf['lastname']);
+                                        $k++;
+                        }
+                        else { 
+                                $recommended[$k]['id'] = $findProf['id'];
+                                $recommended[$k]['profile_image'] = $findProf['profile_image'];
+                                $recommended[$k]['firstname'] = ucfirst($findProf['firstname']);
+                                $recommended[$k]['lastname'] = ucfirst($findProf['lastname']);
+                                $k++;
+                        }
                     }
                 }
             }
          }
-         // dd($fullproposals);
+         dd($recommended);
          //remove duplicate from recommended array;
          $one_dimension = array_map("serialize", $recommended);
             $unique_one_dimension = array_unique($one_dimension);
@@ -320,6 +390,8 @@ class ScoutController extends Controller
          ->with('recommended', $entries)
          ->with('fullproposals', $fullproposals)
          ->with('fullclosedeals', $fullclosedeals)
+         ->with('unreadNotifications', $unreadNotifications)
+         ->with('readNotifications', $readNotifications)
          ->with('comments', $fullcomm)
          ->with('tag', json_decode($posts['tags'], true));
     }
@@ -551,6 +623,24 @@ class ScoutController extends Controller
                 $invite->talent_id = $talent_id;
                 $invite->status = 0;
                 $invite->save();
+
+                $notification = new Notification;
+                $notification->id = null;
+                $getUserID = Post::find(Session::get('post_id'));
+                $notification->user_id = $talent_id;
+                $notification->subject = 'invitation';
+                $notification->body = Session::get('username').' has invited you on a post. Titled: '.$getUserID['title'];
+                $notification->object_id = Session::get('post_id');
+                $notification->is_read = 0;
+                $notification->sent_at = new Carbon();
+                $notification->save();
+                $changecontact = preg_replace('/^0/','63',$findTalent['contactno']);
+                Mail::send('emails.invitation', ['confirmation_code' => ''], function($message) {
+                $message->to($findTalent['emailaddress'], $findTalent['username'])
+                    ->subject('Congratulations! You have been invited.');
+                });
+                $chikkadata = array('number'=> $changecontact, 'message'=> 'A scout has seen your potential. You have been invited to an event! Please visit Talent Scout for more information!');
+                ChikkaController::send($chikkadata);
                 Session::flash('invite', 'User successfully invited!');
             //     Mail::send('emails.invitation', ['user' => $findTalent], function ($m) use ($findTalent) {
             //     $m->from('TalentScout.com', 'Talent Scout');

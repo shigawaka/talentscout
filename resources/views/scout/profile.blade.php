@@ -67,7 +67,7 @@
           <div class="nav-wrapper">
             <ul class="left">
                  <li class="active"><a href="{!! URL::to('/profile').'/'.$user['id'] !!}">Overview</a></li>
-                 <li><a href="/portfolio">Portfolio</a></li>
+                 <li><a href="{!! URL::to('/portfolio').'/'.$user['id'] !!}">Portfolio</a></li>
                  @if(Session::get('id') == $user['id'])
                  <li>
                  <a href="{!! URL::to('/invitation').'/'.$user['id'] !!}">Invitation</a>
@@ -290,6 +290,7 @@
 
             <div class="col s12 m12 card-panel white">
               <div class="icon-block">
+               <h5>Talents</h5>
                 <div class="card2 ">
                 @if($user['id'] == Session::get('id'))
                    <a class="btn-floating btn-small waves-effect waves-light grey btn modal-trigger" data-target="modal1"><i class="material-icons">add</i></a>

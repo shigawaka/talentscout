@@ -180,7 +180,7 @@
                       <div class="form-group"> 
                         <div class="col-sm-10">
                           <div class="checkbox">
-                            <label><input type="checkbox">Yes, I understand and agree to the <a href="">Talent Scout Terms of Service</a></label>
+                            <label><input type="checkbox" required>Yes, I understand and agree to the <a target="_blank" href="{{ URL::to('/terms') }}">Talent Scout Terms of Service</a></label>
                           </div>
                         </div>
                       </div>
@@ -231,7 +231,7 @@
   $(function() {
     $( "#datepicker" ).datepicker({ dateFormat: 'yy-mm-dd',changeMonth: true,
       changeYear: true,
-      yearRange: '1960:1999'});
+      yearRange: '1960:2011'});
   });
   </script>
 </body>

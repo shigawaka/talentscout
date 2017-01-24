@@ -25,7 +25,7 @@
     <!-- Theme CSS -->
     <link href="../../css/creative.min.css" rel="stylesheet">
     <link href="../../css/creative.css" rel="stylesheet">
-    
+
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -65,49 +65,6 @@
           <ul class="nav navbar-nav">
             <li >
               <a href="{!! URL::to('/home') !!}">Home</a>
-            </li>
-            <li>
-              <a href="{!! URL::to('/profile').'/'.Session::get('id') !!}">Profile</a>
-            </li>
-            <li class="active">
-              <a href="{!! URL::to('/about') !!}">About</a>
-            </li>
-            @if(Session::get('roleID') == 0)
-            <li>
-              <a href="{!! URL::to('/post') !!}">My Posts</a>
-            </li>
-            @endif
-          </ul>
-          {!! Form::open(['url'=>'/searchscout', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
-          
-            
-          {!! Form::text('search', '', array('id' => 'q','placeholder' => 'Search...', 'class' => 'form-control', 'style' => 'width:70%;')) !!}              
-          {!! Form::submit('Search', array('class' => 'btn btn-default')) !!}   
-            
-            {!! Form::close() !!}
-          <ul class="nav navbar-nav navbar-right">
-            <li>
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              <span class="glyphicon glyphicon-bell"></span>
-              </a>
-              {{-- @foreach($unreadNotifications as $notification)
-              <div class="notification {{ $notification->type }}">    
-                  <p class="subject">{{ $notification->subject }}</p>
-                  <p class="body">{{ $notification->body }}</p>
-              </div>
-              @endforeach --}}
-            </li>
-            @if(Session::get('roleID') == 2)
-            <li>
-              <a href="#">Welcome {!! ucfirst(Session::get('groupname'))  !!} !</a>
-            </li>
-            @else
-            <li>
-              <a href="#">Welcome {!! ucfirst(Session::get('firstname')),' ', ucfirst(Session::get('lastname'))  !!} !</a>
-            </li>
-            @endif
-             <li>
-              <a href="{!! URL::to('/logout') !!}">Logout</a>
             </li>
           </ul>
         </div>

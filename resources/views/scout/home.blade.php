@@ -25,6 +25,7 @@
     <!-- Theme CSS -->
     <link href="../../css/creative.min.css" rel="stylesheet">
     <link href="../../css/creative.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="../../css/customcssdropdown.css">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -88,14 +89,53 @@
           <ul class="nav navbar-nav navbar-right">
             <li>
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              <span class="glyphicon glyphicon-bell"></span>
+              @if(count($unreadNotifications) == 0)
+              <span class="glyphicon glyphicon-bell "></span>
+              @else
+              <span class="glyphicon glyphicon-bell notification-icon"></span>
+              @endif
               </a>
-              {{-- @foreach($unreadNotifications as $notification)
-              <div class="notification {{ $notification->type }}">    
-                  <p class="subject">{{ $notification->subject }}</p>
-                  <p class="body">{{ $notification->body }}</p>
-              </div>
-              @endforeach --}}
+              <ul class="dropdown-menu notifications" role="menu" aria-labelledby="dLabel">
+    
+    <div class="notification-heading"><h4 class="menu-title">Notifications ( @if(!empty($unreadNotifications)) {{ count($unreadNotifications) }} )@endif</h4><h4 class="menu-title pull-right">View all<i class="glyphicon glyphicon-circle-arrow-right"></i></h4>
+    </div>
+    <li class="divider"></li>
+   <div class="notifications-wrapper">
+    @foreach($unreadNotifications as $notification)
+      @if($notification->subject == 'comment')
+     <a class="content" href="{{ URL::to('/post').'/'.$notification->object_id }}">
+      @elseif($notification->subject == 'invitation')
+     <a class="content" href="{{ URL::to('/invitation').'/'.Session::get('id') }}">
+      @elseif($notification->subject == 'connections')
+     <a class="content" href="{{ URL::to('/connection').'/'.Session::get('id') }}">
+      @endif
+       <div class="notification-item">
+        <h4 class="item-title">{{ $notification->sent_at->diffForHumans() }}</h4>
+        <p class="item-info">{{$notification->body }}</p>
+      </div>
+    </a>
+    @endforeach
+   </div>
+    <li class="divider"></li>
+    @if(count($readNotifications) !== 0)
+    <div class="notification-heading"><h4 class="menu-title">Read notifications</h4></div>
+    @endif
+    <div class="notifications-wrapper">
+    @foreach($readNotifications as $notification)
+      @if($notification->subject == 'comment')
+     <a class="content" href="{{ URL::to('/post').'/'.$notification->object_id }}">
+      @endif
+       <div class="notification-item" style="background: #ecf0f1;">
+        <h4 class="item-title">{{ $notification->sent_at->diffForHumans() }}</h4>
+        <p class="item-info">{{$notification->body }}</p>
+      </div>
+    </a>
+    @endforeach
+    <li class="divider"></li>
+    <div class="notification-footer"><h4 class="menu-title">Mark all as read<a href="{{ URL::to('/readNotifications') }}"><i class="glyphicon glyphicon-circle-arrow-right"></i></a></h4></div>
+   </div>
+  </ul>
+              
             </li>
             <li>
               <a href="#">Welcome {!! ucfirst(Session::get('firstname')),' ', ucfirst(Session::get('lastname'))  !!} !</a>

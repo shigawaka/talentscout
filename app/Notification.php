@@ -8,6 +8,7 @@ class Notification extends Model
 {
     protected $fillable   = ['user_id', 'type', 'subject', 'body', 'object_id', 'object_type', 'sent_at'];
  	private $relatedObject = null;
+    public $table = "notification";
     public function getDates()
     {
         return ['created_at', 'updated_at', 'sent_at'];

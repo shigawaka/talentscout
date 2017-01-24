@@ -338,27 +338,27 @@ class RegistrationController extends Controller
 
         return Redirect::to('http://localhost:8000/login');
     }
-    public function confirmGroup($confirmation_code)
-    {
-        if( ! $confirmation_code) {
-            Session::flash('message', 'Confirmation error!');
-            return Redirect::to('http://localhost:8000/login');
-        }
-        $user = Group::where('confirmation_code', '=', $confirmation_code)->first();
-        if ( ! $user)
-        {
-             Session::flash('message', 'Account Already Activated!');
-              return Redirect::to('http://localhost:8000/login');
-        }
+    // public function confirmGroup($confirmation_code)
+    // {
+    //     if( ! $confirmation_code) {
+    //         Session::flash('message', 'Confirmation error!');
+    //         return Redirect::to('http://localhost:8000/login');
+    //     }
+    //     $user = Group::where('confirmation_code', '=', $confirmation_code)->first();
+    //     if ( ! $user)
+    //     {
+    //          Session::flash('message', 'Account Already Activated!');
+    //           return Redirect::to('http://localhost:8000/login');
+    //     }
 
-        $user->confirmed = 1;
-        $user->confirmation_code = null;
-        $user->save();
+    //     $user->confirmed = 1;
+    //     $user->confirmation_code = null;
+    //     $user->save();
 
-        Session::flash('message', 'You have successfully activated your account!');
+    //     Session::flash('message', 'You have successfully activated your account!');
 
-        return Redirect::to('http://localhost:8000/login');
-    }
+    //     return Redirect::to('http://localhost:8000/login');
+    // }
     public function resetPasswordCode($confirmation_code)
     {
         if( ! $confirmation_code) {

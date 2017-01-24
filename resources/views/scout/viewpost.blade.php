@@ -26,6 +26,7 @@
      <link href="../../css/bootstrap-tagsinput.css" rel="stylesheet">
     <link href="../../css/creative.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="../../css/rating_style.css">
+    <link rel="stylesheet" type="text/css" href="../../css/customcssdropdown.css">
   <script type="text/javascript">
 </script>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -120,24 +121,53 @@
           <ul class="nav navbar-nav navbar-right">
             <li>
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              <span class="glyphicon glyphicon-bell"></span>
+              @if(count($unreadNotifications) == 0)
+              <span class="glyphicon glyphicon-bell "></span>
+              @else
+              <span class="glyphicon glyphicon-bell notification-icon"></span>
+              @endif
               </a>
-              <ul class="dropdown-menu">
-                <li>
-                  <a href="#">Action</a>
-                </li>
-                <li>
-                  <a href="#">Another action</a>
-                </li>
-                <li>
-                  <a href="#">Something else here</a>
-                </li>
-                <li class="divider">
-                </li>
-                <li>
-                  <a href="#">Separated link</a>
-                </li>
-              </ul>
+              <ul class="dropdown-menu notifications" role="menu" aria-labelledby="dLabel">
+    
+    <div class="notification-heading"><h4 class="menu-title">Notifications ( @if(!empty($unreadNotifications)) {{ count($unreadNotifications) }} )@endif</h4><h4 class="menu-title pull-right">View all<i class="glyphicon glyphicon-circle-arrow-right"></i></h4>
+    </div>
+    <li class="divider"></li>
+   <div class="notifications-wrapper">
+    @foreach($unreadNotifications as $notification)
+      @if($notification->subject == 'comment')
+     <a class="content" href="{{ URL::to('/post').'/'.$notification->object_id }}">
+      @elseif($notification->subject == 'invitation')
+     <a class="content" href="{{ URL::to('/invitation').'/'.Session::get('id') }}">
+      @elseif($notification->subject == 'connections')
+     <a class="content" href="{{ URL::to('/connection').'/'.Session::get('id') }}">
+      @endif
+       <div class="notification-item">
+        <h4 class="item-title">{{ $notification->sent_at->diffForHumans() }}</h4>
+        <p class="item-info">{{$notification->body }}</p>
+      </div>
+    </a>
+    @endforeach
+   </div>
+    <li class="divider"></li>
+    @if(count($readNotifications) !== 0)
+    <div class="notification-heading"><h4 class="menu-title">Read notifications</h4></div>
+    @endif
+    <div class="notifications-wrapper">
+    @foreach($readNotifications as $notification)
+      @if($notification->subject == 'comment')
+     <a class="content" href="{{ URL::to('/post').'/'.$notification->object_id }}">
+      @endif
+       <div class="notification-item" style="background: #ecf0f1;">
+        <h4 class="item-title">{{ $notification->sent_at->diffForHumans() }}</h4>
+        <p class="item-info">{{$notification->body }}</p>
+      </div>
+    </a>
+    @endforeach
+    <li class="divider"></li>
+    <div class="notification-footer"><h4 class="menu-title">Mark all as read<a href="{{ URL::to('/readNotifications') }}"><i class="glyphicon glyphicon-circle-arrow-right"></i></a></h4></div>
+   </div>
+  </ul>
+              
             </li>
             <li>
               <a href="#">Welcome {!! ucfirst(Session::get('firstname')),' ', ucfirst(Session::get('lastname'))  !!} !</a>
@@ -153,6 +183,9 @@
         <div class="col-xs-6 col-xs-offset-1" style="height:auto;">
         <div class="form-group">
         <div class="col-sm-12 page-header">
+        @if(Session::get('roleID') == '3')
+          <a href="{!! URL::to('/deletePost').'/'.$posts['id'] !!}">Delete this post</a>
+        @endif
         @if(strpos($posts['file'],'.mp4') == true)
         <video style="width: 100%;" width="400" controls>
             <source src="{!! URL::to('/files').'/'.$posts['file'] !!}" type="video/mp4">
@@ -487,7 +520,7 @@
           </div>
           @elseif(empty($proposal) && Session::get('roleID') == 1 && $posts['status'] == 0)
           <!-- end of modal -->
-        <a id="modal-403917" href="#modal-container-403917" role="button" class="btn btn-success btn-lg" data-toggle="modal">Add proposal</a>
+        <a id="modal-403917" href="#modal-container-403917" role="button" class="btn btn-success btn-lg" data-toggle="modal">Apply</a>
           
           <div class="modal fade" id="modal-container-403917" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -538,7 +571,7 @@
           <!-- end of modal -->
           @elseif(Session::get('roleID') == 1 && $posts['status'] == 0)
           <!-- start of modal -->
-          <a id="modal-403917" href="#modal-container-403917" role="button" class="btn btn-success btn-lg" data-toggle="modal">Edit Proposal</a>
+          <a id="modal-403917" href="#modal-container-403917" role="button" class="btn btn-success btn-lg" data-toggle="modal">Edit Application</a>
           
           <div class="modal fade" id="modal-container-403917" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -591,7 +624,7 @@
         </div>
         @if(Session::get('roleID') == 0 && $posts['scout_id'] == Session::get('id') && $posts['status'] == 0)
         <div class="form-group">
-          <a id="modal-403919" href="#modal-container-403919" role="button" class="btn btn-default btn-lg" data-toggle="modal"><span class="glyphicon glyphicon-user"></span> Proposals</a>
+          <a id="modal-403919" href="#modal-container-403919" role="button" class="btn btn-default btn-lg" data-toggle="modal"><span class="glyphicon glyphicon-user"></span> Applicants</a>
           
           <div class="modal fade" id="modal-container-403919" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -602,7 +635,7 @@
                   </button>
                   
                   <h1 class="modal-title" id="myModalLabel">
-                    Proposals
+                    Applicants
                   </h1>
                 </div>
                 @foreach($fullproposals as $fullprop => $val)

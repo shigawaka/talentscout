@@ -281,7 +281,7 @@
                       <div class="form-group"> 
                         <div class="col-sm-10">
                           <div class="checkbox">
-                            <label><input type="checkbox">Yes, I understand and agree to the <a href="">Talent Scout Terms of Service</a></label>
+                            <label><input type="checkbox" required>Yes, I understand and agree to the <a target="_blank" href="{{ URL::to('/terms') }}">Talent Scout Terms of Service</a></label>
                           </div>
                         </div>
                       </div>
