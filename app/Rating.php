@@ -15,4 +15,8 @@ class Rating extends Model
   	'score',
   	'demerit'
 	];
+	 public function post()
+    {
+        return $this->belongsTo('App\Post','id');
+    }
 }

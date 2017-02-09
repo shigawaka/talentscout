@@ -45,6 +45,7 @@
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/css/materialize.min.css"> -->
     <link rel="stylesheet" href="../../materialize/css/materialize.min.css">
     <link rel="stylesheet" href="../../materialize/materialize-tags.css">
+    <link rel="stylesheet" type="text/css" href="../../css/rating_style.css">
     <!-- Compiled and minified JavaScript -->
     <script src="../../materialize/js/materialize.min.js"></script>
     <script src="../../materialize/materialize-tags.js"></script>    
@@ -80,19 +81,18 @@
             </ul>
 
             <ul class="right">
+              @if(Session::get('first_login') == 1)
+              <li><a href="/home" class="disabled">Home</a></li>
+            @else
               <li><a href="/home">Home</a></li>
-                 <li class="dropdown">
-                 
-                  <a href="#" "dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                    <!--  --> <span class="caret"></span>
-                  </a>
-             
-                </li>
+            @endif
+                 <li><a href="/logout">Logout</a></li>
             </ul>
             <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="mdi-navigation-menu"></i></a>
           </div>
         </div>
       </nav>
+      <main>
       <div class="section no-pad-bot" id="index-banner">
         <div class="container">
           @if (Session::has('message'))
@@ -104,17 +104,23 @@
                 @endif
           <div class="row">
           @if($user['id'] == Session::get('id'))
-            <h3>Add Portfolio</h3>
             {!! Form::open(['url'=>'/addPortfolio', 'method' => 'POST' ,'files' => true]) !!}
-            <a class="btn-floating btn-small waves-effect waves-light grey btn modal-trigger" data-target="modal3"><i class="material-icons">add</i></a>
+            <h3><a class="btn-floating btn-small waves-effect waves-light grey btn modal-trigger" data-target="modal3"><i class="material-icons">add</i></a>
+            </h3>
             <div id="modal3" class="modal modal-fixed-footer">
                              <div class="modal-content">
                              <h4>Add Portfolio</h4>
-                              <div class="input-field col s6">
-                              {!! Form::text('title', '', array('class' => 'validate','placeholder' => 'Enter Title', 'required'=>'required' )) !!}
-                                <!-- <input  value="Frete" id="firstname" type="text" class="validate"> -->
-                                <label for="title">Event Title</label>
-                              </div>
+                             <label for="title">Event Details</label>
+                             <div class="row" id="talentcontainer">
+                                <div class="input-field col s6">
+
+                                  {!! Form::select('category', ['Select Category' => 0], null, ['class' => 'browser-default', 'id' => 'category']) !!}
+                                </div>
+                                <div class="input-field col s6">
+                                  {!! Form::select('talent', ['Select talent'], null, ['class' => 'browser-default','id' => 'talent']) !!}
+                                </div>
+                                
+                               </div>
                               <div class="input-field col s12">
                               {!! Form::textarea('description', '', array('style' => 'min-width:100%;resize:none;','class' => 'form-group','placeholder' => 'Enter Description of the Job', 'required'=>'required')) !!}
                                 <!-- <input  value="Frete" id="firstname" type="text" class="validate"> -->
@@ -139,7 +145,6 @@
                                   @endforeach</p>
                                   
                               </div>
-
                           </div>
                           <div class="modal-footer">
                          <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Cancel</a>
@@ -153,15 +158,101 @@
           </div>
           <div class="row">
             <div class="col s12 m7">
-              <h3>Past Experience</h3>
-              <div class="divider">
-                
-              </div>
+              
+              <div class="divider"></div>
             </div>
+            @foreach($portfolio as $key => $value)
+            <div class="col s12 m7">
+                
+                <div class="card horizontal">
+                  <div class="card-image">
+                  @if(is_array($value['file']))
+                    @foreach($value['file'] as $key => $val)
+                      @if(strpos($val,'.mp4') == true)
+                      <video style="width: 100%;" width="400" controls>
+                          <source src="{!! URL::to('/files').'/'.$val !!}" type="video/mp4">
+                      </video>
+                      @else
+                      <img src="{!! URL::to('/files').'/'.$val !!}">
+                      @endif
+                    @endforeach
+                  @else
+                     @if(strpos($value['file'],'.mp4') == true)
+                      <video style="width: 100%;" width="400" controls>
+                          <source src="{!! URL::to('/files').'/'.$value['file'] !!}" type="video/mp4">
+                      </video>
+                      @else
+                      <img src="{!! URL::to('/files').'/'.$value['file'] !!}">
+                      @endif
+                  @endif
+                  </div>
+                  <div class="card-stacked">
+                    <div class="card-content">
+                    <h5 class="header">Event Name: {{ $value['event_name'] }}</h5>
+                    <h5 class="header">Event Date: {{ Carbon\Carbon::parse($value['event_date'])->format('F d,Y') }}</h5>
+                      <p>{{$value['description']}}</p>
+                    </div>
+                    <div class="card-action">
+                    @if($value['post_id'] !== null)
+                      <a href="{!! URL::to('/post/'.$value['post_id']) !!}">Visit Post</a>
+                    @endif
+                    </div>
+                  </div>
+                </div>
+              </div>
+            @endforeach
+
+            @foreach($hiredposts as $value)
+            <div class="col s12 m7">
+                <div class="card horizontal">
+                  <div class="card-image">
+                  @if(is_array($value['file']))
+                    @foreach($value['file'] as $key => $val)
+                      @if(strpos($val,'.mp4') == true)
+                      <video style="width: 100%;" width="400" controls>
+                          <source src="{!! URL::to('/files').'/'.$val !!}" type="video/mp4">
+                      </video>
+                      @else
+                      <img src="{!! URL::to('/files').'/'.$val !!}">
+                      @endif
+                    @endforeach
+                  @else
+                     @if(strpos($value['file'],'.mp4') == true)
+                      <video style="width: 100%;" width="400" controls>
+                          <source src="{!! URL::to('/files').'/'.$value['file'] !!}" type="video/mp4">
+                      </video>
+                      @else
+                      <img src="{!! URL::to('/files').'/'.$value['file'] !!}">
+                      @endif
+                  @endif
+                  </div>
+                  <div class="card-stacked">
+                    <div class="card-content">
+                    <h5 style="font-size:15px;">Event Name: {{ $value['event_name'] }}</h5>
+                    <h5 style="font-size:15px;">Event Date: {{ Carbon\Carbon::parse($value['event_date'])->format('F d,Y') }}</h5>
+                      @if($value['score'] == null)
+                      <p style="font-style:italic;color:red;">Ongoing event</p>
+                      @else
+                      <div class="stars" style="margin:0;">
+                        <input type="radio" name="attitude" class="star-{{ $value['score'] }}" id="star-{{ $value['score'] }}" checked/>
+                        <span></span>
+                      </div> 
+                      <p style="font-style:italic;">"{!!$value['comment']!!}"</p>
+                      @endif
+                    </div>
+                    <div class="card-action">
+                    @if($value['id'] !== null)
+                      <a href="{!! URL::to('/post/'.$value['id']) !!}">Visit Post</a>
+                    @endif
+                    </div>
+                  </div>
+                </div>
+              </div>
+            @endforeach
           </div>
         </div>
       </div>
-      
+      </main>
 
 
 
@@ -175,6 +266,16 @@
                         </p>
           </div>
         </div>
+        <style type="text/css">
+          body {
+             display: flex;
+             min-height: 100vh;
+             flex-direction: column;
+         }
+         main {
+             flex: 1 0 auto;
+         }
+        </style>
       </footer>
 
           </main>
@@ -215,7 +316,91 @@
         }
     });
 });
+    $('.disabled').click(function(e){
+      alert('Setup your profile first!');
+     e.preventDefault();
+  });
+
+    $(document).ready(function($) {
+        $.ajax({
+            url: "{{ URL('/revealCategory/') }}",
+            method: "GET",
+            dataType: "json",
+            data: {},
+            success: function(data){
+                var next_id = $("#category");
+                $("#category").empty().html(' ');
+                $.each(data, function(key, value) {
+                    $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                });
+                $(next_id).material_select();
+                // $("#talent").html(data);
+            }
+          });
+    $("#category").change(function() {
+        var tal_cal = $(this).val();
+        $.ajax({
+            url: "{{ URL('/revealTalents/') }}",
+            method: "GET",
+            dataType: "json",
+            data: {tal_cal:tal_cal},
+            success: function(data){
+                var next_id = $("#talent");
+                console.log(data);
+                $("#talent").empty().html(' ');
+                $.each(data, function(key, value) {
+                    $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                });
+                $(next_id).material_select();
+                // $("#talent").html(data);
+            }
+          });
+      });
+
+    $('#talentcontainer').on('change', '.category', function() {
+        var tal_cal = $(this).val();
+        $.ajax({
+            url: "{{ URL('/revealTalents/') }}",
+            method: "GET",
+            dataType: "json",
+            data: {tal_cal:tal_cal},
+            success: function(data){
+                var next_id = $(".talent");
+                console.log(data);
+                $(".talent").empty().html(' ');
+                $.each(data, function(key, value) {
+                    $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                });
+                $(next_id).material_select();
+                // $("#talent").html(data);
+            }
+          });
+      });
+
+      $('#talentcontainer').on('click', '#addtalent', function() {
+        $.ajax({
+            url: "{{ URL('/revealCategory/') }}",
+            method: "GET",
+            dataType: "json",
+            data: {},
+            success: function(data){
+                var next_id = $(".category");
+                $(".category").empty().html(' ');
+                $.each(data, function(key, value) {
+                    $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                });
+                $(next_id).material_select();
+                // $("#talent").html(data);
+            }
+          });
+        });
+  });
   </script>
+  @if(Session::has('duplicate'))
+          <script>
+              $('#modal1').openModal();
+          </script>
+  @endif
 
     <!--    
      {!! HTML::script('vendor/jquery/jquery.min.js') !!}

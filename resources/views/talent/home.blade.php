@@ -60,6 +60,9 @@
     <section class="light">
         <div class="container-fluid">
   <div class="row">
+  <div class="col-md-12">
+    <a  href="{{ URL::to('/paymentprocess') }}">Get your profile featured!</a>
+    </div>
     <div class="col-md-12">
       <nav class="navbar navbar-inverse" role="navigation">
         <div class="collapse navbar-collapse"  id="bs-example-navbar-collapse-1">
@@ -72,6 +75,9 @@
             </li>
             <li>
               <a href="{!! URL::to('/about') !!}">About</a>
+            </li>
+            <li>
+              
             </li>
             @if(Session::get('roleID') == 0)
             <li>
@@ -211,7 +217,8 @@
         </h1>
       </div>
       <div class="row">
-      @if(count($posts) > 0)
+      @if(count($posts) == 0)
+      @else
         @foreach($posts as $post)
         <div class="col-md-3 pull-left" style="width:250px;height: auto;">
           <div class="thumbnail" style="height:100%;">
@@ -245,10 +252,9 @@
         </h1>
       </div>
       <div class="row">
+      @if(count($succ) == 0)
+      @else
         @foreach($succ as $succs)
-         <!-- <div class="col-md-2 col-md-offset-1" >
-          <img style="height: 150px; width: 200px;" alt="Bootstrap Image Preview" src="{!! URL::to('/files').'/'.$post['image'] !!}" /></br>
-        </div> -->
         <div class="col-md-7 col-md-offset-2" style="padding-top: 5px;">
            <span class="label label-default">Posted on {!! $succs['date_posted']->format('F d,Y H:i A') !!}</span>
            <span class="label label-default">{!! $succs['rate'] !!}</span>
@@ -273,8 +279,8 @@
           </p>
         </div>
         @endforeach
+      @endif
       </div>
-
     </div>
   </div>
     </div>
@@ -288,7 +294,6 @@
                     <p class="text-center">Talent Scout.</br>
                         All Rights Reserved. 2016 </br>
                         <small style="color: gray;">Contact Talent scout: talentscoutphil@gmail.com · </small> 
-                        <a href="{{ URL::to('/paymentprocess') }}">Get your profile featured!</a>
                         </p>
 </section>
     <!-- jQuery -->

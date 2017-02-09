@@ -42,7 +42,7 @@
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
                 
-                <a class="navbar-brand page-scroll" href="../../index.php"><img src="../../img/logo.png" class="logo"></a>
+                <a class="navbar-brand page-scroll" href="{!! URL::to('/') !!}"><img src="../../img/logo.png" class="logo"></a>
 
            
             </div>
@@ -59,7 +59,7 @@
     <section class="light">
         <div class="container text-center">
             <h3 class="red">Talent Scout Registration</h3>
-            <h5>Register for free and experience the dashboard today</h5>
+            <h5>Register for free and experience Talent Scout!</h5>
             <hr>
 
             <div class="registerbox">

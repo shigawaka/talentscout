@@ -16,10 +16,15 @@ use App\Rating;
 use App\Invitation;
 use App\Talent;
 use App\Notification;
+use App\Subscription;
+use App\TalentDetail;
+use App\Group;
+use DB;
 use Carbon\Carbon;
 use Hash;
 use Mail;
 use Auth;
+use File;
 use Session;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
@@ -199,6 +204,8 @@ class ScoutController extends Controller
                                             ->limit(6)
                                             ->get();
             $fullcomm = array();
+        $users = User::find(Session::get('id'));
+        
         Session::set('post_id', $post_id);
         $exists = Proposal::where('user_id', '=', Auth::user()->id)->where('post_id', '=', $post_id)->first();
         
@@ -280,91 +287,227 @@ class ScoutController extends Controller
                             $fullclosedeals[$i]['profile_image'] = $otheruser['profile_image'];
                             $fullclosedeals[$i]['firstname'] = $otheruser['firstname'];
                             $fullclosedeals[$i]['lastname'] = $otheruser['lastname'];
-                            $fullclosedeals[$i]['body'] = $retrieveprops['body'];
-                            $fullclosedeals[$i]['proposed_rate'] = $retrieveprops['proposed_rate'];
+                            // $fullclosedeals[$i]['body'] = $retrieveprops['body'];
+                            // $fullclosedeals[$i]['proposed_rate'] = $retrieveprops['proposed_rate'];
                             $fullclosedeals[$i]['hired'] = $temp[$i];
                         }
                     }
                  }
          //finding the recommended profiles for this post
          $recommended = array();
+         $recommendednewbie = array();
          $k = 0;
-         foreach (json_decode($posts['tags']) as $tal){
+         $t = 0;
+
+         // dd(count(json_decode($posts['tags'],true)));
+         foreach (json_decode($posts['tags'],true) as $tal){
             $getTalent = Talent::where('fee', '<=', $posts['budget'])
                                 ->where('demerit', '<', 1500)
                                 ->get();
-            foreach ($getTalent as $key => $value) {
-                if(stripos($value['talents'], $tal) !== false){
-                    $findProf = User::find($value['id']);
-                    $hires = json_decode($posts['hire_id'], true);
+            $temp = DB::table('users')
+            ->join('talent', function ($join) use ($posts){
+            $join->on('users.id', '=', 'talent.id')
+                 ->where('talent.fee', '<=', $posts['budget'])
+                 ->where('talent.demerit', '<=', 1500)
+                 ->where('talent.fee_type', '=', $posts['rate']);
+            })
+            ->join('talent_details', function ($join) use ($tal) {
+            $join->on('users.id', '=', 'talent_details.talent_id')
+                 ->where('talent_details.talent', '=', $tal);
+            })
+            ->join('users AS u', function ($join) use ($posts) {
+                $hires = json_decode($posts['hire_id'], true);
+                    if($hires !== null){
                     $checkhired = array_search($findProf['id'], $hires);
-                    // dd($checkhired);
-                    if($checkhired == false){
-                    
-                        if(!empty($recommended)){
-                            $user_age = Carbon::parse($findProf['birthday'])->diffInYears();
-                            //check post age specification (5 - 17 years old)
-                            if($posts['age'] == '1'){
-                                if($user_age <= '17'){
-                                    //check post gender specification 
-                                    if($posts['gender'] == 'any'){
-
-                                    }
-                                    elseif ($posts['gender'] == 'male' && $findProf['gender'] == 'male') {
-                                        # code...
-                                    }
-                                    elseif ($posts['gender'] == 'female' && $findProf['gender'] == 'female') {
-                                        # code...
-                                    }
-                                }
+                    }
+                    else {
+                        $checkhired = false;
+                    }
+                if($checkhired == false){
+                    if($posts['age'] == 1) {
+                        if($posts['gender'] == 'any'){
+                            if($posts['group'] == 0){
+                                $join->on('users.id', '=', 'u.id')
+                                     ->where('u.age', '>=', 5)
+                                     ->where('u.age', '<=', 12);
                             }
-                            //check post age specification (18 years above)
-                            elseif ($posts['age'] == '2') {
-                                if($user_age >= '18'){
-                                    //check post gender specification 
-                                    if($posts['gender'] == 'any'){
-
-                                    }
-                                    elseif ($posts['gender'] == 'male' && $findProf['gender'] == 'male') {
-                                        # code...
-                                    }
-                                    elseif ($posts['gender'] == 'female' && $findProf['gender'] == 'female') {
-                                        # code...
-                                    }
-                                }
+                            else {
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '>=', 5)
+                                     ->where('u.age', '<=', 12)
+                                     ->where('u.roleID', '=', $posts['group']);
                             }
-                            //check post age specification (Age doesn't matter)
-                            elseif ($posts['age'] == '0') {
-                                //check post gender specification 
-                                    if($posts['gender'] == 'any'){
-
-                                    }
-                                    elseif ($posts['gender'] == 'male' && $findProf['gender'] == 'male') {
-                                        # code...
-                                    }
-                                    elseif ($posts['gender'] == 'female' && $findProf['gender'] == 'female') {
-                                        # code...
-                                    }
-                            }
-                            
-                                        $recommended[$k]['id'] = $findProf['id'];
-                                        $recommended[$k]['profile_image'] = $findProf['profile_image'];
-                                        $recommended[$k]['firstname'] = ucfirst($findProf['firstname']);
-                                        $recommended[$k]['lastname'] = ucfirst($findProf['lastname']);
-                                        $k++;
                         }
-                        else { 
-                                $recommended[$k]['id'] = $findProf['id'];
-                                $recommended[$k]['profile_image'] = $findProf['profile_image'];
-                                $recommended[$k]['firstname'] = ucfirst($findProf['firstname']);
-                                $recommended[$k]['lastname'] = ucfirst($findProf['lastname']);
-                                $k++;
+                        else {
+                            if($posts['group'] == 0){
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '>=', 5)
+                                     ->where('u.age', '<=', 12)
+                                     ->where('u.gender', '=', $posts['gender']);
+                            }
+                            else {
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '>=', 5)
+                                     ->where('u.age', '<=', 12)
+                                     ->where('u.gender', '=', $posts['gender'])
+                                     ->where('u.roleID', '=', $posts['group']);
+                            }
+                        }
+                    }
+                    elseif($posts['age'] == 2) {
+                        if($posts['gender'] == 'any'){
+                            if($posts['group'] == 0){
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '>=', 13)
+                                     ->where('u.age', '<=', 19);
+                            }
+                            else {
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '>=', 13)
+                                     ->where('u.age', '<=', 19)
+                                     ->where('u.roleID', '=', $posts['group']);
+                            }
+                        }
+                        else {
+                            if($posts['group'] == 0){
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '>=', 13)
+                                     ->where('u.age', '<=', 19)
+                                     ->where('u.gender', '=', $posts['gender']);
+                            }
+                            else {
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '>=', 13)
+                                     ->where('u.age', '<=', 19)
+                                     ->where('u.gender', '=', $posts['gender'])
+                                     ->where('u.roleID', '=', $posts['group']);
+                            }
+                        }
+                    }
+                    elseif($posts['age'] == 3) {
+                        if($posts['gender'] == 'any'){
+                            if($posts['group'] == 0){
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '>=', 20)
+                                     ->where('u.age', '<=', 34);
+                            }
+                            else {
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '>=', 20)
+                                     ->where('u.age', '<=', 34)
+                                     ->where('u.roleID', '=', $posts['group']);
+                            }
+                        }
+                        else {
+                            if($posts['group'] == 0){
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '>=', 20)
+                                     ->where('u.age', '<=', 34)
+                                     ->where('u.gender', '=', $posts['gender']);
+                            }
+                            else {
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '>=', 20)
+                                     ->where('u.age', '<=', 34)
+                                     ->where('u.gender', '=', $posts['gender'])
+                                     ->where('u.roleID', '=', $posts['group']);
+                            }
+                        }
+                    }
+                    elseif($posts['age'] == 4) {
+                        if($posts['gender'] == 'any'){
+                            if($posts['group'] == 0){
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '>=', 35)
+                                     ->where('u.age', '<=', 50);
+                            }
+                            else {
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '>=', 35)
+                                     ->where('u.age', '<=', 50)
+                                     ->where('u.roleID', '=', $posts['group']);
+                            }
+                        }
+                        else {
+                            if($posts['group'] == 0){
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '>=', 35)
+                                     ->where('u.age', '<=', 50)
+                                     ->where('u.gender', '=', $posts['gender']);
+                            }
+                            else {
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '>=', 35)
+                                     ->where('u.age', '<=', 50)
+                                     ->where('u.gender', '=', $posts['gender'])
+                                     ->where('u.roleID', '=', $posts['group']);
+                            }
+                        }
+                    }
+                    else {
+                        if($posts['gender'] == 'any'){
+                            if($posts['group'] == 0){
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '<=', 100);
+                            }
+                            else {
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '<=', 100)
+                                     ->where('u.roleID', '=', $posts['group']);
+                            }
+                        }
+                        else {
+                            if($posts['group'] == 0){
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '<=', 100)
+                                     ->where('u.gender', '=', $posts['gender']);
+                            }
+                            else {
+                                $join->on('users.id', '=', 'u.id')
+                                ->where('u.age', '<=', 100)
+                                     ->where('u.gender', '=', $posts['gender'])
+                                     ->where('u.roleID', '=', $posts['group']);
+                            }
                         }
                     }
                 }
+            })
+            ->get();
+            // dd($temp);
+            foreach ($temp as $key) {
+            $checkexperience = Rating::where('user_id', '=', $key->id)->get();
+            if(count($checkexperience) == 0){
+                    $recommendednewbie[$t]['id'] = $key->id;
+                    $recommendednewbie[$t]['profile_image'] = $key->profile_image;
+                if($key->firstname == null){
+                    $group = Group::find($key->id);
+                    $recommendednewbie[$t]['firstname'] = ucfirst($group['groupname']);
+                    $recommendednewbie[$t]['lastname'] = '';
+                }
+                else {
+                    $recommendednewbie[$t]['firstname'] = ucfirst($key->firstname);
+                    $recommendednewbie[$t]['lastname'] = ucfirst($key->lastname);
+                }
+                $t++;
+                }
+            else {
+                    $recommended[$t]['id'] = $key->id;
+                    $recommended[$t]['profile_image'] = $key->profile_image;
+                    if($key->firstname == null){
+                        $group = Group::find($key->id);
+                        $recommended[$t]['firstname'] = ucfirst($group['groupname']);
+                        $recommended[$t]['lastname'] = '';
+                    }
+                    else {
+                        $recommended[$t]['firstname'] = ucfirst($key->firstname);
+                        $recommended[$t]['lastname'] = ucfirst($key->lastname);
+                    }
+                    $t++;
+                    }
+                }
             }
-         }
-         dd($recommended);
+         
+         // dd($recommendednewbie);
          //remove duplicate from recommended array;
          $one_dimension = array_map("serialize", $recommended);
             $unique_one_dimension = array_unique($one_dimension);
@@ -386,8 +529,10 @@ class ScoutController extends Controller
             // $comm->setPageName('comm');
          return view('scout.viewpost')
          ->with('posts', $posts)
+         ->with('users', $users)
          ->with('proposal', $exists)
          ->with('recommended', $entries)
+         ->with('recommendednewbie', $recommendednewbie)
          ->with('fullproposals', $fullproposals)
          ->with('fullclosedeals', $fullclosedeals)
          ->with('unreadNotifications', $unreadNotifications)
@@ -395,9 +540,19 @@ class ScoutController extends Controller
          ->with('comments', $fullcomm)
          ->with('tag', json_decode($posts['tags'], true));
     }
+    public function deleteYourPost($post_id){
+        $post = Post::find($post_id);
+        $destinationPath = public_path().'/files/';
+        $file = $post['file'];
+        File::delete($destinationPath.$file);
+        $post->delete();
+        Session::flash('message', 'Successfully deleted!');
+         return Redirect::back();
+    }
     public function addPost(Request $request)
     {
         $data = Request::all();
+       
         $rules = array(
             'title' => 'required|unique:post',
             'description' => 'required',
@@ -412,7 +567,7 @@ class ScoutController extends Controller
         );
 
         $validation = Validator::make($data, $rules, $message);
-
+        $data['talent'] = array_unique($data['talent']);
         if($validation->passes()) {
             if(Post::where('title', $data['title'])->first()) {
                 return back()->withInput();
@@ -429,7 +584,15 @@ class ScoutController extends Controller
                         $file->move($destinationPath, $filename);
                         $detail->file = $filename;
                     }
-                $tags = json_encode(explode(',', $data['tags'][0]));
+                    
+                $to_remove = array('Select Category', 'Select talent', 0);
+                //remove from array if user didn't choose from category or talent
+                $res =  array_diff($data['talent'], $to_remove);
+                
+                //convert 
+                $data['talent'] = implode(',', $res);
+                $tags = json_encode(explode(',', $data['talent']));
+                
                 $detail->tags =$tags;
                 $detail->budget =$data['budget'];
                 $detail->rate = $data['rate'];
@@ -506,6 +669,7 @@ class ScoutController extends Controller
                 $rateUser->id = null;
                 $rateUser->user_id = $user['id'];
                 $rateUser->post_id = $post['id'];
+
                 foreach($data['attitude'] as $atti){
                     if($atti == 1){
                          $score += $atti * 10;
@@ -536,6 +700,18 @@ class ScoutController extends Controller
                     $score += $punc * 10;
                     }
                     break;
+                }
+                $rateUser->attitude = $data['attitude'][0];
+                $rateUser->performance = $data['performance'][0];
+                $rateUser->punctuality = $data['punctuality'][0];
+                $rateUser->comment = $data['comment'][0];
+                if(empty($data['testi_score'])){
+                $rateUser->testimonial_score = null;
+                $rateUser->testimonial_comment = null;
+                }
+                else {
+                $rateUser->testimonial_score = $data['testi_score'];
+                $rateUser->testimonial_comment = $data['testimonial_comment'];
                 }
                 $rateUser->score = $score;
                 $rateUser->demerit = $demerit;
@@ -576,7 +752,18 @@ class ScoutController extends Controller
                     }
                     break;
                 }
-                // dd($findUser['score']);
+                $rateUser->attitude = $data['attitude'][0];
+                $rateUser->performance = $data['performance'][0];
+                $rateUser->punctuality = $data['punctuality'][0];
+                $rateUser->comment = $data['comment'][0];
+                if(empty($data['testi_score'])){
+                $rateUser->testimonial_score = null;
+                $rateUser->testimonial_comment = null;
+                }
+                else {
+                $rateUser->testimonial_score = $data['testi_score'];
+                $rateUser->testimonial_comment = $data['testimonial_comment'];
+                }
                 $findUser->score = $score;
                 $findUser->demerit = $demerit;
                 $findUser->save();            
@@ -605,14 +792,14 @@ class ScoutController extends Controller
         
         //change status of post to done
 
-        $setPost = Post::find(Session::get('post_id'));
+        $setPost = Post::find($post_id);
         $setPost->status = 1;
         $setPost->save();
         return Redirect::to('/post');
     }
     public function inviteTalent($talent_id){
         $findTalent = User::find($talent_id);
-        // dd($findTalent['emailaddress']);
+        // dd($findTalent);
         if(!empty($findTalent)){
             $invite = Invitation::where('talent_id', '=', $talent_id)
                                 ->where('post_id', '=', Session::get('post_id'))->first();
@@ -635,18 +822,13 @@ class ScoutController extends Controller
                 $notification->sent_at = new Carbon();
                 $notification->save();
                 $changecontact = preg_replace('/^0/','63',$findTalent['contactno']);
-                Mail::send('emails.invitation', ['confirmation_code' => ''], function($message) {
+                Mail::send('emails.invitation', ['findTalent' => $findTalent], function($message) use ($findTalent) {
                 $message->to($findTalent['emailaddress'], $findTalent['username'])
                     ->subject('Congratulations! You have been invited.');
                 });
                 $chikkadata = array('number'=> $changecontact, 'message'=> 'A scout has seen your potential. You have been invited to an event! Please visit Talent Scout for more information!');
                 ChikkaController::send($chikkadata);
                 Session::flash('invite', 'User successfully invited!');
-            //     Mail::send('emails.invitation', ['user' => $findTalent], function ($m) use ($findTalent) {
-            //     $m->from('TalentScout.com', 'Talent Scout');
-
-            //     $m->to($findTalent['emailaddress'])->subject('Invitation!');
-            // });
                 return Redirect::back();
             }
             else {

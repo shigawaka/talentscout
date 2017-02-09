@@ -78,20 +78,18 @@
             </ul>
 
             <ul class="right">
+              @if(Session::get('first_login') == 1)
+              <li><a href="/home" class="disabled">Home</a></li>
+            @else
               <li><a href="/home">Home</a></li>
-                 <li class="dropdown">
-                 
-                  <a href="#" "dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                    <!--  --> <span class="caret"></span>
-                  </a>
-             
-                </li>
+            @endif
+                 <li><a href="/logout">Logout</a></li>
             </ul>
             <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="mdi-navigation-menu"></i></a>
           </div>
         </div>
       </nav>
-
+      <main>
       <div class="row">
        @if (Session::has('message'))
                   <div id="card-alert" class="card green">
@@ -100,6 +98,11 @@
                   </div>
                   </div>
                 @endif
+    @if(empty($postDetails))
+    <div>
+    <h5 class="center-align">There's nothing here.</h5>
+  </div>
+    @else
       @foreach($postDetails as $fullprop => $details)
         <div class="col s12 m3">
   <div class="card">
@@ -120,7 +123,7 @@
           <p><a href="{!! URL::to('/invitation/accept').'/'.$details['id'] !!}">Accept Invitation</a></p>
           <p><a href="{!! URL::to('/invitation/decline').'/'.$details['id'] !!}">Decline Invitation</a></p>
           @else
-              <div class="card-panel blue lighten-3 align center">HIRED</div>
+              <div class="card-panel blue lighten-3 align center">BOOKED</div>
           @endif
         @else 
                <!-- Modal begin -->
@@ -238,17 +241,31 @@
             </div>
           </div>
         @endforeach
+    @endif
       </div>
-            
+            </main>
 
 
           <footer class="page-footer  black">
 
         <div class="footer-copyright">
           <div class="container" align="center">
-    Talent Scout|   All rights reserved |   2016
+     <p class="text-center">Talent Scout.
+                        All Rights Reserved. 2016 
+                        <small style="color: gray;">Contact Talent scout: talentscoutphil@gmail.com</small>
+                        </p>
           </div>
         </div>
+        <style type="text/css">
+          body {
+             display: flex;
+             min-height: 100vh;
+             flex-direction: column;
+         }
+         main {
+             flex: 1 0 auto;
+         }
+        </style>
       </footer>
 
           </main>
@@ -268,6 +285,10 @@
       selectMonths: true, // Creates a dropdown to control month
       selectYears: 100 // Creates a dropdown of 15 years to control year
     });
+    $('.disabled').click(function(e){
+      alert('Setup your profile first!');
+     e.preventDefault();
+  });
   </script>
 
 

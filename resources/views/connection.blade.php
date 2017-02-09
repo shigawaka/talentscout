@@ -80,22 +80,21 @@
             </ul>
 
             <ul class="right">
+              @if(Session::get('first_login') == 1)
+              <li><a href="/home" class="disabled">Home</a></li>
+            @else
               <li><a href="/home">Home</a></li>
-                 <li class="dropdown">
-                 
-                  <a href="#" "dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                    <!--  --> <span class="caret"></span>
-                  </a>
-             
-                </li>
+            @endif
+              <li><a href="/logout">Logout</a></li>
             </ul>
             <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="mdi-navigation-menu"></i></a>
           </div>
         </div>
       </nav>
+      <main>
       <div class="section no-pad-bot" id="index-banner">
         <div class="container">
-          @if (Session::has('message'))
+                @if (Session::has('message'))
                   <div id="card-alert" class="card green">
                   <div class="card-content white-text">
                   <p><i class="mdi-navigation-check"></i> {{ Session::get('message') }}</p>
@@ -103,12 +102,23 @@
                   </div>
                 @endif
           <div class="row">
+          
+          <div>
+                {!! Form::open(['url'=>'/searchscout', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
+          {!! Form::text('search', '', array('placeholder' => 'Search...', 'class' => 'form-control', 'style' => 'width:70%;display:none;')) !!}              
+                  @if(empty($endorsed) && empty($endorser))
+                <h5 class="center-align">There's nothing here. {!! Form::submit('Search for connections!', array('class' => 'btn btn-default')) !!}
+                  @endif
+            
+          
+          <!-- <a href="{{ URL::to('/searchscout') }}"> Search for connections!</a></h5> -->
+              </div>
           @if(empty($endorsed))
 
           @else
           <h3>List of people {{ $user['firstname'] }} got endorsed by</h3>
             @foreach($endorsed as $val)
-              <div class="col s3">
+              <div class="col s2">
                 <div class="card">
                     <div class="card-image">
                       <img src="{!! URL::to('/files').'/'.$val['profile_image'] !!}">
@@ -132,11 +142,11 @@
             
             <div class="row">
             @if(empty($endorser))
-
+                
             @else
             <h3>List of people {{ $user['firstname'] }} endorses</h3>
                @foreach($endorser as $val)
-            <div class="col s3">
+            <div class="col s2">
               <div class="card">
                   <div class="card-image">
                     <img src="{!! URL::to('/files').'/'.$val['profile_image'] !!}">
@@ -162,7 +172,7 @@
             </div>
         </div>
       </div>
-
+      </main>
 
 
 
@@ -176,6 +186,16 @@
                         </p>
           </div>
         </div>
+        <style type="text/css">
+          body {
+             display: flex;
+             min-height: 100vh;
+             flex-direction: column;
+         }
+         main {
+             flex: 1 0 auto;
+         }
+        </style>
       </footer>
 
           </main>
@@ -195,6 +215,10 @@
       selectMonths: true, // Creates a dropdown to control month
       selectYears: 100 // Creates a dropdown of 15 years to control year
     });
+    $('.disabled').click(function(e){
+      alert('Setup your profile first!');
+     e.preventDefault();
+  });
   </script>
 
 

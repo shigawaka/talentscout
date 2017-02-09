@@ -81,14 +81,10 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
                     ->withPivot('approved');
     }
 
-    public function addFriend($user)
-    {
-        $this->friends()->attach($user->id);
-    }
-
-    public function removeFriend($user)
-    {
-        $this->friends()->detach($user->id);
-    }
-    
+    public function talentFee(){
+        return $this->belongsTo('App\Talent', 'id');
+    }    
+    public function talentDetail(){
+        return $this->hasMany('App\TalentDetail', 'talent_id');
+    }    
 }

@@ -92,14 +92,12 @@
             </ul>
 
             <ul class="right">
+              @if(Session::get('first_login') == 1)
+              <li><a href="/home" class="disabled">Home</a></li>
+            @else
               <li><a href="/home">Home</a></li>
-                 <li class="dropdown">
-                 
-                  <a href="#" "dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                    <!--  --> <span class="caret"></span>
-                  </a>
-             
-                </li>
+            @endif
+                 <li><a href="/logout">Logout</a></li>
             </ul>
             <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="mdi-navigation-menu"></i></a>
           </div>
@@ -275,6 +273,10 @@
 $.ajaxSetup({
    headers: { 'X-CSRF-Token' : $('meta[name=_token]').attr('content') }
 });
+$('.disabled').click(function(e){
+      alert('Setup your profile first!');
+     e.preventDefault();
+  });
 </script>
     
 

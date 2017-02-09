@@ -7,6 +7,7 @@ use Redirect;
 use Validator;
 use Calendar;
 use Response;
+use DB;
 
 use App\Scout;
 use App\Featured;
@@ -22,8 +23,11 @@ use App\Group;
 use App\Endorse;
 use App\Notification;
 use App\Paypalpayment;
-
-
+use App\Portfolio;
+use App\Subscription;
+use App\Groupmember;
+use App\TalentDetail;
+use App\ScoutDetail;
 
 
 use Hash;
@@ -65,7 +69,127 @@ class HomeController extends Controller
     {
         //
     }
-
+    public function showHome(){
+        if (Auth::check()) {
+         if(Session::get('first_login') == 1){
+            Session::flash('message', 'You need to setup your profile!');
+            return Redirect::to('http://localhost:8000/profile'.'/'.Session::get('id'));
+         }
+         else {
+            if(Session::get('roleID') == 0){
+            return Redirect::to('/homescout');
+            }
+            else {
+            return Redirect::to('/hometalent');
+            }
+         }
+            
+    }
+    else {
+        $testi = Rating::where('testimonial_score', '=', 5)
+                       ->where('testimonial_comment', '!=', '')
+                       ->groupBy('user_id')
+                       ->get();
+        $testimonialarr = array();
+        $i=0;
+        if(count($testi) !== 0){
+            foreach ($testi as $key => $value) {
+                $user = User::find($value['user_id']);
+                if($user !== null){
+                    $testimonialarr[$i]['firstname'] = $user['firstname'];
+                    $testimonialarr[$i]['lastname'] = $user['lastname'];
+                    $testimonialarr[$i]['picture'] = $user['profile_image'];
+                    $testimonialarr[$i]['score'] = $value['testimonial_score'];
+                    $testimonialarr[$i]['comment'] = $value['testimonial_comment'];
+                    $i++;
+                }
+            }
+        }
+        $profilearray = array();
+        $i = 0;
+        $profile = Featured::where('isProfile','=',1)->get();
+        foreach ($profile as $key => $value) {
+            $userdetail = User::find($value['profile_id']);
+            $checkexpiration = Carbon::parse($value['end_date']);
+            if(!Carbon::now()->gte($checkexpiration)){
+            $profilearray[$i]['id'] = $value['profile_id'];
+            $profilearray[$i]['profile_image'] = $userdetail['profile_image'];
+            $profilearray[$i]['firstname'] = $userdetail['firstname'];
+            $profilearray[$i]['lastname'] = $userdetail['lastname'];
+            $profilearray[$i]['profile_description'] = $userdetail['profile_description'];
+            $profilearray[$i]['start_date'] = $value['start_date'];
+            $profilearray[$i]['end_date'] = $value['end_date'];
+            $i++;
+            }
+            else {
+                //remove from db
+            }
+        }
+        return view('home')
+                ->with('profilearray', $profilearray)
+                ->with('testimonialarr', $testimonialarr);
+        }
+    }
+    public function showHomedash(){
+        if (Auth::check()) {
+        if(Session::get('first_login') == 1){
+            Session::flash('message', 'You need to setup your profile!');
+            return Redirect::to('http://localhost:8000/profile'.'/'.Session::get('id'));
+         }
+         else {
+            if(Session::get('roleID') == 0){
+            return Redirect::to('/homescout');
+            }
+            else {
+            return Redirect::to('/hometalent');
+            }
+         }
+    }
+    else {
+        $testi = Rating::where('testimonial_score', '=', 5)
+                       ->where('testimonial_comment', '!=', '')
+                       ->groupBy('user_id')
+                       ->get();
+        $testimonialarr = array();
+        $i=0;
+        if(count($testi) !== 0){
+            foreach ($testi as $key => $value) {
+                $user = User::find($value['user_id']);
+                if($user !== null){
+                    $testimonialarr[$i]['firstname'] = $user['firstname'];
+                    $testimonialarr[$i]['lastname'] = $user['lastname'];
+                    $testimonialarr[$i]['picture'] = $user['profile_image'];
+                    $testimonialarr[$i]['score'] = $value['testimonial_score'];
+                    $testimonialarr[$i]['comment'] = $value['testimonial_comment'];
+                    $i++;
+                }
+            }
+        }
+        $profile = Featured::where('isProfile','=',1)->get();
+        $profilearray = array();
+        $i = 0;
+        foreach ($profile as $key => $value) {
+            $userdetail = User::find($value['profile_id']);
+            $checkexpiration = Carbon::parse($value['end_date']);
+            if(!Carbon::now()->gte($checkexpiration)){
+            $profilearray[$i]['id'] = $value['profile_id'];
+            $profilearray[$i]['profile_image'] = $userdetail['profile_image'];
+            $profilearray[$i]['firstname'] = $userdetail['firstname'];
+            $profilearray[$i]['lastname'] = $userdetail['lastname'];
+            $profilearray[$i]['profile_description'] = $userdetail['profile_description'];
+            $profilearray[$i]['start_date'] = $value['start_date'];
+            $profilearray[$i]['end_date'] = $value['end_date'];
+            $i++;
+            }
+            else {
+                //remove from db
+            }
+        }
+        return view('home')
+            ->with('profilearray', $profilearray)
+            ->with('testimonialarr', $testimonialarr);
+    }
+    }
     /**
      * Display the specified resource.
      *
@@ -90,6 +214,7 @@ class HomeController extends Controller
             if(count($posts) < 0 ){
                 $posts = null;
             }
+
             return view('talent.home')
                 ->with('posts',$posts)
                 ->with('succ',$succ)
@@ -136,7 +261,7 @@ class HomeController extends Controller
                 //remove from db
             }
         }
-        // dd($unreadNotifications);
+        // dd($posts);
         return view('scout.home')
                 ->with('posts',$posts)
                 ->with('succ',$succ)
@@ -230,6 +355,7 @@ if ($validator->fails()) {
         Session::set('username', $cred['username']);
         Session::set('profile_image', $cred['profile_image']);
         Session::set('profile_description', $cred['profile_description']);
+        Session::set('first_login', $cred['first_login']);
             }
         }
         $tf = Talent::find(Auth::user()->id);
@@ -237,10 +363,24 @@ if ($validator->fails()) {
         Session::set('talentfee', $tf['fee']);
         }
         if($cred['roleID'] == 1 || $cred['roleID'] == 2){
-        return Redirect::to('http://localhost:8000/hometalent');
+            //check if first time login
+            if($cred['first_login'] == 1){
+                Session::flash('message', 'You need to setup your profile!');
+                return Redirect::to('http://localhost:8000/profile'.'/'.$cred['id']);
+            }
+            else {
+            return Redirect::to('http://localhost:8000/hometalent');
+            }
         }
         elseif($cred['roleID'] == 3) {
-        return Redirect::to('http://localhost:8000/hometalent');
+            //check if first time login
+            if($cred['first_login'] == 1){
+                Session::flash('message', 'You need to setup your profile!');
+                return Redirect::to('http://localhost:8000/profile'.'/'.$cred['id']);
+            }
+            else {
+            return Redirect::to('http://localhost:8000/hometalent');
+            }
         }
         else {
         return Redirect::to('http://localhost:8000/homescout');
@@ -316,6 +456,7 @@ if ($validator->fails()) {
     }
     public function addProposal(){
         $data = Request::all();
+        dd($data);
         $rules = array(
             'body' => 'required',
             'rate' => 'required',
@@ -336,6 +477,13 @@ if ($validator->fails()) {
                 $detail->id =null;
                 $detail->user_id = Auth::user()->id;
                 $detail->post_id = Session::get('post_id');
+                if( Request::hasFile('file') ) {
+                        $destinationPath = public_path().'/files/';
+                        $file = Request::file('file');
+                        $filename = str_random(10).".".$file->getClientOriginalExtension();
+                        $file->move($destinationPath, $filename);
+                        $detail->file = $filename;
+                    }
                 $detail->body =$data['body'];
                 $detail->proposed_rate = $data['rate'];
                 $detail->save();
@@ -395,10 +543,13 @@ if ($validator->fails()) {
                     }
                     $tal->save();
                 }
+                //finding talents of  user
+                $td = TalentDetail::where('talent_id', '=', $user_id)->get();
                 return view('talent.profile')
                         ->with('rating', $rating)
                         ->with('user', $user)
                         ->with('fee', $tal)
+                        ->with('td', $td)
                         ->with('grouparray', $grouparray)
                         ->with('talent', json_decode($tal['talents'], true));
             }
@@ -411,14 +562,25 @@ if ($validator->fails()) {
                 $user['birthday'] = $birthday;
                 //finding group of the user
                 $grouparray = array();
+                $naccgrouparray = array();
                 $groups = json_decode($groupdetails['member'], true);
-                for ($i=0; $i < count($groups); $i++) { 
+                for ($i = 0; $i < count($groups); $i++) { 
                     $searchusergroup = User::find($groups[$i]);
                     $grouparray[$i]['id'] = $searchusergroup['id'];
                     $grouparray[$i]['fullname'] = $searchusergroup['firstname'].' '.$searchusergroup['lastname'];
                     $grouparray[$i]['profile_image'] = $searchusergroup['profile_image'];
                 }
                 //end finding group
+                //start finding NACC group member
+                $searchnacc = Groupmember::where('group_id', '=', $user_id)->get();
+                $i = 0;
+                foreach ($searchnacc as $key => $value) {
+                    $naccgrouparray[$i]['id'] = $value['id'];
+                    $naccgrouparray[$i]['fullname'] = $value['member'];
+                    $naccgrouparray[$i]['profile_image'] = 'avatar.png';
+                    $i++;
+                }
+                //end finding nacc group member
                 //check if talent sent a request to join in the group
                 $checkinvitation = Invitation::where('inviter_id', '=', Session::get('id'))
                                             ->where('talent_id', '=', $user_id)
@@ -451,11 +613,14 @@ if ($validator->fails()) {
                     }
                     $tal->save();
                 }
+                $td = TalentDetail::where('talent_id', '=', $user_id)->get();
                 return view('talent.profilegroup')
                         ->with('rating', $rating)
                         ->with('user', $user)
+                        ->with('td', $td)
                         ->with('groupdetails', $groupdetails)
                         ->with('grouparray', $grouparray)
+                        ->with('naccgrouparray', $naccgrouparray)
                         ->with('fee', $tal)
                         ->with('talent', json_decode($tal['talents'], true));
             }
@@ -480,8 +645,11 @@ if ($validator->fails()) {
                     $rating->demerit = $finaldemerit;
                 }
                 $rating->save();
+                // dd($rating);
+                $td = ScoutDetail::where('scout_id', '=', $user_id)->get();
                 return view('scout.profile')
                         ->with('rating', $rating)
+                        ->with('td', $td)
                         ->with('user', $user);
             }
     }
@@ -581,35 +749,102 @@ if ($validator->fails()) {
     }
     public function addTalent($user_id){
         $data = Request::except('_token');
+
         $rules = array(
-            'talents' => 'required',
+            //reserve
         );
 
         $message = array(
-            'talents.required' => 'Required',
+            //reserve
         );
 
         $validation = Validator::make($data, $rules, $message);
 
         if($validation->passes()) {
-            $findtal = Talent::find($user_id);
-            if($findtal) {
-                $talenttags = json_encode(explode(',', $data['talents'][0]));
-                $findtal->talents =$talenttags;
-                $findtal->save();
-                return Redirect::back();
-            } else {
-                $detail = new Talent;
-                $detail->id = $user_id;
-                $talenttags = json_encode(explode(',', $data['talents'][0]));
-                $detail->talents =$talenttags;
-                $detail->save();
-                Session::flash('message', 'Successfully added talent!');
-                return Redirect::back();
+            for ($i=0; $i < count($data['category']); $i++) { 
+            $td = TalentDetail::where('talent_id', '=', $user_id)
+                                ->where('category', '=', $data['category'][$i])
+                                ->where('talent', '=', $data['talent'][$i])
+                                ->get();
+                if(count($td) !== 0){
+                    Session::flash('duplicate', 'Duplicate Entry!');
+                    return Redirect::back();
+                }
             }
+               for ($i=0; $i < count($data['category']); $i++) { 
+                    if($data['category'][$i] !== 'Select Category' || $data['talent'][$i] !== 'Select talent'){
+                        //every loop checking for db for duplicate entry entered by the user
+                        $td = TalentDetail::where('talent_id', '=', $user_id)
+                                ->where('category', '=', $data['category'][$i])
+                                ->where('talent', '=', $data['talent'][$i])
+                                ->get();
+                            if(count($td) == 0){
+                                $newtd = new TalentDetail;
+                            $newtd->id = null;
+                            $newtd->talent_id = $user_id;
+                            $newtd->category = $data['category'][$i];
+                            $newtd->talent = $data['talent'][$i];
+                            $newtd->save();
+                            }
+                    }
+                }
+                            Session::flash('message', 'Successfully added talent!');
+                            return Redirect::back();
         } else {
             return Redirect::back()->withInput()->withErrors($validation);
         }
+    }
+    public function addScoutTalent($user_id){
+        $data = Request::except('_token');
+
+        $rules = array(
+            //reserve
+        );
+
+        $message = array(
+            //reserve
+        );
+
+        $validation = Validator::make($data, $rules, $message);
+
+        if($validation->passes()) {
+            for ($i=0; $i < count($data['category']); $i++) { 
+            $td = ScoutDetail::where('talent_id', '=', $user_id)
+                                ->where('category', '=', $data['category'][$i])
+                                ->where('talent', '=', $data['talent'][$i])
+                                ->get();
+                if(count($td) !== 0){
+                    Session::flash('duplicate', 'Duplicate Entry!');
+                    return Redirect::back();
+                }
+            }
+               for ($i=0; $i < count($data['category']); $i++) { 
+                    if($data['category'][$i] !== 'Select Category' || $data['talent'][$i] !== 'Select talent'){
+                        //every loop checking for db for duplicate entry entered by the user
+                        $td = ScoutDetail::where('talent_id', '=', $user_id)
+                                ->where('category', '=', $data['category'][$i])
+                                ->where('talent', '=', $data['talent'][$i])
+                                ->get();
+                            if(count($td) == 0){
+                                $newtd = new ScoutDetail;
+                            $newtd->id = null;
+                            $newtd->talent_id = $user_id;
+                            $newtd->category = $data['category'][$i];
+                            $newtd->talent = $data['talent'][$i];
+                            $newtd->save();
+                            }
+                    }
+                }
+                            Session::flash('message', 'Successfully added talent!');
+                            return Redirect::back();
+        } else {
+            return Redirect::back()->withInput()->withErrors($validation);
+        }
+    }
+    public function removeTalent(){
+        $data = Request::all();
+        TalentDetail::find($data['tal_cal'])->delete();
+        return $data;
     }
     public function showInvitations($user_id) {
         $hired = 0;
@@ -896,7 +1131,6 @@ if ($validator->fails()) {
                                             ->where('is_read', '=', 1)
                                             ->limit(6)
                                             ->get();
-        // dd($data);
         $keyword = strtolower($data['search']);
         //categorize talents
         $guitar = array('acoustic', 'guitar', 'wood guitar','acoustic guitar');
@@ -905,78 +1139,166 @@ if ($validator->fails()) {
         $drum = array('drum', 'drummer', 'drummer band', 'marching band');
         $vocalist = array('singing', 'singer', 'songer', 'sing', 'vocalist', 'choir', 'vocal');
 
-        $searchUser = User::all();
+        $searchUser = User::where('roleID', '=', '1')
+                          ->orWhere('roleID', '=', '2')
+                          ->orWhere('roleID','=','0')->get();
         $arr = array();
         $counter = 0;
         if(!empty($data['search']) && !empty($data['fee']) && !empty($data['category'])) {
             foreach ($searchUser as $key => $value) {
-            if(stripos(strtolower($value['firstname']), strtolower($keyword)) !== false || stripos(strtolower($value['lastname']), strtolower($keyword)) !== false){
-            $fee = Talent::where('id', '=', $value['id'])->where('fee', '<=', $data['fee'])->first();
-            // dd($fee);
-            if(!empty($fee)){
-                $arr[$counter]['fee'] = $fee['fee'];
-              }
-            else {
-                $arr[$counter]['fee'] = 'Unavailable';
-                 }
-            $arr[$counter]['id'] = $value['id'];
-            $arr[$counter]['firstname'] = $value['firstname'];
-            $arr[$counter]['lastname'] = $value['lastname'];
-            $arr[$counter]['profile_image'] = $value['profile_image'];
-            $arr[$counter]['profile_description'] = $value['profile_description'];
-            $rank = Rating::where('user_id', '=', $value['id'])->first();
-            if(!empty($rank)){
-                $arr[$counter]['rank'] = $rank['score'];
-              }
-            else {
-                $arr[$counter]['rank'] = 0;
-              }
-            $counter++;
+            if($value['id'] !== Session::get('id')){
+                if($value['roleID'] == '2'){
+                    $group = Group::find($value['id']);
+                    if(stripos(strtolower($group['groupname']), strtolower($keyword)) !== false){
+                    $fee = Talent::where('id', '=', $value['id'])->where('fee', '<=', $data['fee'])->first();
+                    // dd($fee);
+                    if(!empty($fee)){
+                        $arr[$counter]['fee'] = $fee['fee'];
+                      }
+                    else {
+                        $arr[$counter]['fee'] = 'Unavailable';
+                         }
+                    $arr[$counter]['id'] = $value['id'];
+                    $arr[$counter]['groupname'] = $group['groupname'];
+                    $arr[$counter]['profile_image'] = $value['profile_image'];
+                    $arr[$counter]['profile_description'] = $value['profile_description'];
+                    $rank = Rating::where('user_id', '=', $value['id'])->first();
+                    if(!empty($rank)){
+                        $arr[$counter]['rank'] = $rank['score'];
+                      }
+                    else {
+                        $arr[$counter]['rank'] = 0;
+                      }
+                    $counter++;
+                    }
+                }
+                else {
+                    if(stripos(strtolower($value['firstname']), strtolower($keyword)) !== false || stripos(strtolower($value['lastname']), strtolower($keyword)) !== false){
+                    $fee = Talent::where('id', '=', $value['id'])
+                                ->where('fee', '<=', $data['fee'])
+                                ->first();
+                    if(!empty($fee)){
+                        $arr[$counter]['fee'] = $fee['fee'];
+                      }
+                    else {
+                        $arr[$counter]['fee'] = 'Unavailable';
+                         }
+                    $td = TalentDetail::where('talent_id', '=', $fee['id'])
+                                     ->where('category', '=', $data['category'])
+                                     ->get();
+                    if(count($td) !== 0){
+                        $arr[$counter]['id'] = $value['id'];
+                        $arr[$counter]['firstname'] = $value['firstname'];
+                        $arr[$counter]['lastname'] = $value['lastname'];
+                        $arr[$counter]['profile_image'] = $value['profile_image'];
+                        $arr[$counter]['profile_description'] = $value['profile_description'];
+                        $rank = Rating::where('user_id', '=', $value['id'])->first();
+                        if(!empty($rank)){
+                            $arr[$counter]['rank'] = $rank['score'];
+                          }
+                        else {
+                            $arr[$counter]['rank'] = 0;
+                          }
+                        $counter++;
+                    }
+                    
+                    }
+                }
             }
           }
         }
         elseif(!empty($data['search']) && !empty($data['fee'])) {
             foreach ($searchUser as $key => $value) {
-            if(stripos(strtolower($value['firstname']), strtolower($keyword)) !== false || stripos(strtolower($value['lastname']), strtolower($keyword)) !== false){
-            $fee = Talent::where('id', '=', $value['id'])->where('fee', '<=', $data['fee'])->first();
-            if(!empty($fee)){
-                $arr[$counter]['fee'] = $fee['fee'];
-            }
-            else {
-                $arr[$counter]['fee'] = 'Unavailable';
-            }
-            $arr[$counter]['id'] = $value['id'];
-            $arr[$counter]['firstname'] = $value['firstname'];
-            $arr[$counter]['lastname'] = $value['lastname'];
-            $arr[$counter]['profile_image'] = $value['profile_image'];
-            $arr[$counter]['profile_description'] = $value['profile_description'];
-            $rank = Rating::where('user_id', '=', $value['id'])->first();
-            if(!empty($rank)){
-                $arr[$counter]['rank'] = $rank['score'];
-            }
-            else {
-                $arr[$counter]['rank'] = 0;
-            }
-            $counter++;
-            }
+                 if($value['id'] !== Session::get('id')){
+                    if($value['roleID'] == '2'){
+                        $group = Group::find($value['id']);
+                        if(stripos(strtolower($group['groupname']), strtolower($keyword)) !== false){
+                        $fee = Talent::where('id', '=', $value['id'])->where('fee', '<=', $data['fee'])->first();
+                        if(!empty($fee)){
+                            $arr[$counter]['fee'] = $fee['fee'];
+                        }
+                        else {
+                            $arr[$counter]['fee'] = 'Unavailable';
+                        }
+                        $arr[$counter]['id'] = $value['id'];
+                        $arr[$counter]['groupname'] = $group['groupname'];
+                        $arr[$counter]['profile_image'] = $value['profile_image'];
+                        $arr[$counter]['profile_description'] = $value['profile_description'];
+                        $rank = Rating::where('user_id', '=', $value['id'])->first();
+                        if(!empty($rank)){
+                            $arr[$counter]['rank'] = $rank['score'];
+                        }
+                        else {
+                            $arr[$counter]['rank'] = 0;
+                        }
+                        $counter++;
+                        }
+                    }
+                    else {
+                        if(stripos(strtolower($value['firstname']), strtolower($keyword)) !== false || stripos(strtolower($value['lastname']), strtolower($keyword)) !== false){
+                        $fee = Talent::where('id', '=', $value['id'])->where('fee', '<=', $data['fee'])->first();
+                        if(!empty($fee)){
+                            $arr[$counter]['fee'] = $fee['fee'];
+                        }
+                        else {
+                            $arr[$counter]['fee'] = 'Unavailable';
+                        }
+                        $arr[$counter]['id'] = $value['id'];
+                        $arr[$counter]['firstname'] = $value['firstname'];
+                        $arr[$counter]['lastname'] = $value['lastname'];
+                        $arr[$counter]['profile_image'] = $value['profile_image'];
+                        $arr[$counter]['profile_description'] = $value['profile_description'];
+                        $rank = Rating::where('user_id', '=', $value['id'])->first();
+                        if(!empty($rank)){
+                            $arr[$counter]['rank'] = $rank['score'];
+                        }
+                        else {
+                            $arr[$counter]['rank'] = 0;
+                        }
+                        $counter++;
+                        }
+                    }
+                }
           }
         }
         elseif (!empty($data['search'])) {
         foreach ($searchUser as $key => $value) {
-            if(stripos(strtolower($value['firstname']), strtolower($keyword)) !== false || stripos(strtolower($value['lastname']), strtolower($keyword)) !== false){
-            $arr[$counter]['id'] = $value['id'];
-            $arr[$counter]['firstname'] = $value['firstname'];
-            $arr[$counter]['lastname'] = $value['lastname'];
-            $arr[$counter]['profile_image'] = $value['profile_image'];
-            $arr[$counter]['profile_description'] = $value['profile_description'];
-            $rank = Rating::where('user_id', '=', $value['id'])->first();
-            if(!empty($rank)){
-                $arr[$counter]['rank'] = $rank['score'];
-            }
-            else {
-                $arr[$counter]['rank'] = 0;
-            }
-            $counter++;
+            if($value['id'] !== Session::get('id')){
+                if($value['roleID'] == '2'){
+                    $group = Group::find($value['id']);
+                    if(stripos(strtolower($group['groupname']), strtolower($keyword)) !== false){
+                    $arr[$counter]['id'] = $value['id'];
+                    $arr[$counter]['groupname'] = $group['groupname'];
+                    $arr[$counter]['profile_image'] = $value['profile_image'];
+                    $arr[$counter]['profile_description'] = $value['profile_description'];
+                    $rank = Rating::where('user_id', '=', $value['id'])->first();
+                    if(!empty($rank)){
+                        $arr[$counter]['rank'] = $rank['score'];
+                    }
+                    else {
+                        $arr[$counter]['rank'] = 0;
+                    }
+                    $counter++;
+                    // dd($arr[0]['groupname']);
+                    }
+                }
+                else {
+                    if(stripos(strtolower($value['firstname']), strtolower($keyword)) !== false || stripos(strtolower($value['lastname']), strtolower($keyword)) !== false){
+                    $arr[$counter]['id'] = $value['id'];
+                    $arr[$counter]['firstname'] = $value['firstname'];
+                    $arr[$counter]['lastname'] = $value['lastname'];
+                    $arr[$counter]['profile_image'] = $value['profile_image'];
+                    $arr[$counter]['profile_description'] = $value['profile_description'];
+                    $rank = Rating::where('user_id', '=', $value['id'])->first();
+                    if(!empty($rank)){
+                        $arr[$counter]['rank'] = $rank['score'];
+                    }
+                    else {
+                        $arr[$counter]['rank'] = 0;
+                    }
+                    $counter++;
+                    }
+                }
             }
           }
         }
@@ -1010,6 +1332,48 @@ if ($validator->fails()) {
             $counter++;
           }
         }
+        elseif($data['category'] !== 'Select Category'){
+            foreach ($searchUser as $key => $value) {
+            $fee = TalentDetail::where('talent_id', '=', $value['id'])
+                         ->where('category', '=', $data['category'])
+                         ->get();
+            if(count($fee) !== 0){
+                if($value['roleID'] == 2){
+                    $gro = Group::find($value['id']);
+                    $arr[$counter]['id'] = $value['id'];
+                    $arr[$counter]['firstname'] = $gro['groupname'];
+                    $arr[$counter]['lastname'] = '';
+                    $arr[$counter]['profile_image'] = $value['profile_image'];
+                    $arr[$counter]['profile_description'] = $value['profile_description'];
+                    $rank = Rating::where('user_id', '=', $value['id'])->first();
+                    if(!empty($rank)){
+                        $arr[$counter]['rank'] = $rank['score'];
+                    }
+                    else {
+                        $arr[$counter]['rank'] = 0;
+                    }
+                    $counter++;
+                }
+                else {
+                    $arr[$counter]['id'] = $value['id'];
+                    $arr[$counter]['firstname'] = $value['firstname'];
+                    $arr[$counter]['lastname'] = $value['lastname'];
+                    $arr[$counter]['profile_image'] = $value['profile_image'];
+                    $arr[$counter]['profile_description'] = $value['profile_description'];
+                    $rank = Rating::where('user_id', '=', $value['id'])->first();
+                    if(!empty($rank)){
+                        $arr[$counter]['rank'] = $rank['score'];
+                    }
+                    else {
+                        $arr[$counter]['rank'] = 0;
+                    }
+                    $counter++;
+                }
+            }
+            
+          }
+        }
+        // dd($arr);
         arsort($arr);
         // dd($arr);
         return view('scout.searchtalent')
@@ -1020,8 +1384,10 @@ if ($validator->fails()) {
     public function searchScout(){
         $data = Request::except('_token');
         $keyword = strtolower($data['search']);
-
-        $searchUser = User::all();
+        $searchUser = User::where('roleID', '=', '1')
+                          ->orWhere('roleID', '=', '2')
+                          ->orWhere('roleID','=','0')->get();
+        $searchPost = Post::all();
         $arr = array();
         $counter = 0;
         $unreadNotifications = Notification::where('user_id', '=', Session::get('id'))
@@ -1035,101 +1401,152 @@ if ($validator->fails()) {
         // if(!empty($data['search']) && $data['category'] !== null && $data['category'] === 'post'){
             
         // }
-
-        if(!empty($data['search']) && !empty($data['category'])) {
+        if(!empty($data['search']) && $data['category'] !== 'Select Category') {
             foreach ($searchUser as $key => $value) {
-            if(stripos(strtolower($value['firstname']), strtolower($keyword)) !== false || stripos(strtolower($value['lastname']), strtolower($keyword)) !== false){
-            $arr[$counter]['id'] = $value['id'];
-            $arr[$counter]['firstname'] = $value['firstname'];
-            $arr[$counter]['lastname'] = $value['lastname'];
-            $arr[$counter]['profile_image'] = $value['profile_image'];
-            $arr[$counter]['profile_description'] = $value['profile_description'];
-            $rank = Rating::where('user_id', '=', $value['id'])->first();
-            if(!empty($rank)){
-                $arr[$counter]['rank'] = $rank['score'];
-              }
-            else {
-                $arr[$counter]['rank'] = 0;
-              }
-            $counter++;
+                if($value['id'] !== Session::get('id')){
+                if($value['roleID'] == '2'){
+                    $group = Group::find($value['id']);
+                    if(stripos(strtolower($group['groupname']), strtolower($keyword)) !== false){
+                    $td = TalentDetail::where('talent_id', '=', $group['id'])
+                                      ->where('category', '=', $data['category'])
+                                      ->get();
+                    if(count($td) !== 0){
+                         $arr[$counter]['id'] = $value['id'];
+                        $arr[$counter]['groupname'] = $group['groupname'];
+                        $arr[$counter]['profile_image'] = $value['profile_image'];
+                        $arr[$counter]['profile_description'] = $value['profile_description'];
+                        $rank = Rating::where('user_id', '=', $value['id'])->first();
+                        if(!empty($rank)){
+                            $arr[$counter]['rank'] = $rank['score'];
+                          }
+                        else {
+                            $arr[$counter]['rank'] = 0;
+                          }
+                        $counter++;
+                        }
+                    }
+                   
+                }
+                else {
+                    if(stripos(strtolower($value['firstname']), strtolower($keyword)) !== false || stripos(strtolower($value['lastname']), strtolower($keyword)) !== false){
+                    $td = TalentDetail::where('talent_id', '=', $value['id'])
+                                      ->where('category', '=', $data['category'])
+                                      ->get();
+                    if(count($td) !== 0){
+                         $arr[$counter]['id'] = $value['id'];
+                        $arr[$counter]['groupname'] = $group['groupname'];
+                        $arr[$counter]['profile_image'] = $value['profile_image'];
+                        $arr[$counter]['profile_description'] = $value['profile_description'];
+                        $rank = Rating::where('user_id', '=', $value['id'])->first();
+                        if(!empty($rank)){
+                            $arr[$counter]['rank'] = $rank['score'];
+                          }
+                        else {
+                            $arr[$counter]['rank'] = 0;
+                          }
+                        $counter++;
+                        }
+                    }
             }
           }
         }
-        elseif(!empty($data['search']) && !empty($data['fee'])) {
-            foreach ($searchUser as $key => $value) {
-            if(stripos(strtolower($value['firstname']), strtolower($keyword)) !== false || stripos(strtolower($value['lastname']), strtolower($keyword)) !== false){
-            $fee = Talent::where('id', '=', $value['id'])->where('fee', '<=', $data['fee'])->first();
-            if(!empty($fee)){
-                $arr[$counter]['fee'] = $fee['fee'];
-            }
-            else {
-                $arr[$counter]['fee'] = 'Unavailable';
-            }
-            $arr[$counter]['id'] = $value['id'];
-            $arr[$counter]['firstname'] = $value['firstname'];
-            $arr[$counter]['lastname'] = $value['lastname'];
-            $arr[$counter]['profile_image'] = $value['profile_image'];
-            $arr[$counter]['profile_description'] = $value['profile_description'];
-            $rank = Rating::where('user_id', '=', $value['id'])->first();
-            if(!empty($rank)){
-                $arr[$counter]['rank'] = $rank['score'];
-            }
-            else {
-                $arr[$counter]['rank'] = 0;
-            }
-            $counter++;
-            }
-          }
-        }
+    }
+        // elseif(!empty($data['search']) && !empty($data['category'])) {
+        //     foreach ($searchUser as $key => $value) {
+        //     if(stripos(strtolower($value['firstname']), strtolower($keyword)) !== false || stripos(strtolower($value['lastname']), strtolower($keyword)) !== false){
+        //     $fee = Talent::where('id', '=', $value['id'])->where('fee', '<=', $data['fee'])->first();
+        //     if(!empty($fee)){
+        //         $arr[$counter]['fee'] = $fee['fee'];
+        //     }
+        //     else {
+        //         $arr[$counter]['fee'] = 'Unavailable';
+        //     }
+        //     $arr[$counter]['id'] = $value['id'];
+        //     $arr[$counter]['firstname'] = $value['firstname'];
+        //     $arr[$counter]['lastname'] = $value['lastname'];
+        //     $arr[$counter]['profile_image'] = $value['profile_image'];
+        //     $arr[$counter]['profile_description'] = $value['profile_description'];
+        //     $rank = Rating::where('user_id', '=', $value['id'])->first();
+        //     if(!empty($rank)){
+        //         $arr[$counter]['rank'] = $rank['score'];
+        //     }
+        //     else {
+        //         $arr[$counter]['rank'] = 0;
+        //     }
+        //     $counter++;
+        //     }
+        //   }
+        // }
         elseif (!empty($data['search'])) {
         foreach ($searchUser as $key => $value) {
-            if(stripos(strtolower($value['firstname']), strtolower($keyword)) !== false || stripos(strtolower($value['lastname']), strtolower($keyword)) !== false){
-            $arr[$counter]['id'] = $value['id'];
-            $arr[$counter]['firstname'] = $value['firstname'];
-            $arr[$counter]['lastname'] = $value['lastname'];
-            $arr[$counter]['profile_image'] = $value['profile_image'];
-            $arr[$counter]['profile_description'] = $value['profile_description'];
-            $rank = Rating::where('user_id', '=', $value['id'])->first();
-            if(!empty($rank)){
-                $arr[$counter]['rank'] = $rank['score'];
-            }
-            else {
-                $arr[$counter]['rank'] = 0;
-            }
-            $counter++;
+            if($value['id'] !== Session::get('id')){
+                if($value['roleID'] == '2'){
+                    $group = Group::find($value['id']);
+                    if(stripos(strtolower($group['groupname']), strtolower($keyword)) !== false){
+                    $arr[$counter]['id'] = $value['id'];
+                    $arr[$counter]['groupname'] = $group['groupname'];
+                    $arr[$counter]['profile_image'] = $value['profile_image'];
+                    $arr[$counter]['profile_description'] = $value['profile_description'];
+                    $rank = Rating::where('user_id', '=', $value['id'])->first();
+                    if(!empty($rank)){
+                        $arr[$counter]['rank'] = $rank['score'];
+                    }
+                    else {
+                        $arr[$counter]['rank'] = 0;
+                    }
+                    $counter++;
+                    }
+                }
+                else {
+                    if(stripos(strtolower($value['firstname']), strtolower($keyword)) !== false || stripos(strtolower($value['lastname']), strtolower($keyword)) !== false){
+                    $arr[$counter]['id'] = $value['id'];
+                    $arr[$counter]['firstname'] = $value['firstname'];
+                    $arr[$counter]['lastname'] = $value['lastname'];
+                    $arr[$counter]['profile_image'] = $value['profile_image'];
+                    $arr[$counter]['profile_description'] = $value['profile_description'];
+                    $rank = Rating::where('user_id', '=', $value['id'])->first();
+                    if(!empty($rank)){
+                        $arr[$counter]['rank'] = $rank['score'];
+                    }
+                    else {
+                        $arr[$counter]['rank'] = 0;
+                    }
+                    $counter++;
+                    }
+                }
             }
           }
         }
-        elseif(empty($data['search']) && !empty($data['fee'])) {
-            foreach ($searchUser as $key => $value) {
-            $fee = Talent::where('id', '=', $value['id'])
-                         ->where('fee', '<=', $data['fee'])->first();
-            if(!empty($fee)){
-                $arr[$counter]['fee'] = $fee['fee'];
-                $arr[$counter]['id'] = $value['id'];
-                $arr[$counter]['firstname'] = $value['firstname'];
-                $arr[$counter]['lastname'] = $value['lastname'];
-                $arr[$counter]['profile_image'] = $value['profile_image'];
-                $arr[$counter]['profile_description'] = $value['profile_description'];
-            }
-            else {
-                $arr[$counter]['fee'] = 'Unavailable';
-                $arr[$counter]['id'] = $value['id'];
-                $arr[$counter]['firstname'] = $value['firstname'];
-                $arr[$counter]['lastname'] = $value['lastname'];
-                $arr[$counter]['profile_image'] = $value['profile_image'];
-                $arr[$counter]['profile_description'] = $value['profile_description'];
-            }
-            $rank = Rating::where('user_id', '=', $value['id'])->first();
-            if(!empty($rank)){
-                $arr[$counter]['rank'] = $rank['score'];
-            }
-            else {
-                $arr[$counter]['rank'] = 0;
-            }
-            $counter++;
-          }
-        }
+        // elseif(empty($data['search']) && !empty($data['category'])) {
+        //     foreach ($searchUser as $key => $value) {
+        //     $fee = Talent::where('id', '=', $value['id'])
+        //                  ->where('fee', '<=', $data['fee'])->first();
+        //     if(!empty($fee)){
+        //         $arr[$counter]['fee'] = $fee['fee'];
+        //         $arr[$counter]['id'] = $value['id'];
+        //         $arr[$counter]['firstname'] = $value['firstname'];
+        //         $arr[$counter]['lastname'] = $value['lastname'];
+        //         $arr[$counter]['profile_image'] = $value['profile_image'];
+        //         $arr[$counter]['profile_description'] = $value['profile_description'];
+        //     }
+        //     else {
+        //         $arr[$counter]['fee'] = 'Unavailable';
+        //         $arr[$counter]['id'] = $value['id'];
+        //         $arr[$counter]['firstname'] = $value['firstname'];
+        //         $arr[$counter]['lastname'] = $value['lastname'];
+        //         $arr[$counter]['profile_image'] = $value['profile_image'];
+        //         $arr[$counter]['profile_description'] = $value['profile_description'];
+        //     }
+        //     $rank = Rating::where('user_id', '=', $value['id'])->first();
+        //     if(!empty($rank)){
+        //         $arr[$counter]['rank'] = $rank['score'];
+        //     }
+        //     else {
+        //         $arr[$counter]['rank'] = 0;
+        //     }
+        //     $counter++;
+        //   }
+        // }
         arsort($arr);
         // dd($arr);
         return view('talent.searchscout')
@@ -1184,6 +1601,45 @@ if ($validator->fails()) {
             $results[] = [ 'id' => '', 'value' => 'No Result Found' ];
             return Response::json($results);
     }
+    public function revealTalent(){
+        $data = Request::all();
+        $results = array();
+        $entertainment = array('Clown', 'Magician', 'Trickster');
+        $singing = array('Legit', 'Traditional Musical Theatre', 'Contemporary Musical Theatre', 'Modern Pop', 'Pop/Rock');
+        $dancing = array('Ballet','Belly Dance','Break dance','Hip-hop','Line Dance', 'RnB', 'Salsa', 'Samba', 'Sarabande','Tap Dance','Traditional Dancing','Yongko Dance');
+        if($data['tal_cal'] == "Select Category"){
+            $results[0] = ['value' => 'Select talent'];
+        }
+        else {
+            if($data['tal_cal'] == 'Dancing'){
+                for ($i=0; $i < count($dancing); $i++) { 
+                $results[$i] = ['value' => $dancing[$i]];
+                }
+            }
+            elseif($data['tal_cal'] == 'Singing'){
+                for ($i=0; $i < count($singing); $i++) { 
+                $results[$i] = ['value' => $singing[$i]];
+                }
+            }
+            elseif($data['tal_cal'] == 'Entertainment'){
+                    for ($i=0; $i < count($entertainment); $i++) { 
+                    $results[$i] = ['value' => $entertainment[$i]];
+                    }
+            }
+            
+        }
+        return Response::json($results);
+    }
+    public function revealCategory(){
+        $data = Request::all();
+        $results = array();
+        $cat = array('Select Category','Singing', 'Dancing', 'Entertainment');
+
+        for ($i=0; $i < count($cat); $i++) { 
+            $results[$i] = ['value' => $cat[$i]];
+        }
+        return Response::json($results);
+    }
     public function searchUserFeaturedProfile() {
         $term = Request::get('q');
         
@@ -1204,22 +1660,64 @@ if ($validator->fails()) {
             $results[] = [ 'id' => '', 'value' => 'No Result Found' ];
             return Response::json($results);
     }
+    public function addNACCmember($name){
+        $fullname = str_replace('_', ' ', $name);
+        $mem = new Groupmember;
+        $mem->id = null;
+        $mem->group_id = Session::get('id');
+        $mem->member = $fullname;
+        $mem->save();
+        Session::flash('message', 'Member added successfully!');
+        return Redirect::back();
+    }
     public function showPortfolio($id){
+        $user = User::find($id);
         //retrieve portfolio in db
-
+        $portfolio = Portfolio::where('user_id','=', $id)->get();
+        foreach ($portfolio as $key => $value) {
+            $value['file'] = json_decode($value['file']);
+        }
+        // dd($portfolio);
         //retrieve past experience in post table (if hired)
+        $posts = Post::all();
+        $hiredposts = array();
+        $counter = 0;
+        foreach ($posts as $key => $value) {
+            $hireid = json_decode($value['hire_id']);
+            if($hireid !== null){
+
+                if(array_search($id, $hireid) !== false){
+                    $findRating = Rating::where('post_id', '=', $value['id'])->first();
+                    if($findRating !== null){
+
+                    $checkpost = $findRating->post()
+                                ->join('post', 'post.id', '=', 'rating.post_id')
+                                ->get(['post.*']); // exclude extra details from friends table
+                    }
+                    $average_score = ceil($findRating['attitude'] + $findRating['performance'] + $findRating['punctuality'])/3;
+                    // dd(json_decode($value['file']));
+                    $hiredposts[$counter]['id'] = $value['id'];
+                    $hiredposts[$counter]['event_name'] = $value['title'];
+                    $hiredposts[$counter]['description'] = $value['description'];
+                    $hiredposts[$counter]['file'] = $value['file'];
+                    $hiredposts[$counter]['event_date'] = $value['start_date'];
+                    $hiredposts[$counter]['score'] = (int)$average_score;
+                    $hiredposts[$counter]['comment'] = $findRating['comment'];
+                    $counter++;
+                }
+            }
+        }
 
         
-
-
-        $user = User::find($id);
         return view('portfolio')
-               ->with('user', $user);
+               ->with('user', $user)
+               ->with('hiredposts', $hiredposts)
+               ->with('portfolio', $portfolio);
     }
     public function addPortfolio(){
         $data = Request::all();
         $rules = array(
-            'files' => 'max:200000|mimes:jpg,jpeg,png,bmp,mp4,ogg,mkv,avi',
+            // 'files' => 'max:200000|mimes:jpg,jpeg,png,bmp,mp4,ogg,mkv,avi',
         );
         
 
@@ -1231,7 +1729,28 @@ if ($validator->fails()) {
         $validation = Validator::make($data, $rules, $message);
 
         if($validation->passes()){
-
+            $detail = new Portfolio;
+            $detail->id = null;
+            $detail->user_id = Session::get('id');
+            $detail->talent = $data['talent'];
+            $detail->category = $data['category'];
+            $detail->event_date = date("Y-m-d", strtotime($data['event_date']));
+            $detail->description = $data['description'];
+            $temparr = array();
+            if( Request::hasFile('files') ) {
+                        $destinationPath = public_path().'/files/';
+                        // $file = Request::file('file');
+                        for ($i=0; $i < count($data['files']); $i++) { 
+                        $filename = str_random(10).".".$data['files'][$i]->getClientOriginalExtension();
+                        $data['files'][$i]->move($destinationPath, $filename);
+                        array_push($temparr, $filename);
+                        }
+                        $detail->file = json_encode($temparr);
+                        // dd($detail->file);
+                    }
+            $detail->save();
+            Session::flash('message', 'Added portfolio!');
+            return Redirect::back();
         }
         else
         {
@@ -1272,6 +1791,14 @@ if ($validator->fails()) {
         $user->save();
         Session::flash('message', 'Member removed!');
         return Redirect::back();
+    }
+    public function removeNACCmember($id){
+        $mem = Groupmember::find($id);
+        if($mem !== null){
+            $mem->delete();
+             Session::flash('message', 'Member removed!');
+             return Redirect::back();
+        }
     }
     public function leaveGroup($id){
         $user = User::find($id);
@@ -1358,8 +1885,9 @@ if ($validator->fails()) {
     $profilearray = array();
     $i = 0;
     foreach ($profile as $key => $value) {
+        // dd($value);
         $userdetail = User::find($value['profile_id']);
-        $profilearray[$i]['id'] = $value['profile_id'];
+        $profilearray[$i]['id'] = $value['id'];
         $profilearray[$i]['profile_image'] = $userdetail['profile_image'];
         $profilearray[$i]['firstname'] = $userdetail['firstname'];
         $profilearray[$i]['lastname'] = $userdetail['lastname'];
@@ -1371,9 +1899,11 @@ if ($validator->fails()) {
     // dd($feedbacks);
     $payments = Paypalpayment::where('state', '=', 'pending')->get();
     // dd($payments);
+    $subscription = Subscription::all();
     return view('admin.adminpanel')
             ->with('profile',$profile)
             ->with('feedbacks', $feedbacks)
+            ->with('subscription', $subscription)
             ->with('payments', $payments)
             ->with('profilearray',$profilearray);
     }
@@ -1399,12 +1929,11 @@ if ($validator->fails()) {
     }
     public function addFeaturedProfile(){
         $data = Request::all();
-        // dd($data['invisible']);
+        // dd($data);
         $start_date = Carbon::parse($data['start_date']);
-        $end_date = Carbon::parse($data['end_date']);
+        $end_date = $start_date->addWeeks($data['duration']);
         $checkstartdate = Carbon::now()->gt($start_date);
-        $checkendate = $end_date->lt($start_date);
-        if($checkstartdate || $checkendate){
+        if($checkstartdate){
             return Redirect::back()->withInput()->withErrors('Error input!');
         }
         else {
@@ -1415,11 +1944,60 @@ if ($validator->fails()) {
             $details->image = null;
             $details->profile_id = $data['invisible'];
             $details->start_date = $data['start_date'];
-            $details->end_date = $data['end_date'];
+            $details->end_date = $end_date;
             $details->save();
             Session::flash('message', 'Successfully added!');
             return Redirect::back();
         }
+    }
+    public function showPaymentprocess(){
+        $subscription = Subscription::all();
+        return view('payment')
+               ->with('subscription', $subscription);
+    }
+    public function addSubscription(){
+        $data = Request::all();
+        $sub = new Subscription;
+        $sub->id = null;
+        $sub->price = $data['price'];
+        $sub->description = $data['description'];
+        if( Request::hasFile('file') ) {
+                        $destinationPath = public_path().'/images/';
+                        $file = $data['file'];
+                        $filename = str_random(10).".".$file->getClientOriginalExtension();
+                        $file->move($destinationPath, $filename);
+                        $sub->file = $filename;
+                    }
+        $sub->save();
+        Session::flash('message','Successfully added!');
+        return Redirect::back();
+    }
+    public function editSubscription(){
+        $data = Request::all();
+        $sub = Subscription::find($data['hiddenid']);
+        if($sub !== null){
+            $sub->price = $data['price'];
+            $sub->description = $data['description'];
+            if( Request::hasFile('file') ) {
+                        $destinationPath = public_path().'/images/';
+                        $file = $data['file'];
+                        $filename = str_random(10).".".$file->getClientOriginalExtension();
+                        $file->move($destinationPath, $filename);
+                        $sub->file = $filename;
+                    }
+            $sub->save();
+            Session::flash('message','Successfully edited!');
+            return Redirect::back();
+        }
+        Session::flash('message','Something went wrong!');
+        return Redirect::back();
+    }
+    public function deleteSubscription($id){
+        $sub = Subscription::find($id);
+        \File::Delete(public_path().'/images/'.$sub['file']);
+        $sub->delete();
+        Session::flash('message','Successfully deleted!');
+        return Redirect::back();
     }
     public function addFeaturedFeedback(){
         $detail = new Featured;
@@ -1441,7 +2019,7 @@ if ($validator->fails()) {
         return Redirect::back();
     }
     public function removeFeaturedProfile($id){
-        Featured::where('profile_id','=', $id)->delete();
+        Featured::find($id)->delete();
          Session::flash('message', 'Successfully deleted!');
          return Redirect::back();
     }
@@ -1531,17 +2109,17 @@ if ($validator->fails()) {
         $notification = new Notification;
                 $notification->id = null;
                 $getUserID = User::find($id);
-                dd($getUserID);
+                // dd($getUserID);
                 $notification->user_id = $id;
                 $notification->subject = 'comment';
-                $notification->body = Session::get('username').' has commented on your post.';
-                $notification->object_id = Session::get('post_id');
+                $notification->body = Session::get('username').' has endorse you!';
+                $notification->object_id = null;
                 $notification->is_read = 0;
                 $notification->sent_at = new Carbon();
                 $notification->save();
 
         Session::flash('message', 'Successfully endorse!');
-        return Redirect::back();
+        return Redirect::to('/home');
     }
     public function rateScout($scout_id, $post_id){
         $data = Request::except('_token');
@@ -1649,9 +2227,9 @@ if ($validator->fails()) {
                     }
                     $tal->save();
                 }
-                // $deleteinvitation = Invitation::where('post_id', '=', $post_id)
-                //                                 ->where('talent_id', '=', Session::get('id'))->first();
-                
+                Invitation::where('post_id', '=', $post_id)
+                                                ->where('talent_id', '=', Session::get('id'))->delete();
+                Session::flash('message', 'Successfully Rated Scout!');
                 return Redirect::back();
     }
 }

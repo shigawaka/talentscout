@@ -53,7 +53,7 @@
         <!-- /.container-fluid -->
     </nav>
 
-    <div class="carouselcontainer">
+    <div class="carouselcontainer" style="background-color:#2c3e50;">
        
 
                 <!--  START OF carousel -->
@@ -66,7 +66,11 @@
   <ol class="carousel-indicators">
     <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
     <li data-target="#myCarousel" data-slide-to="1"></li>
-    
+    @if(count($testimonialarr) !== 0)
+        @for($i = 1; $i <= count($testimonialarr); $i++)
+        <li data-target="#myCarousel" data-slide-to="{!! $i !!}"></li>
+        @endfor
+    @endif()
   </ol>
 
   <!-- Wrapper for slides -->
@@ -78,8 +82,19 @@
     <div class="item">
       <img src="img/carousel_2.jpg" alt="Chania">
     </div>
-
-   
+    @if(!empty($testimonialarr))
+        @foreach($testimonialarr as $key => $value)
+        <div class="item">
+            <div class="col-md-3 text-center">
+          <img style="max-width:65%;" src="{{ URL::to('/files').'/'.$value['picture'] }}" alt="Chania">
+            </div>
+          <blockquote class="blockquote" style="padding-top:105px;">
+          <p class="mb-0" style="color:white;">{{ $value['comment'] }}</p>
+          <footer class="blockquote-footer">Talent Scout User <cite title="Source Title">{{ ucfirst($value['firstname']) }} {{ ucfirst($value['lastname']) }}.</cite><br /><cite>Rated Talent Scout {{ $value['score'] }}/5</cite></footer>
+        </blockquote>
+        </div>
+        @endforeach
+    @endif
   </div>
 
   <!-- Left and right controls -->
@@ -98,7 +113,31 @@
 
 
     </div>
-
+    <div class="page-header">
+        <h1 style="text-align:center;">
+          Featured Profiles<br />
+        </h1>
+      </div>
+      <div class="row">
+      @foreach($profilearray as $value)
+        <div class="col-md-4 text-center">
+          <div class="thumbnail" style="border:none;">
+            <img class="img-circle"style="height:150px; width:150px;"  alt="Bootstrap Thumbnail First" src="{!! URL::to('/files').'/'.$value['profile_image'] !!}" />
+            <div class="caption">
+              <h3>
+                {!! ucfirst($value['firstname']).' '.ucfirst($value['lastname']) !!}
+              </h3>
+              <p>
+              {!! $value['profile_description'] !!}
+              </p>
+              <p>
+                <!-- <a class="btn btn-primary" href="{{ URL::to('/profile').'/'.$value['id'] }}">View</a> -->
+              </p>
+            </div>
+          </div>
+        </div>
+      @endforeach
+      </div>
     <section class="bg-primary" id="about">
         <div class="container">
             <div class="row">

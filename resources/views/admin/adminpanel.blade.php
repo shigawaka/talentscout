@@ -146,11 +146,15 @@
                 {!! Form::text('start_date', '', array('id' => 'datepicker','class' => 'form-control', 'placeholder' => 'Event starting', 'required'=>'required')) !!}                        
                 </div>
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
-                    Add End Date     
+                    Select Duration    
                 </h3>
                 <div class="col-xs-12">
-               {!! Form::text('end_date', '', array('id' => 'datepicker2','class' => 'form-control', 'placeholder' => 'Event ending', 'required'=>'required')) !!}                        
-                                                  
+               <!-- {!! Form::text('end_date', '', array('id' => 'datepicker2','class' => 'form-control', 'placeholder' => 'Event ending', 'required'=>'required')) !!}                         -->
+                 <select name="duration">
+                      <option value="1">1 Week</option>
+                      <option value="2">2 Weeks</option>
+                      <option value="3">3 Weeks</option>
+                  </select>   
                 </div>
 
                                                   @foreach($errors->all() as $message)
@@ -158,7 +162,7 @@
                                                     </div></div>
                                                     @endforeach
                 <div class="modal-footer">
-                {!! Form::submit('Save Changes', array('class' => 'btn btn-info')) !!}  
+                {!! Form::submit('Add Profile!', array('class' => 'btn btn-info')) !!}  
                 {!! Form::close(); !!}          
                  <!--  <button type="button" class="btn btn-primary">
                     Save changes
@@ -191,7 +195,11 @@
                 End date: </br>{{ Carbon\Carbon::parse($value['end_date'])->format('F d,Y H:i A') }}
               </h5>
               <h5>
+              @if(Carbon\Carbon::parse($value['end_date'])->gt(Carbon\Carbon::now()))
                 Remaining: {{ Carbon\Carbon::parse($value['end_date'])->diffForHumans(null, true) }} left
+              @else
+                Remaining: {{ Carbon\Carbon::parse($value['end_date'])->diffForHumans(null, true) }} EXPIRED!
+              @endif
               </h5>
             </div>
           </div>
@@ -227,6 +235,136 @@
             <hr style="max-width:inherit;border-width:10px;border-color:#DCC6E0;" />
           </div>
         <!-- end payment list -->
+        <!-- subscription list -->
+        <div class="col-md-12">
+        <hr style="max-width:inherit;border-width:10px;border-color:#DCC6E0;" />
+          <h1>Subscription <a id="modal-403917" href="#modal-container-403919" role="button" class="btn btn-success btn-lg" data-toggle="modal">Add Subscription</a></h1>
+        <!-- begin modal for adding subscription -->
+          <div class="modal fade" id="modal-container-403919" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    ×
+                  </button>
+                  {!! Form::open(['url'=>'/addSubscription', 'files' => true]) !!}
+                  <h1 class="modal-title" id="myModalLabel">
+                    Add Subscription Option
+                  </h1>
+                </div>
+                <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
+                    Add Price     
+                </h3>
+                <div class="col-xs-12">
+                {!! Form::number('price', '', array('step' => 'any','placeholder' => 'Enter Price', 'class' => 'form-group')) !!} 
+                </div>
+                <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
+                    Add Description     
+                </h3>
+                <div class="col-xs-12">
+                {!! Form::textarea('description', '', array('style' => 'min-width:100%;resize:none;','class' => 'form-group','placeholder' => 'Description of the new subscription!')) !!}                        
+                </div>
+                <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
+                    Select File    
+                </h3>
+                <div class="col-xs-12">
+                    {!! Form::file('file', ['class' => 'form-group','placeholder' => 'Upload Video']) !!}
+                </div>
+
+                                                  @foreach($errors->all() as $message)
+                                                    <div class="col-xs-12"><div class="alert alert-danger text-center">{{ $message }}
+                                                    </div></div>
+                                                    @endforeach
+                <div class="modal-footer">
+                {!! Form::submit('Add new Subscription!', array('class' => 'btn btn-info')) !!}  
+                {!! Form::close(); !!}          
+                 <!--  <button type="button" class="btn btn-primary">
+                    Save changes
+                  </button>         -->
+                  <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                  </button> 
+                </div>
+              </div>
+              
+            </div>
+            
+          </div>
+        <!-- end adding subscription profile -->
+        <table class="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Price</th>
+                  <th>Description</th>
+                  <th>File</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach($subscription as $value)
+                <tr>
+                  <td>{{ $value['id'] }}</td>
+                  <td>{{ $value['price'] }}</td>
+                  <td>{{ $value['description'] }}</td>
+                  <td><img style="width:150px;" src="{{ URL::to('/images').'/'.$value['file'] }}"></td>
+                  <td><a id="trigger" role="button" class="edit" href="#modal-container-403920" data-target="#modal-container-403920" data-uid="{!! $value['id'] !!}" data-price="{!! $value['price'] !!}" data-desc="{!! $value['description'] !!}">Edit</a> | <a href="{{ URL::to('/deleteSubscription').'/'.$value['id'] }}">Delete</a></td>
+                </tr>
+                @endforeach
+              </tbody>
+            </table>
+            <hr style="max-width:inherit;border-width:10px;border-color:#DCC6E0;" />
+          </div>
+        <!-- end subscription list -->
+        <!-- Modal -->
+        <div class="modal fade" id="modal-container-403920" role="dialog" aria-labelledby="myModalLabel3" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    ×
+                  </button>
+                  {!! Form::open(['url'=>'/editSubscription', 'files' => true]) !!}
+                  {!! Form::hidden('hiddenid', '', array('id' => 'invisible_id')) !!}
+                  <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
+                    Add Price     
+                </h3>
+                <div class="col-xs-12">
+                {!! Form::number('price', '', array('step' => 'any','placeholder' => 'Enter Price', 'class' => 'form-group', 'id' => 'price')) !!} 
+                </div>
+                <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
+                    Add Description     
+                </h3>
+                <div class="col-xs-12">
+                {!! Form::textarea('description', '', array('style' => 'min-width:100%;resize:none;','class' => 'form-group', 'id' => 'description','placeholder' => 'Description of the new subscription!')) !!}                        
+                </div>
+                <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
+                    Select File    
+                </h3>
+                <div class="col-xs-12">
+                    {!! Form::file('file', ['class' => 'form-group','placeholder' => 'Choose File']) !!}
+                </div>
+
+                                                  @foreach($errors->all() as $message)
+                                                    <div class="col-xs-12"><div class="alert alert-danger text-center">{{ $message }}
+                                                    </div></div>
+                                                    @endforeach
+                <div class="modal-footer">
+                {!! Form::submit('Edit Subscription!', array('class' => 'btn btn-info')) !!}  
+                {!! Form::close(); !!}          
+                 <!--  <button type="button" class="btn btn-primary">
+                    Save changes
+                  </button>         -->
+                  <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                  </button> 
+                </div>
+              </div>
+              
+            </div>
+            
+          </div>
+          </div>
         <!-- begin featured slideshow -->
         <!-- begin modal for adding featured profile -->
     <a id="modal-403918" href="#modal-container-403918" role="button" class="btn btn-success btn-lg" data-toggle="modal">Add Featured Feedbacks</a>
@@ -374,6 +512,20 @@
                   });
                 }
             });
+    });
+    
+    $(".edit").on("click", function (event) {
+    var uid = $(this).data("uid");
+    var price = $(this).data("price");
+    var description = $(this).data("desc");
+    // $(this) will be refer to button which was clicked 
+    console.log(uid);
+    console.log(price);
+    console.log(description);
+    $("#price").val(price);
+    $("#description").val(description);
+    $('input[name=hiddenid]').val(uid);
+    $('#modal-container-403920').modal('show');
     });
 });
 </script>

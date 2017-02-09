@@ -156,9 +156,9 @@
         @if (Session::has('message'))
         <div class="alert alert-info text-center">{{ Session::get('message') }}</div>
         @endif
-        <div class="col-xs-3 col-xs-offset-1" style="height:auto;">
+        <div class="col-xs-12 " style="height:auto;">
         <div class="form-group">
-        <div class="col-sm-10">
+        <!-- <div class="col-sm-10">
         {!! Form::open(['url'=>'/sortpost']) !!}
           <h1>Sort By</h1>
           </div>
@@ -166,11 +166,11 @@
           {!! Form::select('sort', ['' => 'Select sorting','status' => 'Closed Deals', 'date_posted' => 'Date Posted']) !!}
           </div>
         {!! Form::submit('Sort', array('class' => 'btn btn-info btn-lg')) !!} 
-        {!! Form::close() !!}
+        {!! Form::close() !!} -->
         </div>
           
            <!-- {!! Form::button('Create Account',['id' => 'modal-403917','href' => '#modal-container-403917','role' => 'button','class'=>'btn btn-success btn-lg btn-block']) !!} -->
-           <a id="modal-403917" href="#modal-container-403917" role="button" class="btn btn-success btn-lg" data-toggle="modal">ADD POST</a>
+           <a id="modal-403917" href="#modal-container-403917" role="button" class="btn btn-success btn-lg" data-toggle="modal">+</a>
           
           <div class="modal fade" id="modal-container-403917" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -213,11 +213,36 @@
                 @endforeach
                 </div>
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
-                    Add Tags (Separated by Comma)
+                   Choose Category and Talent
                 </h3>
-                <div class="col-xs-12">
-                {!! Form::text('tags[0]', '', array('placeholder' => 'Add Tags', 'data-role' => 'tagsinput', 'required'=>'required')) !!}              
-                
+                <div class="col-xs-12" id="talentcontainer">
+                <div class="col-xs-5">
+                {!! Form::select('category[]', ['Select Category' => 0], null, [ 'id' => 'category']) !!}
+                </div>
+                <div class="col-xs-5">
+                  {!! Form::select('talent[]', ['Select talent'], null, ['id' => 'talent']) !!}
+                </div>
+                <div class="col-xs-5">
+                {!! Form::select('category[]', ['Select Category' => 0], null, [ 'id' => 'category1']) !!}
+                </div>
+                <div class="col-xs-5">
+                  {!! Form::select('talent[]', ['Select talent'], null, ['id' => 'talent1']) !!}
+                </div>
+                <div class="col-xs-5">
+                {!! Form::select('category[]', ['Select Category' => 0], null, [ 'id' => 'category2']) !!}
+                </div>
+                <div class="col-xs-5">
+                  {!! Form::select('talent[]', ['Select talent'], null, ['id' => 'talent2']) !!}
+                </div>
+                <div class="col-xs-5">
+                {!! Form::select('category[]', ['Select Category' => 0], null, [ 'id' => 'category3']) !!}
+                </div>
+                <div class="col-xs-5">
+                  {!! Form::select('talent[]', ['Select talent'], null, ['id' => 'talent3']) !!}
+                </div>
+                <!-- <div class="col-xs-12">
+                          <a href="javascript:void(0)" id="addtalent">Add more talent</a>
+                </div> -->
                 </div>
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
                     Add Start Date     
@@ -257,13 +282,13 @@
                     Talent's Rate    
                 </h3>
                 <div class="col-xs-12">
-                {!! Form::select('rate', array('Fixed Price' => 'Fixed Price', 'Hourly Rate' => 'Hourly')) !!}
+                {!! Form::select('rate', array('Fixed Rate' => 'Fixed Rate', 'Hourly Rate' => 'Hourly Rate')) !!}
                 </div>
                 <h3 class="form-group" style="padding-left: 17px;padding-top:25px" id="myModalLabel">
                     Age Minimum Requirement    
                 </h3>
                 <div class="col-xs-12">
-                {!! Form::select('age', array('0' => 'Any Age', '1' => 'Between 5 - 17 years old', '2' => '18 years old and above')) !!}
+                {!! Form::select('age', array('0' => 'Any Age', '1' => 'Children (5 - 12 years old)', '2' => 'Teen (13 - 19 years old)', '3' => 'Adult (20 - 34 years old)', '4' => 'Old (35 - 50 years old)')) !!}
                 </div>
                 <h3 class="form-group" style="padding-left: 17px;padding-top:25px" id="myModalLabel">
                     Gender    
@@ -272,10 +297,10 @@
                 {!! Form::select('gender', array('any' => 'Any gender', 'male' => 'Male only', 'female' => 'Female only')) !!}
                 </div>
                 <h3 class="form-group" style="padding-left: 17px;padding-top:25px" id="myModalLabel">
-                    Characteristic    
+                    Type of talent    
                 </h3>
                 <div class="col-xs-12">
-                {!! Form::select('group', array('0' => 'Group and Individual', '1' => 'Group only', '2' => 'Individual Only')) !!}
+                {!! Form::select('group', array('0' => 'Group and Individual', '1' => 'Individual Only', '2' => 'Group only')) !!}
                 </div>
                 <h3 class="form-group" style="padding-left: 17px;padding-top:25px" id="myModalLabel">
                     Number of Talent(s)    
@@ -301,8 +326,8 @@
           
         </div>
         @foreach($posts as $post)
-        <div class="col-md-6 col-md-offset-1 pull-right" style="right:20px;background-color: rgb(189,245,226); border-top: 1px solid;">
-           <span class="label label-default">Posted on {!! $post['date_posted']->format('F d,Y H:i A') !!}</span>
+        <div class="col-md-3 col-md-offset-1" style="right:20px;background-color: rgb(189,245,226); border-top: 1px solid;">
+           <span class="label label-default">Posted on {!! $post['date_posted']->format('F d,Y H:i A') !!}</span><p class="text-right"><a class="btn" href="{!! URL::to('/deleteYourPost/'.$post['id']) !!}">Delete this post »</a></p>
         <p>
         
         </p> 
@@ -314,11 +339,11 @@
 
           </p>
           @if(strpos($post['file'],'.mp4') == true)
-          <video style="width: 100%;" width="400" controls>
+          <video style="width: 100%;" width="250" controls>
               <source src="{!! URL::to('/files').'/'.$post['file'] !!}" type="video/mp4">
           </video>
           @else
-          <img class="img-responsive" style="height: 300px; width: 450px;" src="{!! URL::to('/files').'/'.$post['file'] !!}" alt="Chania">
+          <img class="img-responsive" style="height: 250px; width: 250px;" src="{!! URL::to('/files').'/'.$post['file'] !!}" alt="Chania">
           @endif
           <p>
             @if($post['status'] == 0)
@@ -329,6 +354,7 @@
           </p>
           <p>
             <a class="btn" href="{!! URL::to('/post/'.$post['id']) !!}">View details »</a>
+            
           </p>
         </div>
         @endforeach
@@ -389,14 +415,178 @@
             alert("Too big!\n File Size limit: 200mb!");
             $("#ifile").val('');
         }
-        else if(fextension !== 'mp4'){
-          alert('File extension is not MP4!');
-          $("#ifile").val('');
-        }
+        // else if(fextension !== 'mp4'){
+        //   alert('File extension is not MP4!');
+        //   $("#ifile").val('');
+        // }
     });
 });
   </script>
+  <script>
+    $(document).ready(function($) {
+        $.ajax({
+            url: "{{ URL('/revealCategory/') }}",
+            method: "GET",
+            dataType: "json",
+            data: {},
+            success: function(data){
+                var next_id = $("#category");
+                $("#category").empty().html(' ');
+                $.each(data, function(key, value) {
+                    $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                });
+                for (var i = 1; i <= 3; i++) {
+                    var next_id = $("#category"+i);
+                  $("#category"+i).empty().html(' ');
+                  $.each(data, function(key, value) {
+                      $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                  });
+                };
+                // $(next_id).material_select();
+                // $("#talent").html(data);
+              
+            }
+          });
+    $("#category").change(function() {
+        var tal_cal = $(this).val();
+        $.ajax({
+            url: "{{ URL('/revealTalents/') }}",
+            method: "GET",
+            dataType: "json",
+            data: {tal_cal:tal_cal},
+            success: function(data){
+                var next_id = $("#talent");
+                console.log(data);
+                $("#talent").empty().html(' ');
+                $.each(data, function(key, value) {
+                    $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                });
+                // $("#talent").html(data);
+            }
+          });
+      });
+      
+          $("#category1").change(function() {
+          var tal_cal = $(this).val();
+          $.ajax({
+              url: "{{ URL('/revealTalents/') }}",
+              method: "GET",
+              dataType: "json",
+              data: {tal_cal:tal_cal},
+              success: function(data){
+                  var next_id = $("#talent1");
+                  console.log(next_id);
+                  console.log(data);
+                  $("#talent1").empty().html(' ');
+                  $.each(data, function(key, value) {
+                      $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                  });
+                  // $("#talent").html(data);
+              }
+            });
+        });
 
+          $("#category2").change(function() {
+          var tal_cal = $(this).val();
+          $.ajax({
+              url: "{{ URL('/revealTalents/') }}",
+              method: "GET",
+              dataType: "json",
+              data: {tal_cal:tal_cal},
+              success: function(data){
+                  var next_id = $("#talent2");
+                  console.log(next_id);
+                  console.log(data);
+                  $("#talent2").empty().html(' ');
+                  $.each(data, function(key, value) {
+                      $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                  });
+                  // $("#talent").html(data);
+              }
+            });
+        });
+
+          $("#category3").change(function() {
+          var tal_cal = $(this).val();
+          $.ajax({
+              url: "{{ URL('/revealTalents/') }}",
+              method: "GET",
+              dataType: "json",
+              data: {tal_cal:tal_cal},
+              success: function(data){
+                  var next_id = $("#talent3");
+                  console.log(next_id);
+                  console.log(data);
+                  $("#talent3").empty().html(' ');
+                  $.each(data, function(key, value) {
+                      $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                  });
+                  // $("#talent").html(data);
+              }
+            });
+        });
+     
+    $('#talentcontainer').on('change', '.category', function() {
+        var tal_cal = $(this).val();
+        $.ajax({
+            url: "{{ URL('/revealTalents/') }}",
+            method: "GET",
+            dataType: "json",
+            data: {tal_cal:tal_cal},
+            success: function(data){
+                var next_id = $(".talent");
+                console.log(data);
+                $(".talent").empty().html(' ');
+                $.each(data, function(key, value) {
+                    $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                });
+                // $(next_id).material_select();
+                // $("#talent").html(data);
+            }
+          });
+      });
+
+      $('#talentcontainer').on('click', '#addtalent', function() {
+        $.ajax({
+            url: "{{ URL('/revealCategory/') }}",
+            method: "GET",
+            dataType: "json",
+            data: {},
+            success: function(data){
+                var next_id = $(".category");
+                $(".category").empty().html(' ');
+                $.each(data, function(key, value) {
+                    $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                });
+                // $(next_id).material_select();
+                // $("#talent").html(data);
+            }
+          });
+        });
+
+
+    $("#addtalent").on("click", function (event) {
+      $("#talentcontainer").append("<div id='temprow'><div class='col-xs-5'><select class='category' name='category[]'></select></div><div class='col-xs-5'><select class='talent' name='talent[]'><option value='Select Talent'>Select Talent</option></select></div><div class='col-xs-12'><a href='javascript:void(0)' id='removetalent'>Remove</a></div></div>");
+    });
+
+    $("#talentcontainer").on("click", '#removetalent',function (event) {
+      $("#temprow").remove();
+    });
+
+    $(".wrap").on("click", '#removetalent',function (event) {
+      var tal_cal = $(this).data("id");
+      $.ajax({
+            url: "{{ URL('/removeTalent/') }}",
+            method: "GET",
+            data: {tal_cal:tal_cal},
+            success: function(data){
+                console.log(data);
+                $("#preload").remove();
+            }
+          });
+      });
+  });
+  </script>
 </body>
 
 </html>

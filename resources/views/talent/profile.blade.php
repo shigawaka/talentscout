@@ -81,14 +81,12 @@
             </ul>
 
             <ul class="right">
+            @if(Session::get('first_login') == 1)
+              <li><a href="/home" class="disabled">Home</a></li>
+            @else
               <li><a href="/home">Home</a></li>
-                 <li class="dropdown">
-                 
-                  <a href="#" "dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                    <!--  --> <span class="caret"></span>
-                  </a>
-             
-                </li>
+            @endif
+                 <li><a href="/logout">Logout</a></li>
             </ul>
             <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="mdi-navigation-menu"></i></a>
           </div>
@@ -212,6 +210,13 @@
                 {!! $message !!}
                 @endforeach
             </div>
+            <div class="input-field col s3">
+            {!! Form::select('fee_type', [
+             'Fixed Rate' => 'Fixed Rate',
+             'Hourly Rate' => 'Hourly Rate'], $fee['fee_type']
+              ) !!}
+            <label for="age" class="left-align">Fee type</label>
+            </div>
 
 
                       
@@ -234,11 +239,11 @@
             </div>
                    <div class="card-panel grey lighten-3"><h6><i>Talent Fee: ₱{!! $fee['fee'] !!}</i></h6></div>
                        @if($fee['score'] <= 1000)
-                       <div class="card-panel orange lighten-2"><img style="width: 50px;font-family: 'Quasiparticles';"class="responsive-img" src="{!! URL::to('/files') !!}/newbie.png"><h6>New Talent</h6></div>
+                       <div class="card-panel orange lighten-2"><img style="width: 50px;font-family: 'Quasiparticles';"class="responsive-img" src="{!! URL::to('/files') !!}/newbie.png"><h6>New Talent <br /> Points: {{ $fee['score'] }}</h6></div>
                        @elseif($fee['score'] >= 1500)
-                       <div class="card-panel blue lighten-2"><img style="width: 50px;"class="responsive-img" src="{!! URL::to('/files') !!}/risingtalent.png"><h4><i>Rising Talent</i></h4></div>
+                       <div class="card-panel blue lighten-2"><img style="width: 50px;"class="responsive-img" src="{!! URL::to('/files') !!}/risingtalent.png"><h4><i>Rising Talent <br /> Points: {{ $fee['score'] }}</i></h4></div>
                        @elseif($fee['score'] >= 2000)
-                       <div class="card-panel gold lighten-2"><img style="width: 50px;"class="responsive-img" src="{!! URL::to('/files') !!}/startalent.png"><h4><i>Star Talent</i></h4></div>
+                       <div class="card-panel gold lighten-2"><img style="width: 50px;"class="responsive-img" src="{!! URL::to('/files') !!}/startalent.png"><h4><i>Star Talent <br /> Points: {{ $fee['score'] }}</i></h4></div>
                        @endif
                         @if($fee['demerit'] <= 1000)
                       <div class="card-panel orange lighten-2" > <h6><i><i class="large material-icons light-blue-text">sentiment_neutral</i><br />Demerit: {!! $fee['demerit'] !!}</i></h6></div>
@@ -318,34 +323,59 @@
 
             <div class="col s12 m12 card-panel white">
               <div class="icon-block">
-                <h5>Talents</h5>
-                @if(!empty($talent))
-                  @foreach($talent as $tal)
+                <h5>Talents @if($user['id'] == Session::get('id'))
+                   <a class="btn-floating btn-small waves-effect waves-light grey btn modal-trigger" data-target="modal1"><i class="material-icons">add</i></a>
+                @endif</h5>
+                @if(!empty($td))
+                  @foreach($td as $key => $tal)
                 <div class="chip">
-                  {!! $tal !!}
+                  {!! $tal['talent'] !!}
                 </div>
                   @endforeach
                 @endif
                 <div class="card2 ">
-                @if($user['id'] == Session::get('id'))
-                   <a class="btn-floating btn-small waves-effect waves-light grey btn modal-trigger" data-target="modal1"><i class="material-icons">add</i></a>
-                @endif
                 </div>  
-             <div id="modal1" class="modal modal-fixed-footer">
+             <div id="modal1" class="modal modal-fixed-footer" style="width:80%;">
               {!! Form::open(['url'=>'/addtalent/'.$user['id'].'', 'files' => true]) !!}
                        <div class="modal-content">
                        <h4>Your talents</h4>
                        <div class="divider"></div>
-                       <p>Top talents</p>
                        <div class="wrap">
-                        @if(empty($talent))
-                        {!! Form::text('talents[]', '', array('data-role' => 'materialtags')) !!}
-                         @else
-                        {!! Form::text('talents[]', implode(',', $talent), array('data-role' => 'materialtags')) !!}
-                         @endif
-                         @foreach($errors->get('talents') as $message)
-                        {!! $message !!}
-                        @endforeach
+                       @if (Session::has('duplicate'))
+                          <div id="card-alert" class="card red">
+                          <div class="card-content white-text">
+                          <p><i class="mdi-navigation-check"></i> {{ Session::get('duplicate') }}</p>
+                          </div>
+                          </div>
+                        @endif
+
+                          
+                       <div class="row" id="talentcontainer">
+                        <div class="col s5">
+                          {!! Form::select('category[]', ['Select Category' => 0], null, ['class' => 'browser-default', 'id' => 'category']) !!}
+                        </div>
+                        <div class="col s5">
+                          {!! Form::select('talent[]', ['Select talent'], null, ['class' => 'browser-default','id' => 'talent']) !!}
+                        </div>
+                        <div class="col s12">
+                          <a href="javascript:void(0)" id="addtalent">Add more talent</a>
+                        </div>
+                       </div>
+                      @foreach($td as $key => $value)
+                          <div class="row" id="preload">
+                            <div class="col s5">
+                              {!! Form::select('category2[]', [$value['category'] => $value['category']], $value['category'], ['class' => 'browser-default', 'class' => 'browser-default']) !!}
+                            </div>
+                            <div class="col s5">
+                            {!! Form::select('talent2[]', [$value['talent'] => $value['talent']], $value['talent'], ['class' => 'browser-default','class' => 'browser-default']) !!}
+                          </div>
+                            <div class="col s2">
+                              <input type="hidden" id="talid" value="{!! $value['id'] !!}" />
+                              <a href="javascript:void(0)" id="removetalent" data-id="{!! $value['id'] !!}">Remove</a>
+                            </div>
+                          </div>
+                      @endforeach
+
                         </div>
                        </div>
                     <div class="modal-footer">
@@ -353,66 +383,6 @@
                     {!! Form::close() !!}
                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Cancel</a>                    </div>
               </div>
-
-           <h5>Experience</h5>
-            <div class="card2">
-            @if($user['id'] == Session::get('id'))
-              <a class="btn-floating btn-small waves-effect waves-light grey btn modal-trigger" data-target="modal2"><i class="material-icons">add</i></a>
-            @endif
-            </div>
-                    <div id="modal2" class="modal modal-fixed-footer">
-                             <div class="modal-content">
-                             <h4>Experience</h4>
-                             <div class="input-field col s12">
-                             <input id="agency" type="text" class="validate">
-                             <label for="agency">Agency</label>
-                             </div>
-                             <div class="input-field col s12">
-                             <input id="title" type="text" class="validate">
-                             <label for="title">Job title</label>
-                             </div>
-                          </div>
-                          <div class="modal-footer">
-                          <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Cancel</a>
-                          <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Save</a>
-                          </div>
-                         </div>
-           <h5>Qualifications</h5>
-            <div class="card2">
-            @if($user['id'] == Session::get('id'))
-    <a class="btn-floating btn-small waves-effect waves-light grey btn modal-trigger" data-target="modal3"><i class="material-icons">add</i></a>
-            @endif
-            </div>
-                  <div id="modal3" class="modal modal-fixed-footer">
-                             <div class="modal-content">
-                             <h4>Edit Qualifications</h4>
-                              <div class="input-field col s12">
-                             <input id="qualification" type="text" class="validate">
-                             <label for="qualification">Add a qualification</label>
-                             </div>
-                           
-                          </div>
-                          <div class="modal-footer">
-                         <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Cancel</a>
-                          <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Save</a>
-                          </div>
-                         </div>
-
-            <h5>Group</h5>
-            <div class="card2">
-            @if($user['id'] == Session::get('id'))
-    <a class="btn-floating btn-small waves-effect waves-light grey btn modal-trigger" data-target="modal4"><i class="material-icons">add</i></a>
-            @endif
-            </div>
-                  <div id="modal4" class="modal modal-fixed-footer">
-                             <div class="modal-content">
-                             <h4>Modal Header</h4>
-                             <p>A bunch of text</p>
-                          </div>
-                          <div class="modal-footer">
-                          <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Agree</a>
-                          </div>
-                         </div>
               </div>
             </div>
 
@@ -460,8 +430,120 @@
     });
     
   </script>
+  <script>
+    $(document).ready(function() {
+    // Select - Single
+    $('select:not([multiple])').material_select();
+     $('select').material_select();
+  });
+
+    $('.disabled').click(function(e){
+      alert('Setup your profile first!');
+     e.preventDefault();
+  });
+
+     $(document).ready(function($) {
+        $.ajax({
+            url: "{{ URL('/revealCategory/') }}",
+            method: "GET",
+            dataType: "json",
+            data: {},
+            success: function(data){
+                var next_id = $("#category");
+                $("#category").empty().html(' ');
+                $.each(data, function(key, value) {
+                    $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                });
+                $(next_id).material_select();
+                // $("#talent").html(data);
+            }
+          });
+    $("#category").change(function() {
+        var tal_cal = $(this).val();
+        $.ajax({
+            url: "{{ URL('/revealTalents/') }}",
+            method: "GET",
+            dataType: "json",
+            data: {tal_cal:tal_cal},
+            success: function(data){
+                var next_id = $("#talent");
+                console.log(data);
+                $("#talent").empty().html(' ');
+                $.each(data, function(key, value) {
+                    $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                });
+                $(next_id).material_select();
+                // $("#talent").html(data);
+            }
+          });
+      });
+
+    $('#talentcontainer').on('change', '.category', function() {
+        var tal_cal = $(this).val();
+        $.ajax({
+            url: "{{ URL('/revealTalents/') }}",
+            method: "GET",
+            dataType: "json",
+            data: {tal_cal:tal_cal},
+            success: function(data){
+                var next_id = $(".talent");
+                console.log(data);
+                $(".talent").empty().html(' ');
+                $.each(data, function(key, value) {
+                    $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                });
+                $(next_id).material_select();
+                // $("#talent").html(data);
+            }
+          });
+      });
+
+      $('#talentcontainer').on('click', '#addtalent', function() {
+        $.ajax({
+            url: "{{ URL('/revealCategory/') }}",
+            method: "GET",
+            dataType: "json",
+            data: {},
+            success: function(data){
+                var next_id = $(".category");
+                $(".category").empty().html(' ');
+                $.each(data, function(key, value) {
+                    $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                });
+                $(next_id).material_select();
+                // $("#talent").html(data);
+            }
+          });
+        });
 
 
+    $("#addtalent").on("click", function (event) {
+      $("#talentcontainer").append("<div class='row' id='temprow'><div class='col s5'><select class='category browser-default' name='category[]'></select></div><div class='col s5'><select class='talent browser-default' name='talent[]'><option value='Select Talent'>Select Talent</option></select></div><div class='col s2'><a href='javascript:void(0)' id='removetalent'>Remove</a></div></div>");
+    });
+
+    $("#talentcontainer").on("click", '#removetalent',function (event) {
+      $("#temprow").remove();
+    });
+
+    $(".wrap").on("click", '#removetalent',function (event) {
+      var tal_cal = $(this).data("id");
+      $.ajax({
+            url: "{{ URL('/removeTalent/') }}",
+            method: "GET",
+            data: {tal_cal:tal_cal},
+            success: function(data){
+                console.log(data);
+                $("#preload").remove();
+            }
+          });
+      });
+  });
+  </script>
+  @if(Session::has('duplicate'))
+          <script>
+              $('#modal1').openModal();
+          </script>
+  @endif
     <!--    
      {!! HTML::script('vendor/jquery/jquery.min.js') !!}
      {!! HTML::script('vendor/bootstrap/js/bootstrap.min.js') !!}

@@ -14,6 +14,7 @@ use Session;
 use App\Featured;
 use App\Scout;
 use App\Group;
+use App\Subscription;
 use Carbon\Carbon;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
@@ -99,20 +100,23 @@ class RegistrationController extends Controller
                 $detail->password = Hash::make($data['password']);
                 $detail->profile_image ='avatar.png';
                 $detail->profile_description =' ';
-                $confirmation_code = str_random(30);
+                $confirmation_code = str_random(7);
                 $detail->confirmation_code = $confirmation_code;
+                $detail->first_login = 1;
+                $detail->expiration = Carbon::now()->addMinutes(15);
                 $detail->save();
                 $talent = new Talent;
                 $talent->id = $detail->id;
                 $talent->talents = null;
                 $talent->fee = 0;
+                $talent->fee_type = null;
                 $talent->save();
                 Mail::send('emails.emailactivation', ['confirmation_code' => $confirmation_code], function($message) {
                 $message->to(Request::get('emailaddress'), Request::get('username'))
                     ->subject('Verify your email address');
                 });
                 Session::flash('message', 'Thanks for signing up! Please check your email to activate your account.');
-                $chikkadata = array('number'=> $changecontact, 'message'=> 'Thank you for signing up in Talent Scout!'.ucfirst($detail->firstname).' '.ucfirst($detail->lastname).'.This is where your path to stardom begins!');
+                $chikkadata = array('number'=> $changecontact, 'message'=> 'Thank you for signing up in Talent Scout! '.ucfirst($detail->firstname).' '.ucfirst($detail->lastname).'.This is where your path to stardom begins! Follow this link to activate your account! This expires in 15 minutes! http://localhost:8000/register/verify/'.$confirmation_code.'');
                 ChikkaController::send($chikkadata);
                 return Redirect::to('http://localhost:8000/login');
             }
@@ -165,8 +169,10 @@ class RegistrationController extends Controller
                 $detail->password = Hash::make($data['passwordg']);
                 $detail->profile_image ='avatar.png';
                 $detail->profile_description =' ';
-                $confirmation_code = str_random(30);
+                $confirmation_code = str_random(7);
                 $detail->confirmation_code = $confirmation_code;
+                $detail->first_login = 1;
+                $detail->expiration = Carbon::now()->addMinutes(15);
                 $detail->save();
                 $talent = new Talent;
                 $talent->id = $detail->id;
@@ -186,8 +192,8 @@ class RegistrationController extends Controller
                 $message->to(Request::get('emailaddress'), Request::get('username'))
                     ->subject('Verify your email address');
                 });
-                $chikkadata = array('number'=> $changecontact, 'message'=> 'Thank you for signing up in Talent Scout!'.ucfirst($detail->groupname).'.This is where your path to stardom begins!');
-                // ChikkaController::send($chikkadata);
+                $chikkadata = array('number'=> $changecontact, 'message'=> 'Thank you for signing up in Talent Scout! '.ucfirst($detail->groupname).'.This is where your path to stardom begins! Follow this link to activate your account! This expires in 15 minutes! http://localhost:8000/register/verify/'.$confirmation_code.'');
+                ChikkaController::send($chikkadata);
                 Session::flash('message', 'Thanks for signing up! Please check your email.');
                 return Redirect::to('http://localhost:8000/login');
             }
@@ -295,8 +301,10 @@ class RegistrationController extends Controller
                 $detail->password = Hash::make($data['password']);
                 $detail->profile_image ='avatar.png';
                 $detail->profile_description =' ';
-                $confirmation_code = str_random(30);
+                $confirmation_code = str_random(7);
                 $detail->confirmation_code = $confirmation_code;
+                $detail->first_login = 1;
+                $detail->expiration = Carbon::now()->addMinutes(15);
                 $detail->save();
 
                 $scout = new Scout;
@@ -308,7 +316,7 @@ class RegistrationController extends Controller
                 $message->to(Request::get('emailaddress'), Request::get('username'))
                     ->subject('Verify your email address');
                 });
-                $chikkadata = array('number'=> $changecontact, 'message'=> 'Thank you for signing up in Talent Scout!'.ucfirst($detail->firstname).' '.ucfirst($detail->lastname).'.Hope you find the right talented person fit for your needs!');
+                $chikkadata = array('number'=> $changecontact, 'message'=> 'Thank you for signing up in Talent Scout!'.ucfirst($detail->firstname).' '.ucfirst($detail->lastname).'.Hope you find the right talented person fit for your needs! Follow this link to activate your account! This expires in 15 minutes! http://localhost:8000/register/verify/'.$confirmation_code.'');
                 ChikkaController::send($chikkadata);
                 Session::flash('message', 'Thanks for signing up! We have sent an activation code to your email.');
                 return Redirect::to('http://localhost:8000/login');
@@ -319,12 +327,19 @@ class RegistrationController extends Controller
     }
      public function confirm($confirmation_code)
     {
+
         if( ! $confirmation_code) {
-            Session::flash('message', 'Confirmation error!');
+            Session::flash('message', 'Confirmation error! The code is either invalid or it has reached the maximum expiration time!');
             return Redirect::to('http://localhost:8000/login');
         }
         $user = User::where('confirmation_code', '=', $confirmation_code)->first();
-        if ( ! $user)
+        $expiration = Carbon::parse($user['expiration']);
+        $checkExp = Carbon::now()->lte($expiration);
+        if($checkExp == false){
+            Session::flash('message', 'The code is either invalid or expired!');
+            return Redirect::to('http://localhost:8000/login');
+        }
+        elseif ( ! $user)
         {
              Session::flash('message', 'Account Already Activated!');
               return Redirect::to('http://localhost:8000/login');
@@ -381,6 +396,27 @@ class RegistrationController extends Controller
 
         return Redirect::to('http://localhost:8000/login');
     }
+    public function resendActivationcode($confirmation_code)
+    {
+        if( ! $confirmation_code) {
+            Session::flash('message', 'Confirmation error!');
+            return Redirect::to('http://localhost:8000/login');
+        }
+        $user = User::where('confirmation_code', '=', $confirmation_code)->first();
+        if ( ! $user)
+        {
+             Session::flash('message', 'Account Already Activated!');
+              return Redirect::to('http://localhost:8000/login');
+        }
+
+        $random_code = str_random(7);
+        $user->confirmation_code = $random_code;
+        $user->expiration = Carbon::now()->addMinutes(15);
+        $user->save();
+
+        Session::flash('message', 'We have sent another activation code! Please follow the link provided. It will expire in 15 minutes! ');
+        return Redirect::to('http://localhost:8000/login');
+    }
     public function resetPassword(){
         $detail = User::where('emailaddress', '=', Request::get('emailaddress'))->first();
         $confirmation_code = str_random(30);
@@ -392,5 +428,27 @@ class RegistrationController extends Controller
                 });
                 Session::flash('message', 'Password Reset Link sent! Kindly check your email.');
                 return Redirect::to('http://localhost:8000/login');
+    }
+    public function resendActivation(){
+        $detail = User::where('emailaddress', '=', Request::get('emailaddress'))
+                        ->where('confirmed', '=', null)
+                        ->first();
+        if($detail == null){
+            Session::flash('message', 'Account is already activated!');
+            return Redirect::to('http://localhost:8000/login');
+        }
+        else {
+
+        $confirmation_code = str_random(7);
+        $detail->confirmation_code = $confirmation_code;
+        $detail->expiration = Carbon::now()->addMinutes(15);
+        $detail->save();    
+         Mail::send('emails.resendActivation', ['confirmation_code' => $confirmation_code], function($message) {
+                $message->to(Request::get('emailaddress'), Request::get('username'))
+                    ->subject('Resend Activation Code');
+                });
+                Session::flash('message', 'We have sent another confirmation code! Kindly check your email.');
+                return Redirect::to('http://localhost:8000/login');
+        }
     }
 }

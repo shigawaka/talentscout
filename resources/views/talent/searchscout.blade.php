@@ -159,27 +159,33 @@
           </div>
           <div class="col-sm-10">
           <label for="sel1">By Search Category:</label>
-          {!! Form::select('category', ['' => 'Select category','post' => 'Post'], null, ['class' => 'form-control']) !!}
+          {!! Form::select('category', ['' => 'Select category'], null, ['id' => 'category','class' => 'form-control']) !!}
           <br>
           </div>
         </div>
            {!! Form::submit('Search',['class'=>'btn btn-success btn-lg btn-block', 'placeholder' =>'Search']) !!}
           {!! Form::close() !!}
         </div>
-        @if(!empty($result))
+        @if(count($result) == 0)
+        No match found!
+        @else
         @foreach($result as $res)
         <div class="col-md-3" style="width: 250px;height:500px;">
           <div class="thumbnail" style="height: 100%;">
             <img alt="Bootstrap Thumbnail First" src="{!! URL::to('/files').'/'.$res['profile_image'] !!}" />
             <div class="caption">
               <h4>
+                 @if(empty($res['groupname']))
                 <b>{!! ucfirst($res['firstname']).' '.ucfirst($res['lastname']) !!}</b>
+                @else
+                <b>{!! ucfirst($res['groupname']) !!}</b>
+                @endif
               </h4>
               <p style="font-size: 13px;">
                 <i>{!! $res['profile_description'] !!}</i><br>
               </p>
               <p>
-                <a class="btn btn-primary" href="#">Endorse</a> <a class="btn" href="{{ URL::to('/profile').'/'.$res['id'] }}">View</a>@if(!empty($res['fee']))<span class="label label-default"> Talent Fee:  {!! $res['fee'] !!} @endif 
+                <a class="btn btn-primary" href="{{ URL::to('/endorseUser').'/'.$res['id'] }}">Endorse</a> <a class="btn" href="{{ URL::to('/profile').'/'.$res['id'] }}">View</a>@if(!empty($res['fee']))<span class="label label-default"> Talent Fee:  {!! $res['fee'] !!} @endif 
                 </span>
                 </br>
                 @if($res['rank'] <= 1000)
@@ -226,7 +232,34 @@
     <!-- Theme JavaScript -->
     <script src="../../js/creative.min.js"></script>
     <script src="../../js/carousel.js"></script>
+<script>
+  $(document).ready(function($) {
+        $.ajax({
+            url: "{{ URL('/revealCategory/') }}",
+            method: "GET",
+            dataType: "json",
+            data: {},
+            success: function(data){
+                var next_id = $("#category");
+                $("#category").empty().html(' ');
+                $.each(data, function(key, value) {
+                    $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                });
+                for (var i = 1; i <= 3; i++) {
+                    var next_id = $("#category"+i);
+                  $("#category"+i).empty().html(' ');
+                  $.each(data, function(key, value) {
+                      $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
+                  });
+                };
+                // $(next_id).material_select();
+                // $("#talent").html(data);
+              
+            }
+          });
+      });
 
+</script>
 </body>
 
 </html>

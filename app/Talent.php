@@ -13,4 +13,8 @@ class Talent extends Model
 	'talentid',
   	'talents'
 	];
+
+	public function userTalentFee(){
+		return $this->belongsTo('App\User', 'id');
+	}
 }

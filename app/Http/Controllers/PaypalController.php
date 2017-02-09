@@ -113,7 +113,6 @@ class PaypalController extends Controller
     }
     public function postPayment(Request $request)
     {
-        // dd($request['duration']);
     $payer = new Payer();
     $payer->setPaymentMethod('paypal');
     $total = 0;
@@ -123,24 +122,24 @@ class PaypalController extends Controller
         $item_1->setName('1 week duration') // item name
         ->setCurrency('PHP')
         ->setQuantity(1)
-        ->setPrice('129.99'); // unit price
-        $total = 129.99;
+        ->setPrice($request['hiddenprice'][0]); // unit price
+        $total = $request['hiddenprice'][0];
     }
     elseif($request['duration'] == '2'){
         $item_1 = new Item();
         $item_1->setName('2 weeks duration') // item name
         ->setCurrency('PHP')
         ->setQuantity(1)
-        ->setPrice('229.99'); // unit price
-        $total = 229.99;
+        ->setPrice($request['hiddenprice'][1]); // unit price
+        $total = $request['hiddenprice'][1];
     }
     elseif ($request['duration'] == '3') {
         $item_1 = new Item();
         $item_1->setName('3 weeks duration') // item name
         ->setCurrency('PHP')
         ->setQuantity(1)
-        ->setPrice('311.99'); // unit price
-        $total = 311.99;
+        ->setPrice($request['hiddenprice'][2]); // unit price
+        $total = $request['hiddenprice'][2];
     }
     // $item_1 = new Item();
     // $item_1->setName('Item 1') // item name
@@ -235,7 +234,7 @@ class PaypalController extends Controller
         $data->user_id = Session::get('id');
         $data->firstname = $user['firstname'];
         $data->lastname = $user['lastname'];
-        $data->state = 'pending'
+        $data->state = 'pending';
         $data->duration = Session::get('duration');
         $data->save();
         Session::forget('duration');

@@ -180,6 +180,8 @@
         </h1>
       </div>
       <div class="row">
+      @if(count($posts) == 0)
+      @else
         @foreach($posts as $post)
          <div class="col-md-2 col-md-offset-1" >
          @if(strpos($post['file'],'.mp4') == true)
@@ -214,7 +216,7 @@
           </p>
         </div>
         @endforeach
-
+      @endif
       </div>
       <div class="page-header" style="background-color: #86E2D5; padding-top: 5px;">
         <h1 style="text-align:center;">
@@ -222,10 +224,9 @@
         </h1>
       </div>
       <div class="row">
+       @if(count($succ) == 0)
+       @else
         @foreach($succ as $succs)
-         <!-- <div class="col-md-2 col-md-offset-1" >
-          <img style="height: 150px; width: 200px;" alt="Bootstrap Image Preview" src="{!! URL::to('/files').'/'.$post['image'] !!}" /></br>
-        </div> -->
         <div class="col-md-7 col-md-offset-2" style="padding-top: 5px;">
            <span class="label label-default">Posted on {!! $succs['date_posted']->format('F d,Y H:i A') !!}</span>
            <span class="label label-default">{!! $succs['rate'] !!}</span>
@@ -250,6 +251,7 @@
           </p>
         </div>
         @endforeach
+        @endif
       </div>
 
     </div>

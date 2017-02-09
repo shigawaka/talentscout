@@ -194,44 +194,22 @@ div.product-chooser{
         <h1 class="text-center">Choose your duration!</h1>
     <div class="row form-group product-chooser">
     {!! Form::open(['url'=>'/payment']) !!}
+      
+      @foreach($subscription as $key => $value)
       <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
         <div class="product-chooser-item selected">
-          <img src="{{ URL::to('/images/number1.png')}}" class="img-rounded col-xs-4 col-sm-4 col-md-12 col-lg-12" alt="Mobile and Desktop">
+          <img src="{{ URL::to('/images').'/'.$value['file']}}" class="img-rounded col-xs-4 col-sm-4 col-md-12 col-lg-12" alt="Mobile and Desktop">
                 <div class="col-xs-8 col-sm-8 col-md-12 col-lg-12">
-            <span class="title">1 week · For only ‎₱129.99 </span>
-            <span class="description">Get featured for 1 week! This is our minimum duration for getting featured! </span>
+            <span class="title">{{$key + 1}} week · For only ‎₱{{ $value['price'] }} </span>
+            <span class="description">{{ $value['description'] }}</span>
             <!-- <input type="radio" name="product" value="mobile_desktop" checked="checked"> -->
-            {!! Form::radio('duration', '1', true) !!}
+            {!! Form::hidden('hiddenprice[]',$value['price'] , array('id' => 'hehe')) !!}
+            {!! Form::radio('duration',  $key + 1 , true) !!}
           </div>
           <div class="clear"></div>
         </div>
       </div>
-      
-      <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-        <div class="product-chooser-item">
-          <img src="{{ URL::to('/images/number2.png')}}" class="img-rounded col-xs-4 col-sm-4 col-md-12 col-lg-12" alt="Desktop">
-                <div class="col-xs-8 col-sm-8 col-md-12 col-lg-12">
-            <span class="title">2 week · For only ‎₱229.99 (Save 10% off!) </span>
-            <span class="description">Get featured for 2 weeks! Get this promo and save 10% off!</span>
-            <!-- <input type="radio" name="product" value="desktop"> -->
-            {!! Form::radio('duration', '2', false) !!}
-          </div>
-          <div class="clear"></div>
-        </div>
-      </div>
-      
-      <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-        <div class="product-chooser-item">
-          <img src="{{ URL::to('/images/number3.png')}}" class="img-rounded col-xs-4 col-sm-4 col-md-12 col-lg-12" alt="Mobile">
-                <div class="col-xs-8 col-sm-8 col-md-12 col-lg-12">
-            <span class="title">3 week · For only ‎₱311.99 (Save 20% off!) </span>
-            <span class="description">Get featured for 3 weeks! Get this promo and save 20% off! This is our maximum duration for getting featured!</span>
-            <!-- <input type="radio" name="product" value="mobile"> -->
-            {!! Form::radio('duration', '3', false) !!}
-          </div>
-          <div class="clear"></div>
-        </div>
-      </div>
+      @endforeach
       
       <button type="submit"><img class="img-responsive center-block" src="{{ URL::to('images/paynow_button.png') }}"></button>
       {!! Form::close() !!}

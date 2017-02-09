@@ -11,32 +11,8 @@
 |
 */
 
-Route::get('/home', function () {
-	if (Auth::check()) {
-		if(Session::get('roleID') == 0){
-		return Redirect::to('/homescout');
-		}
-		else {
-		return Redirect::to('/hometalent');
-		}
-	}
-	else {
-    return view('home');
-	}
-});
-Route::get('/', function () {
-    if (Auth::check()) {
-		if(Session::get('roleID') == 0){
-		return Redirect::to('/homescout');
-		}
-		else {
-		return Redirect::to('/hometalent');
-		}
-	}
-	else {
-    return view('home');
-	}
-});
+Route::get('/home', 'HomeController@showHome');
+Route::get('/', 'HomeController@showHomedash');
 
 Route::get('/scoutregister', function () {
     return view('scout.register');
@@ -47,6 +23,9 @@ Route::get('/talentregister', function () {
 });
 Route::get('/forgotpassword', function () {
     return view('forgotpassword');
+});
+Route::get('/resendlink', function () {
+    return view('resendactivation');
 });
 //email activation
 Route::get('register/verify/{confirmationCode}', [
@@ -62,6 +41,12 @@ Route::post('/resetpassword', 'RegistrationController@resetpassword');
 Route::get('reset/verify/{confirmationCode}', [
     'as' => 'confirmation_path',
     'uses' => 'RegistrationController@resetpasswordCode'
+]);
+//resend activation code
+Route::post('/resendActivation', 'RegistrationController@resendActivation');
+Route::get('reset/verify/{confirmationCode}', [
+    'as' => 'confirmation_path',
+    'uses' => 'RegistrationController@resendActivationCode'
 ]);
 //login
 Route::get('/login', function () {
@@ -102,6 +87,7 @@ Route::post('/addpost', 'ScoutController@addPost');
 Route::post('/editpost', 'ScoutController@editpost');
 Route::post('/closepost/{id}', 'ScoutController@closePost');
 Route::post('/sortpost', 'ScoutController@sortPost');
+Route::get('/deleteYourPost/{id}', 'ScoutController@deleteYourPost');
 //hire
 Route::get('/hire/{id}', 'ScoutController@hire');
 //profile
@@ -110,6 +96,7 @@ Route::get('/profile/{id}', 'HomeController@showProfile');
 Route::post('/profile/edit/{id}', 'HomeController@editProfile');
 //endorse
 Route::get('/connection/{id}', 'HomeController@showConnection');
+Route::get('/endorseUser/{id}', 'HomeController@endorseUser');
 Route::get('/removeEndorsement/{id}', 'HomeController@removeEndorsement');
 //invitation
 Route::get('/invitation/{id}', 'HomeController@showInvitations');
@@ -125,13 +112,21 @@ Route::post('/ratescout/{id}/{postid}', 'HomeController@rateScout');
 //add group member
 Route::get('/addmembers/', 'HomeController@addMember');
 Route::get('/savemember/{id}', 'HomeController@saveMember');
+//revealtalent
+Route::get('/revealTalents/', 'HomeController@revealTalent');
+//revealcategory
+Route::get('/revealCategory/', 'HomeController@revealCategory');
 //remove/leave member/group 
 Route::get('/removeMember/{id}', 'HomeController@removeMember');
+Route::get('/removeNACCMember/{id}', 'HomeController@removeNACCmember');
 Route::get('/leaveGroup/{id}', 'HomeController@leaveGroup');
 //join group
 Route::get('/joinGroup/{id}', 'HomeController@joinGroup');
+Route::get('/addNACCmember/{name}', 'HomeController@addNACCmember');
 //add talent
 Route::post('/addtalent/{id}', 'HomeController@addTalent');
+//remove talent
+Route::get('/removeTalent', 'HomeController@removeTalent');
 //homepage
 Route::get('/homescout', 'HomeController@show');
 Route::get('/hometalent', 'HomeController@show');
@@ -172,9 +167,7 @@ Route::post('/payment', array(
     'as' => 'payment',
     'uses' => 'PaypalController@postPayment',
 ));
-Route::get('/paymentprocess', function () {
-    return view('payment');
-});
+Route::get('/paymentprocess', 'HomeController@showPaymentprocess');
 // this is after make the payment, PayPal redirect back to your site
 Route::get('/payment/status', array(
     'as' => 'payment.status',
@@ -182,13 +175,16 @@ Route::get('/payment/status', array(
 ));
 //admin
 Route::get('/featured', 'HomeController@showFeatured');
-Route::get('/removefeaturedprofile/{id}', 'HomeController@removeFeatureProfile');
+Route::get('/removefeaturedprofile/{id}', 'HomeController@removeFeaturedProfile');
 Route::get('/approvePayment/{id}', 'HomeController@approvePayment');
 Route::get('/deletePost/{id}', 'HomeController@deletePost');
 Route::get('/removefeaturedfeedback/{id}', 'HomeController@removeFeatureFeedback');
 Route::get('/searchUserFeaturedProfile/', 'HomeController@searchUserFeaturedProfile');
 Route::post('/addFeaturedProfile', 'HomeController@addFeaturedProfile');
 Route::post('/addFeaturedFeedback', 'HomeController@addFeaturedFeedback');
+Route::post('/addSubscription', 'HomeController@addSubscription');
+Route::post('/editSubscription', 'HomeController@editSubscription');
+Route::get('/deleteSubscription/{id}', 'HomeController@deleteSubscription');
 
 }); //end group route
 

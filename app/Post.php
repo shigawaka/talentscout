@@ -24,4 +24,9 @@ class Post extends Model
   {
     return ['created_at', 'updated_at', 'date_posted'];
   }
+  public function rating()
+    {
+        return $this->hasMany('App\Rating','post_id');
+    }
+  
 }

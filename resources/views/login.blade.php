@@ -50,6 +50,7 @@
         <!-- /.container-fluid -->
     </nav>
     <section>
+    <main>
     <div class="row">
     @if (Session::has('message'))
         <div class="alert alert-info col-xs-12 text-center">{{ Session::get('message') }}</div>
@@ -78,22 +79,27 @@
                             {!! Form::button('Login',['class'=>'btn btn-success btn-lg btn-block', 'type' => 'submit ']) !!}
                         </div>
                         <div class="col-sm-6">
-                            <a class="pull-right" href="{!! URL::to('/forgotpassword') !!}">Forgot Password?</a>
+                            <a class="pull-right" href="{!! URL::to('/forgotpassword') !!}">Forgot Password?</a> 
                             Don't have an account? <a href="{{ URL::to('/#services') }}">Register</a>
+                        </div>
+                        <div class="col-sm-6">
+                        <a class="pull-right" href="{!! URL::to('/resendlink') !!}">Resend confirm code?</a>
                         </div>
                       </div>
                     {!! Form::close() !!}
                 </div>
             </div>
             </section>
-
-<section class="bg-dark">
+</main>
+<section class="bg-dark footer navbar-fixed-bottom">
 
 <div class="col-lg-12 text-center">
                     <p>Talent Scout.</br>
                         All Rights Reserved.</br>
                         2016</p>
                 </div>
+                <style type="text/css">
+        </style>
 </section>
     <!-- jQuery -->
 

@@ -69,13 +69,16 @@
                         <div class="col-sm-12">
                             {!! Form::button('Send Password Reset Link',['class'=>'btn btn-success btn-lg btn-block', 'type' => 'submit ']) !!}
                         </div>
+                        <div class="col-sm-12">
+                        <a class="pull-right" href="{!! URL::to('/login') !!}">Login</a>
+                        </div>
                       </div>
                     {!! Form::close() !!}
                 </div>
             </div>
             </section>
 
-<section class="bg-dark">
+<section class="bg-dark footer navbar-fixed-bottom">
 
 <div class="col-lg-12 text-center">
                     <p>Talent Scout.</br>

@@ -180,11 +180,12 @@
         
       </nav>
       <div class="row">
-        <div class="col-xs-6 col-xs-offset-1" style="height:auto;">
+        <div class="col-xs-7" style="height:auto;">
         <div class="form-group">
         <div class="col-sm-12 page-header">
         @if(Session::get('roleID') == '3')
           <a href="{!! URL::to('/deletePost').'/'.$posts['id'] !!}">Delete this post</a>
+        
         @endif
         @if(strpos($posts['file'],'.mp4') == true)
         <video style="width: 100%;" width="400" controls>
@@ -212,9 +213,13 @@
           @if( $posts['age'] == '0')
           No Age Limit
           @elseif( $posts['age'] == '1')
-          5 - 17 years old only!
+          5 - 12 years old only!
           @elseif( $posts['age'] == '2')
-          18 and above only!
+          13 - 19 years old only!
+          @elseif( $posts['age'] == '3')
+          20 - 35 years old only!
+          @elseif( $posts['age'] == '4')
+          36 - 50 years old only!
           @endif
           </p>
         </div>
@@ -235,7 +240,7 @@
           </p>
         </div>
         <div class="col-sm-4" style="padding-top: 10px;">
-          <p><strong>Hired</strong> </br>
+          <p><strong>Booked</strong> </br>
           @if(empty($posts['hire_id']))
           0
           @else
@@ -247,7 +252,7 @@
           <p><strong>Talent Characteristic</strong> </br>
           @if($posts['hire_id'] == '0')
           Group and Individual <br /><small style="color: gray;">Any talent group or individual are entertained</small>
-          @elseif($posts['hire_id'] == '1')
+          @elseif($posts['hire_id'] == '2')
           Group only! <br /><small style="color: gray;">Only talent groups are entertained</small>
           @else
           Individual only! <br /><small style="color: gray;">Only individual talents are entertained</small>
@@ -263,35 +268,6 @@
               <p>{!! $posts['description'] !!}</p>
             </div>
           </div>
-          @if(Session::get('roleID') == 0 && Session::get('id') == $posts['scout_id'] && $posts['status'] == 0)
-          <div class="form-group">
-            <div class="col-md-10" style="border-top: 2px solid;">
-              <h2>Recommended Profiles!</h2>
-              {!! $recommended->render() !!}
-            @if (Session::has('invite'))
-            <label class="label label-danger">{!! Session::get('invite') !!}!</label>
-            @endif
-            </div>
-            @if($recommended->total() == 0)
-            <div class="col-md-10" style="border-top: 2px solid;">
-            <h3>NONE FOR NOW</h3>
-            </div>
-            @endif
-            @foreach($recommended as $recom)
-            <div class="col-md-5">
-              <div class="card">
-              <img style="width:200px; height:200px;"class="card-img-top" src="{!! URL::to('/files').'/'.$recom['profile_image'] !!}" alt="Card image cap">
-              <div class="card-block">
-                <h4 class="card-title">{!! $recom['firstname'].' '.$recom['lastname'] !!}</h4>
-                <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
-                <a href="{!! URL::to('/profile').'/'.$recom['id'] !!}" class="btn btn-success">Visit Profile</a>
-                <a href="{!! URL::to('/profile/invite').'/'.$recom['id'] !!}" class="btn btn-primary">Invite</a>
-              </div>
-            </div>
-            </div>
-            @endforeach
-          </div>
-          @endif
         <!-- left row -->
         </div>
         <div class="col-md-4 col-md-offset-1">
@@ -502,9 +478,32 @@
         <span></span>
     </div>
                 </div>
+                <div class="col-xs-12">
+                  
+                {!! Form::textarea('comment['.$fullprop.']', '', array('style' => 'min-width:100%;resize:none;','class' => 'form-group','placeholder' => 'Describe your experience with this talent!')) !!}
+                </div>
                 @endforeach  
+                <div class="col-xs-12" id="testimony">
+                <hr />
+                <label class="label label-info">How helpful was Talent Scout to you?</label>
+                <div class="stars" style="margin:0;">
+                {!! Form::radio('testi_score', 1, false, ['class' => 'star-1', 'id' => 'star-1']) !!}
+                <label title="Bad!" class="star-1" for="star-1">1</label>
+                {!! Form::radio('testi_score', 2, false, ['class' => 'star-2', 'id' => 'star-2']) !!}
+                <label title="Not Bad!" class="star-2" for="star-2">2</label>
+                {!! Form::radio('testi_score', 3, false, ['class' => 'star-3', 'id' => 'star-3']) !!}
+                <label title="Good!" class="star-3" for="star-3">3</label>
+                {!! Form::radio('testi_score', 4, false, ['class' => 'star-4', 'id' => 'star-4']) !!}
+                <label title="Very Good!" class="star-4" for="star-4">4</label>
+                {!! Form::radio('testi_score', 5, false, ['class' => 'star-5', 'id' => 'star-5']) !!}
+                <label title="Excellent!" class="star-5" for="star-5">5</label>
+                <span></span>
+                </div>
+                {!! Form::textarea('testimonial_comment', '', array('style' => 'min-width:100%;resize:none;','class' => 'form-group','placeholder' => 'Describe how helpful was Talent Scout to you.')) !!}
+                <a href="#" id="skip">Skip review</a>
+                </div>
                 <div class="modal-footer">
-                {!! Form::submit('Rate talent(s) and close deal!', array('class' => 'btn btn-info')) !!}  
+                {!! Form::submit('Rate and close deal!', array('class' => 'btn btn-info')) !!}  
                 {!! Form::close(); !!}          
                  <!--  <button type="button" class="btn btn-primary">
                     Save changes
@@ -519,6 +518,9 @@
             
           </div>
           @elseif(empty($proposal) && Session::get('roleID') == 1 && $posts['status'] == 0)
+          @if(count($proposal) !== 0)
+                <a id="modal-403917" href="#modal-container-403917" role="button" class="btn btn-success btn-lg" data-toggle="modal" disabled>Booked</a>
+          @else
           <!-- end of modal -->
         <a id="modal-403917" href="#modal-container-403917" role="button" class="btn btn-success btn-lg" data-toggle="modal">Apply</a>
           
@@ -544,7 +546,17 @@
                 @endforeach
                 </div>
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
-                    Add Proposed rate  <small class="col-xs-offset-1">Client's Budget: ₱{!! $posts['budget'] !!}</small>
+                    Add Video
+                </h3>
+                <div class="col-xs-12">
+                {!! Form::file('file', ['id'=>'ifile','class' => 'form-group','placeholder' => 'Upload Video']) !!}
+                
+                @foreach($errors->get('file') as $message)
+                <div class="alert alert-danger text-center">{{ $message }}</div>
+                @endforeach
+                </div>
+                <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
+                    Add Proposed rate  <small class="col-xs-offset-1">Client's Budget: ₱{!! $posts['budget'].'-'.$posts['rate'] !!}</small>
                 </h3>
 
                 <div class="col-xs-12">
@@ -569,6 +581,7 @@
             
           </div>
           <!-- end of modal -->
+            @endif
           @elseif(Session::get('roleID') == 1 && $posts['status'] == 0)
           <!-- start of modal -->
           <a id="modal-403917" href="#modal-container-403917" role="button" class="btn btn-success btn-lg" data-toggle="modal">Edit Application</a>
@@ -638,12 +651,13 @@
                     Applicants
                   </h1>
                 </div>
+
                 @foreach($fullproposals as $fullprop => $val)
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
                     {!! $val['firstname'] , ' ',  $val['lastname'] !!}
-                    @if(!empty($val['hired']))f
+                    @if(!empty($val['hired']))
                       @if($val['user_id'] === $val['hired'])
-                      <a disabled class="btn btn-success" href="{!! URL::to('/hire').'/'.$val['user_id'] !!}">Hired</a>
+                      <a disabled class="btn btn-success" href="{!! URL::to('/hire').'/'.$val['user_id'] !!}">Booked</a>
                       @else
                       <a class="btn btn-info" href="{!! URL::to('/hire').'/'.$val['user_id'] !!}">Hire</a>
                       @endif
@@ -659,7 +673,8 @@
                 </blockquote>
                 </div>
                 
-                @endforeach          
+                @endforeach  
+                        
                 <div class="modal-footer">
                  <!--  <button type="button" class="btn btn-primary">
                     Save changes
@@ -679,13 +694,12 @@
         </div>
         <!-- comment area -->
             {!! Form::open(['url'=>'/addComment']) !!}
-                          <div class="col-sm-1">
-                  <div class="thumbnail">
-                  <img class="img-responsive user-photo" src="{!! URL::to('/files').'/'.Session::get('profile_image') !!}">
-                  </div><!-- /thumbnail -->
-                  </div><!-- /col-sm-1 -->
+                          
 
                   <div class="col-sm-4">
+                  <div class="thumbnail">
+                  <img style="width:100px;" class="img-responsive user-photo" src="{!! URL::to('/files').'/'.Session::get('profile_image') !!}">
+                  </div><!-- /thumbnail -->
                   <div class="panel panel-default">
                   <div class="panel-heading">
                   {!! Form::textarea('comment', '', array('style' => 'min-width:100%;resize:none;height:120px;width:20px;','class' => 'form-group','placeholder' => 'Type some comment')) !!}
@@ -729,6 +743,62 @@
         <!-- end of comment area -->
         <!-- right row -->
       </div>
+      @if(Session::get('roleID') == 0 && Session::get('id') == $posts['scout_id'] && $posts['status'] == 0)
+          <!-- talents with rating -->
+          <div class="form-group">
+            <div class="col-md-12" style="border-top: 2px solid;">
+              <h2>Recommended Profiles with Experience!</h2>
+              {!! $recommended->render() !!}
+            @if (Session::has('invite'))
+            <label class="label label-danger">{!! Session::get('invite') !!}!</label>
+            @endif
+            </div>
+            @if($recommended->total() == 0)
+            <div class="col-md-12" style="border-top: 2px solid;">
+            <h3>NONE FOR NOW</h3>
+            </div>
+            @endif
+            @foreach($recommended as $recom)
+            <div class="col-md-2">
+              <div class="card">
+              <img style="width:100px; height:100px;"class="card-img-top" src="{!! URL::to('/files').'/'.$recom['profile_image'] !!}" alt="Card image cap">
+              <div class="card-block">
+                <h4 class="card-title">{!! $recom['firstname'].' '.$recom['lastname'] !!}</h4>
+                <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
+                <a href="{!! URL::to('/profile').'/'.$recom['id'] !!}" class="btn btn-success">Visit Profile</a>
+                <a href="{!! URL::to('/profile/invite').'/'.$recom['id'] !!}" class="btn btn-primary">Invite</a>
+              </div>
+            </div>
+            </div>
+            @endforeach
+          </div>
+          <!-- newbie talents without rating -->
+          <div class="form-group">
+            <div class="col-md-12" style="border-top: 2px solid;">
+              <h2>Recommended Profiles Newly Registered!</h2>
+            @if (Session::has('invite'))
+            <label class="label label-danger">{!! Session::get('invite') !!}!</label>
+            @endif
+            </div>
+            @if(empty($recommendednewbie))
+            <div class="col-md-12" style="border-top: 2px solid;">
+            <h3>NONE FOR NOW</h3>
+            </div>
+            @endif
+            @foreach($recommendednewbie as $recom)
+            <div class="col-md-2">
+              <div class="card">
+              <img style="width:100px; height:100px;"class="card-img-top" src="{!! URL::to('/files').'/'.$recom['profile_image'] !!}" alt="Card image cap">
+              <div class="card-block">
+                <h4 class="card-title">{!! $recom['firstname'].' '.$recom['lastname'] !!}</h4>
+                <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
+                <a href="{!! URL::to('/profile').'/'.$recom['id'] !!}" class="btn btn-success">Visit Profile</a>
+                <a href="{!! URL::to('/profile/invite').'/'.$recom['id'] !!}" class="btn btn-primary">Invite</a>
+              </div>
+            </div>
+            </div>
+            @endforeach
+          @endif
     </div>
   </div>
 </div>
@@ -760,7 +830,7 @@
     <script src="../../js/carousel.js"></script>
     <script src="../../js/bootstrap-tagsinput.js"></script>
     <script src="../../js/bootstrap-tagsinput-angular.js"></script>
-  //   <script>
+     <script>
   //   $(document).on('click','.pagination a', function (event) {
   //       event.preventDefault();
   //       if ( $(this).attr('href') != '#' ) {
@@ -769,6 +839,30 @@
   //       }
   //   });
   // </script>
+  <script>
+    $("document").ready(function(){
+
+    $("#ifile").change(function() {
+        var fsize = $('#ifile')[0].files[0].size;
+        var fname = $('#ifile')[0].files[0].name;
+        var fextension = fname.split('.').pop();
+        console.log(fextension);
+        if(fsize>200000000) //do something if file size more than 1 mb (1048576)
+        {
+            alert("Too big!\n File Size limit: 200mb!");
+            $("#ifile").val('');
+        }
+        // else if(fextension !== 'mp4'){
+        //   alert('File extension is not MP4!');
+        //   $("#ifile").val('');
+        // }
+    });
+
+    $("#skip").click(function(){
+        $("#testimony").remove();
+    });
+});
+  </script>
 </body>
 
 </html>
