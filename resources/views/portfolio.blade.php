@@ -81,7 +81,7 @@
             </ul>
 
             <ul class="right">
-              @if(Session::get('first_login') == 1)
+              @if(Session::get('first_login') == 1 || Session::get('address') == null || Session::get('profile_image') == 'avatar.png')
               <li><a href="/home" class="disabled">Home</a></li>
             @else
               <li><a href="/home">Home</a></li>
@@ -301,6 +301,16 @@
               $('#modal3').openModal();
           </script>
   @endif
+  @if(Session::get('first_login') == 1 || Session::get('address') == null || Session::get('profile_image') == 'avatar.png')
+  <script>
+    $(document).ready(function() {
+      $('.disabled').click(function(e){
+      alert('You need to setup your profile! Setup the following: Profile Image, Talents, Talent fee, Address, link your card!');
+     e.preventDefault();
+  });
+    });
+  </script>
+  @endif
 <script>
     $("document").ready(function(){
 
@@ -316,10 +326,6 @@
         }
     });
 });
-    $('.disabled').click(function(e){
-      alert('Setup your profile first!');
-     e.preventDefault();
-  });
 
     $(document).ready(function($) {
         $.ajax({

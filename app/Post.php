@@ -26,7 +26,7 @@ class Post extends Model
   }
   public function rating()
     {
-        return $this->hasMany('App\Rating','post_id');
+        return $this->hasManyThrough('App\Rating','post_id');
     }
   
 }

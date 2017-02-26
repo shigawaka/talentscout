@@ -180,7 +180,7 @@
         
       </nav>
       <div class="row">
-        <div class="col-xs-7" style="height:auto;">
+        <div class="col-xs-7" style="height:auto;background-color:#36D7B7;">
         <div class="form-group">
         <div class="col-sm-12 page-header">
         @if(Session::get('roleID') == '3')
@@ -249,17 +249,27 @@
           </p>
         </div>
         <div class="col-sm-4" style="padding-top: 10px;">
-          <p><strong>Talent Characteristic</strong> </br>
-          @if($posts['hire_id'] == '0')
+          <p><strong>Talent Variety</strong> </br>
+          @if($posts['group'] == '0')
           Group and Individual <br /><small style="color: gray;">Any talent group or individual are entertained</small>
-          @elseif($posts['hire_id'] == '2')
+          @elseif($posts['group'] == '2')
           Group only! <br /><small style="color: gray;">Only talent groups are entertained</small>
           @else
           Individual only! <br /><small style="color: gray;">Only individual talents are entertained</small>
           @endif
           </p>
         </div>
+        <div class="col-sm-4" style="padding-top: 10px;">
+          <p><strong>Event Start Date</strong> </br>
+          {!! Carbon\Carbon::parse($posts['start_date'])->format('F d,Y H:i A')!!}
+          </p>
         </div>
+        <div class="col-sm-4" style="padding-top: 10px;">
+          <p><strong>Event End Date</strong> </br>
+          {!! Carbon\Carbon::parse($posts['end_date'])->format('F d,Y H:i A') !!}
+          </p>
+        </div>
+      </div>
           <div class="form-group">
             <div class="col-md-10">
               <h2>Details</h2>
@@ -362,10 +372,10 @@
                 {!! Form::select('gender', array('any' => 'Any gender', 'male' => 'Male only', 'female' => 'Female only'), $posts['gender']) !!}
                 </div>
                 <h3 class="form-group" style="padding-left: 17px;padding-top:25px" id="myModalLabel">
-                    Characteristic    
+                    Type of Talent    
                 </h3>
                 <div class="col-xs-12">
-                {!! Form::select('group', array('0' => 'Group and Individual', '1' => 'Group only', '2' => 'Individual Only'), $posts['group']) !!}
+                {!! Form::select('group', array('0' => 'Group and Individual', '1' => 'Individual Only', '2' => 'Group Only'), $posts['group']) !!}
                 </div>
                 <h3 class="form-group" style="padding-left: 17px;padding-top:25px" id="myModalLabel">
                     Number of Talent(s)    

@@ -81,7 +81,7 @@
             </ul>
 
             <ul class="right">
-            @if(Session::get('first_login') == 1)
+            @if(Session::get('first_login') == 1 || Session::get('address') == null || Session::get('profile_image') == 'avatar.png')
               <li><a href="/home" class="disabled">Home</a></li>
             @else
               <li><a href="/home">Home</a></li>
@@ -98,7 +98,7 @@
 
               <div class="cardcard-content valign center">
                 <div class="card-image">
-                   <img class="circle" src="{!! URL::to('/files').'/'.$user['profile_image'] !!}" style="width:250px; height:250px; ">
+                   <img class="circle" src="{!! URL::to('/files').'/'.$user['profile_image'] !!}" style="height:250px; ">
                  </div>
                 
                  <div class="card-stacked">
@@ -108,6 +108,13 @@
                   <button data-target="modal" class="btn modal-trigger" id="btn1">
                   <i class="material-icons">more_vert</i>
                 </button>
+                    @if(Session::get('cc') == 'null')
+                    <button data-target="modalcard" class="btn modal-trigger" id="btn1">
+                    <i class="material-icons">payment</i>  Link debit/credit card
+                    </button>
+                    @else
+                    <a href="{!! URL::to('/unlinkCard').'/'.$user['id'] !!}" class="btn btn-info" id="unlinkCard"><i class="material-icons">payment</i> Unlink card</a>
+                    @endif
                   @endif
                 </div>
                 @if (Session::has('message'))
@@ -232,6 +239,80 @@
                     <!-- <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Save</a> -->
                     </div>
               </div>
+              <!-- start modal card -->
+              <div id="modalcard" class="modal modal-fixed-footer">
+                       <div class="modal-content">
+                       <h4>Link Debit/Credit Card</h4>
+                       <div class="divider"></div>
+                      <div class="wrap">
+                        <div class="row">
+                        {!! Form::open(['url'=>'/linkcreditcard', 'files' => true]) !!}
+                          <div class="input-field col s6">
+            {!! Form::text('firstname', '', array('class' => 'validate','placeholder' => 'Enter Firstname')) !!}
+              <!-- <input  value="Frete" id="firstname" type="text" class="validate"> -->
+              <label for="firstname">First Name</label>
+              @foreach($errors->get('firstname') as $message)
+                {!! $message !!}
+                @endforeach
+            </div>
+            <div class="input-field col s6">
+            {!! Form::text('lastname', '', array('class' => 'validate','placeholder' => 'Enter Lastname')) !!}
+              <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
+              <label for="lastname">Last Name</label>
+              @foreach($errors->get('lastname') as $message)
+                {!! $message !!}
+                @endforeach
+            </div>
+            <div class="input-field col s6">
+            <label for="cardtype" style="margin-top:-30px;">Card Type</label>
+            {!! Form::select('cardtype', ['visa' => 'Visa','mastercard' => 'MasterCard', 'maestro' => 'Maestro', 'amex' => 'American Express', 'discover' => 'Discover'], null, ['class' => 'browser-default']) !!}
+              @foreach($errors->get('cardtype') as $message)
+                {!! $message !!}
+                @endforeach
+            </div>
+            <div class="input-field col s6">
+            <label for="cardtype">Card Number</label>
+            {!! Form::number('cardnumber', null, ['class' => 'browser-default', 'min' => '0']) !!}
+              @foreach($errors->get('cardnumber') as $message)
+                {!! $message !!}
+                @endforeach
+            </div>
+            <div class="input-field col s6">
+            <label for="cardtype" style="margin-top:-30px;">Expiry Date</label>
+            {!! Form::select('cardmonth', ['01' => '01','02' => '02', '03' => '03','04' => '04','05' => '05','06' => '06','07' => '07','08' => '08','09' => '09','10' => '10','11' => '11','12' => '12'], null, ['class' => 'browser-default']) !!}
+            {!! Form::select('cardyear', ['2014' => '2014','2015'  => '2015', '2016'  => '2016','2017'  => '2017','2018'  => '2018','2019'  => '2019','2020'  => '2020','2021'  => '2021','2022'  => '2022'], null, ['class' => 'browser-default']) !!}
+              @foreach($errors->get('cardmonth') as $message)
+                {!! $message !!}
+                @endforeach
+                @foreach($errors->get('cardyear') as $message)
+                {!! $message !!}
+                @endforeach
+            </div>
+            <div class="input-field col s6">
+            <label for="cardtype">CVV</label>
+            {!! Form::number('cardcvv', null, ['class' => 'browser-default', 'min' => '0']) !!}
+              @foreach($errors->get('cardcvv') as $message)
+                {!! $message !!}
+                @endforeach
+            </div>
+                      </div>
+                       @if(Session::has('errorpaypal'))
+                       <div id="card-alert" class="card red">
+                        <div class="card-content white-text">
+                        <p><i class="mdi-navigation-check"></i> {{ Session::get('errorpaypal') }}</p>
+                        </div>
+                        </div>
+                       @endif
+                        </div>
+                       </div>
+                    <div class="modal-footer">
+                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Cancel</a>
+                    {!! Form::submit('Link Card', array('class' => 'btn btn-info')) !!}  
+                      {!! Form::close(); !!}   
+                    <!-- <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat ">Save</a> -->
+                    </div>
+              </div>
+              <!-- end modal debit/card div -->
                   <h2><b>{!! ucfirst($user['firstname']) .' '. ucfirst($user['lastname']) !!}</b></h2>
                    <h5>{!! $user['address'] !!}</h5>
                    <div class="card-action">
@@ -266,6 +347,12 @@
                    <div class="card-content">
                     <i class="material-icons cyan-text darken-text">date_range</i>Birthday
                        <h6>{!! $user['birthday'] !!}</h6>
+                    </div>
+                    </div>
+                    <div class="card-stacked">
+                   <div class="card-content">
+                    <i class="material-icons cyan-text darken-text">location_on</i>Address
+                       <h6>{!! $user['address'] !!}</h6>
                     </div>
                     </div>
                    <div class="card-stacked">
@@ -422,6 +509,23 @@
               $('#modal').openModal();
           </script>
   @endif
+
+  @if(Session::has('errorpaypal'))
+          <script>
+              $('#modalcard').openModal();
+          </script>
+  @endif
+
+  @if(Session::get('first_login') == 1 || Session::get('address') == null || Session::get('profile_image') == 'avatar.png')
+  <script>
+    $(document).ready(function() {
+      $('.disabled').click(function(e){
+      alert('You need to setup your profile! Setup the following: Profile Image, Talents, Talent fee, Address, link your card!');
+     e.preventDefault();
+  });
+    });
+  </script>
+  @endif
   <script>
   
     $('.datepicker').pickadate({
@@ -437,10 +541,7 @@
      $('select').material_select();
   });
 
-    $('.disabled').click(function(e){
-      alert('Setup your profile first!');
-     e.preventDefault();
-  });
+    
 
      $(document).ready(function($) {
         $.ajax({

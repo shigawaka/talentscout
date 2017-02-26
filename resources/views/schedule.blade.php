@@ -92,7 +92,7 @@
             </ul>
 
             <ul class="right">
-              @if(Session::get('first_login') == 1)
+              @if(Session::get('first_login') == 1 || Session::get('address') == null || Session::get('profile_image') == 'avatar.png')
               <li><a href="/home" class="disabled">Home</a></li>
             @else
               <li><a href="/home">Home</a></li>
@@ -137,9 +137,9 @@
                   <div class="input-field col s6">
                         {!! Form::label('allday', 'Is this an all day event?') !!}
                         <p>
-                        {!! Form::radio('allday', 'True', true, array('id'=>'true')) !!}
+                        {!! Form::radio('allday', 'True', false, array('id'=>'true', 'class' => 'alldayevent')) !!}
                         {!! Form::label('true', 'True') !!}
-                        {!! Form::radio('allday', 'False', false, array('id'=>'false')) !!}
+                        {!! Form::radio('allday', 'False', true, array('id'=>'false','class'=>'notallday')) !!}
                         {!! Form::label('false', 'False') !!}
                         </p>
               @foreach($errors->get('allday') as $message)
@@ -164,7 +164,7 @@
                 
                   </div>
                   <div class="input-field col s12">
-            {!! Form::text('start_time', '', array('class' => 'timepicker','placeholder' => 'Enter Start Time')) !!}
+            {!! Form::text('start_time', '', array('id' => 'starttime','class' => 'timepicker','placeholder' => 'Enter Start Time')) !!}
               <!-- <input  value="Frete" id="firstname" type="text" class="validate"> -->
               <label for="firstname">Start Time</label>
               @foreach($errors->get('start_time') as $message)
@@ -189,7 +189,7 @@
                 @endforeach
                   </div>
                   <div class="input-field col s12">
-            {!! Form::text('end_time', '', array('class' => 'timepicker2','placeholder' => 'Enter End Time')) !!}
+            {!! Form::text('end_time', '', array('id' => 'endtime','class' => 'timepicker2','placeholder' => 'Enter End Time')) !!}
               <!-- <input  value="Frete" id="firstname" type="text" class="validate"> -->
               <label for="firstname">End Time</label>
               @foreach($errors->get('end_time') as $message)
@@ -208,7 +208,7 @@
               {!! Form::close(); !!}
             </div>
           </div>
-        <div id="dialog" title="" style="display:none;">Are you sure want to delete it?</div>
+        <div id="dialog" title="" style="display:none;">Are you sure want to cancel it? <br/> <small>Please be mindful when cancelling which involves an event booking you got invited or proposed.</small> <br/> <small>If you are confused, Please read our <a style="color:blue;" target="_blank" href="{{ URL::to('/terms') }}">Policy and Terms</a></small> </div>
         {!! $calendar->calendar() !!}
         {!! $calendar->script() !!}
       </div>
@@ -273,13 +273,28 @@
 $.ajaxSetup({
    headers: { 'X-CSRF-Token' : $('meta[name=_token]').attr('content') }
 });
-$('.disabled').click(function(e){
-      alert('Setup your profile first!');
+</script>
+    @if(Session::get('first_login') == 1 || Session::get('address') == null || Session::get('profile_image') == 'avatar.png')
+  <script>
+    $(document).ready(function() {
+      $('.disabled').click(function(e){
+      alert('You need to setup your profile! Setup the following: Profile Image, Talents, Talent fee, Address, link your card!');
      e.preventDefault();
   });
-</script>
-    
+    });
+  </script>
+  @endif
+  <script>
+    $(".alldayevent").click(function() {
+      $('#starttime').prop('disabled', true);
+      $('#endtime').prop('disabled', true);
+    });
 
+    $(".notallday").click(function() {
+      $('#starttime').prop('disabled', false);
+      $('#endtime').prop('disabled', false);
+    });
+  </script>
       </body>
 
     </html>

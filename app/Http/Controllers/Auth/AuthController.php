@@ -7,7 +7,7 @@ use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
 use Illuminate\Support\Facades\Redirect;
 use Validator;
-
+use Session;
 use Illuminate\Support\Facades\Auth;
 use Input;
 use App\Featured;
@@ -73,7 +73,7 @@ public function getLogin(){
   public function getLogout()
     {
          Auth::logout();
- 
+        Session::flush();
         return Redirect::to('/home');
     }
   

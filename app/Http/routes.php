@@ -138,14 +138,16 @@ Route::get('/about', function () {
 Route::get('/send', 'EmailController@send');
 
 //search
-Route::post('/search', 'HomeController@searchTalent');
-Route::get('/search', function () {
-    return view('scout.searchtalent');
-});
-Route::post('/searchscout', 'HomeController@searchScout');
-Route::get('/searchscout', function () {
-    return view('talent.searchscout');
-});
+Route::post('/searchkeytalent', 'HomeController@searchTalent');
+Route::get('/search', 'HomeController@showSearchTalent');
+// Route::get('/search', function () {
+//     return view('scout.searchtalent');
+// });
+Route::post('/searchingkeyscout', 'HomeController@searchScout');
+Route::get('/searchscout', 'HomeController@showSearchScout');
+// Route::get('/searchscout', function () {
+//     return view('talent.searchscout');
+// });
 Route::get('/view', function () {
     return view('scout.viewpost');
 });
@@ -167,18 +169,33 @@ Route::post('/payment', array(
     'as' => 'payment',
     'uses' => 'PaypalController@postPayment',
 ));
+Route::get('/penalizetalent/{id}', 'PaypalController@penalizeTalent');
 Route::get('/paymentprocess', 'HomeController@showPaymentprocess');
+//link to tie-up account in paypal
+Route::get('/linkuserpaypal', 'PaypalController@createAgreement');
+//admin activates billing plan
+Route::get('/createbillingplan', 'PaypalController@createBillingPlan');
+Route::post('/linkcreditcard', 'PaypalController@linkcreditcard');
+Route::get('/unlinkCard/{id}', 'PaypalController@unlinkCard');
+Route::get('/paythroughcard/{price}/{duration}', 'PaypalController@paythroughcard');
+Route::get('/processcreditcard', 'PaypalController@processCreditCard');
 // this is after make the payment, PayPal redirect back to your site
 Route::get('/payment/status', array(
     'as' => 'payment.status',
     'uses' => 'PaypalController@getPaymentStatus',
+));
+
+// User agree to the Billing plan, redirects back to site.
+Route::get('/processagreement', array(
+    'as' => 'processagreement',
+    'uses' => 'PaypalController@processAgreement',
 ));
 //admin
 Route::get('/featured', 'HomeController@showFeatured');
 Route::get('/removefeaturedprofile/{id}', 'HomeController@removeFeaturedProfile');
 Route::get('/approvePayment/{id}', 'HomeController@approvePayment');
 Route::get('/deletePost/{id}', 'HomeController@deletePost');
-Route::get('/removefeaturedfeedback/{id}', 'HomeController@removeFeatureFeedback');
+Route::get('/removefeaturedfeedback/{id}', 'HomeController@removeFeaturedFeedback');
 Route::get('/searchUserFeaturedProfile/', 'HomeController@searchUserFeaturedProfile');
 Route::post('/addFeaturedProfile', 'HomeController@addFeaturedProfile');
 Route::post('/addFeaturedFeedback', 'HomeController@addFeaturedFeedback');

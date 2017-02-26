@@ -63,7 +63,7 @@
       <nav class="navbar navbar-inverse" role="navigation">
         <div class="collapse navbar-collapse"  id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
-            <li  class="active">
+            <li>
               <a href="{!! URL::to('/home') !!}">Home</a>
             </li>
             <li>
@@ -77,14 +77,17 @@
               <a href="{!! URL::to('/post') !!}">My Posts</a>
             </li>
             @endif
+            <li class="active">
+              <a href="{{ URL::to('/searchscout') }}">SEARCH</a>
+            </li>
           </ul>
-          {!! Form::open(['url'=>'/searchscout', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
+         <!--  {!! Form::open(['url'=>'/searchscout', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
           
             
           {!! Form::text('search', '', array('placeholder' => 'Search...', 'class' => 'form-control', 'style' => 'width:70%;')) !!}              
           {!! Form::submit('Search', array('class' => 'btn btn-default')) !!}   
             
-            {!! Form::close() !!}
+            {!! Form::close() !!} -->
           <ul class="nav navbar-nav navbar-right">
             <li>
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -147,18 +150,21 @@
         
       </nav>
       <div class="row">
+        @if (Session::has('message'))
+        <div class="alert alert-info text-center">{{ Session::get('message') }}</div>
+        @endif
         <div class="col-xs-3" style="height:900px;">
         <div class="form-group">
         <div class="col-sm-10">
           <h3>Search Criteria</h3>
           </div>
-          {!! Form::open(['url'=>'/searchscout', 'files' => true]) !!}
+          {!! Form::open(['url'=>'/searchingkeyscout', 'files' => true]) !!}
           <div class="col-sm-10">
           {!! Form::text('search', '', array('class' => 'form-control','placeholder' => 'Enter the Keywords')) !!}
           <!-- <input class="form-control" type="text" name="keyword" placeholder="Enter the Keywords"> --><br>
           </div>
           <div class="col-sm-10">
-          <label for="sel1">By Search Category:</label>
+          <label for="sel1">By Talent Category:</label>
           {!! Form::select('category', ['' => 'Select category'], null, ['id' => 'category','class' => 'form-control']) !!}
           <br>
           </div>

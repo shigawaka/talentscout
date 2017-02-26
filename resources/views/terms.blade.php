@@ -76,6 +76,8 @@
         <p>There are many various kinds of social gathering; it could be a birthday or an event in the community or a concert. The success of any social gathering can be determined by the number of people that actually enjoyed the event; this includes the performance of the individual showcasing one’s talent resulting in adding the latter’s and event manager’s portfolio. Everything seems smooth however one of the common problems for hosting/managing an event is finding talents or icebreakers to entertain the crowds; this could take days or weeks for contacting and verifying the talents which is inconvenient. Talent Scout is the One-Stop web application available for finding events which one can showcase his/her talents and could rise to Stardom or are you finding someone perfect for your event; instead of asking someone if they know someone that can sing or dance, etc. One can find it in Talent Scout. </p>
         <h1>Policy and Terms of Talent Scout</h1>
         <h3>ACCEPTANCE OF TERMS</h3>
+        <p>The registered user shall link his/her debit or credit card to be used as a gateway of cash-bond</p>
+        <p>*Debit/Credit card credentials are not saved and only gets unique ID from it through <a target="_blank" href="https://developer.paypal.com/docs/api/vault/">Paypal Vault API</a> </p>
         <p>
 BY USING THE SERVICES, YOU ARE AGREEING, ON BEHALF OF YOURSELF AND THOSE YOU REPRESENT, TO COMPLY WITH AND BE LEGALLY BOUND BY THESE TERMS AS WELL AS OUR PRIVACY POLICY AND ALL APPLICABLE LAWS. IF YOU, FOR YOURSELF OR ON BEHALF OF THOSE YOU REPRESENT, DO NOT AGREE TO ANY PROVISION OF THESE TERMS, YOU MUST, FOR YOURSELF AND ON BEHALF ANY SUCH PERSON(S), DISCONTINUE THE REGISTRATION PROCESS, DISCONTINUE YOUR USE OF THE SERVICES, AND, IF YOU ARE ALREADY REGISTERED, CANCEL YOUR ACCOUNT.</p>
         <h3>USER CONDUCT</h3>
@@ -83,7 +85,11 @@ BY USING THE SERVICES, YOU ARE AGREEING, ON BEHALF OF YOURSELF AND THOSE YOU REP
 
 As a condition of use, you promise not to use the Services for any purpose that is unlawful or prohibited by these Terms, or any other purpose not reasonably intended by Talent Scout. By way of example, and not as a limitation, you agree not to use the Services: <br />
 <ul>
-  <li>To cancel,be absent, not showing up to the specified event without the knowledge of the other party</li>
+  <li>To cancel,be absent, not showing up to the specified event without the knowledge of the other party. If it happens, the Linked debit/credit card shall automatically deduct as a guarantee for the Site and Other users</li>
+  <ul>Penalties occur in the FF:
+  <li>User has cancelled in a nick of time (3 - 2 days prior to the event)</li>
+  <li>Scout has cancelled his/her event after 1 week of creating the event</li>
+  </ul>
   <li>To abuse, harass, threaten, impersonate or intimidate any person; </br></li>
   <li>To post or transmit, or cause to be posted or transmitted, any Visual Content or Communications that are libelous, defamatory, obscene, pornographic, abusive, offensive, profane, or that infringes any copyright or other right of any person; <br /></li>
   <li>For any purpose (including posting or viewing Visual Content) that is not permitted under the laws of the jurisdiction where you use the Services; <br /></li>

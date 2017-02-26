@@ -83,15 +83,20 @@
             <li>
               <a href="{!! URL::to('/post') !!}">My Posts</a>
             </li>
+            
             @endif
+            <li>
+              <a href="{{ URL::to('/searchscout') }}">SEARCH</a>
+            </li>
           </ul>
-          {!! Form::open(['url'=>'/searchscout', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
+         <!--  {!! Form::open(['url'=>'/searchscout', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
           
             
           {!! Form::text('search', '', array('placeholder' => 'Search...', 'class' => 'form-control', 'style' => 'width:70%;')) !!}              
           {!! Form::submit('Search', array('class' => 'btn btn-default')) !!}   
             
-            {!! Form::close() !!}
+            {!! Form::close() !!} -->
+
           <ul class="nav navbar-nav navbar-right">
             <li>
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -160,7 +165,7 @@
         
       </nav>
       <div class="row">
-      .<div class="carouselcontainer">
+      <div class="carouselcontainer" style="background-color:#2c3e50;">
        
 
                 <!--  START OF carousel -->
@@ -172,25 +177,36 @@
   <!-- Indicators -->
   <ol class="carousel-indicators">
     <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-    @for($i = 1; $i < count($slideshow); $i++)
-    <li data-target="#myCarousel" data-slide-to="{{ $i }}"></li>
-    @endfor
-    <!-- <li data-target="#myCarousel" data-slide-to="2"></li> -->
+    <li data-target="#myCarousel" data-slide-to="1"></li>
+    @if(count($testimonialarr) !== 0)
+        @for($i = 1; $i <= count($testimonialarr); $i++)
+        <li data-target="#myCarousel" data-slide-to="{!! $i !!}"></li>
+        @endfor
+    @endif()
   </ol>
 
   <!-- Wrapper for slides -->
   <div class="carousel-inner" role="listbox">
     <div class="item active">
-      <img style="width:1280px; height:380px;" src="{!! URL::to('/img').'/'.$slideshow[0]['image'] !!}" alt="Chania">
+      <img src="img/carousel_1.jpg" alt="Chania">
     </div>
 
-    @foreach($slideshow as $key => $show)
-    @if($key !== 0)
     <div class="item">
-      <img style="width:1280px; height:380px;" src="{!! URL::to('/img').'/'.$show['image'] !!}" alt="Chania">
+      <img src="img/carousel_2.jpg" alt="Chania">
     </div>
+    @if(!empty($testimonialarr))
+        @foreach($testimonialarr as $key => $value)
+        <div class="item">
+            <div class="col-md-3 text-center">
+          <img style="max-width:65%;" src="{{ URL::to('/files').'/'.$value['picture'] }}" alt="Chania">
+            </div>
+          <blockquote class="blockquote" style="padding-top:105px;">
+          <p class="mb-0" style="color:white;">{{ $value['comment'] }}</p>
+          <footer class="blockquote-footer">Talent Scout User <cite title="Source Title">{{ ucfirst($value['firstname']) }} {{ ucfirst($value['lastname']) }}.</cite><br /><cite>Rated Talent Scout {{ $value['score'] }}/5</cite></footer>
+        </blockquote>
+        </div>
+        @endforeach
     @endif
-    @endforeach
   </div>
 
   <!-- Left and right controls -->
@@ -211,9 +227,10 @@
     </div>
 
     <div class="col-md-12">
-      <div class="page-header">
-        <h1 style="text-align:center;">
-          Recent Deals Posted<br />
+      <div class="page-header" style="background-color:#2c3e50;">
+        <h1 style="text-align:center;color:white;">
+          Events<br />
+          <small style="color:#e74c3c;">Matches your criteria</small>
         </h1>
       </div>
       <div class="row">
@@ -231,11 +248,53 @@
           @endif
             <div class="caption text-center">
             <span class="label label-default">Posted on {!! $post['date_posted']->format('F d,Y H:i A') !!}</span>
-              <h3>
+              <h4>
                 {!! $post['title'] !!}
-              </h3>
+              </h4>
               <p style="font-size:13px;">
               {!! $post['description'] !!}
+              </p>
+              <p style="font-size:13px;">
+              Budget: ₱{!! $post['budget'] !!} | {!! $post['rate'] !!}
+              </p>
+              <p>
+                <a class="btn btn-primary" href="{!! URL::to('/post/'.$post['id']) !!}">View Details</a>
+              </p>
+            </div>
+          </div>
+        </div>
+        @endforeach
+      @endif
+      </div>
+      <div class="page-header" style="background-color:#2c3e50;">
+        <h1 style="text-align:center;color:white;">
+          All events<br />
+          <small style="color:#e74c3c;">All the current events</small>
+        </h1>
+      </div>
+      <div class="row">
+      @if(count($otherpost) == 0)
+      @else
+        @foreach($otherpost as $post)
+        <div class="col-md-3 pull-left" style="width:250px;height: auto;">
+          <div class="thumbnail" style="height:100%;">
+          @if(strpos($post['file'],'.mp4') == true)
+            <video style="width: 100%;" width="400" controls>
+              <source src="{!! URL::to('/files').'/'.$post['file'] !!}" type="video/mp4">
+            </video>
+          @else
+            <img class="img-responsive" style="height:300px; width:200px;"  alt="Bootstrap Thumbnail First" src="{!! URL::to('/files').'/'.$post['file'] !!}" />
+          @endif
+            <div class="caption text-center">
+            <span class="label label-default">Posted on {!! $post['date_posted']->format('F d,Y H:i A') !!}</span>
+              <h4>
+                {!! $post['title'] !!}
+              </h4>
+              <p style="font-size:13px;">
+              {!! $post['description'] !!}
+              </p>
+              <p style="font-size:13px;">
+              Budget: ₱{!! $post['budget'] !!} | {!! $post['rate'] !!}
               </p>
               <p>
                 <a class="btn btn-primary" href="{!! URL::to('/post/'.$post['id']) !!}">View Details</a>

@@ -8,6 +8,8 @@ use Validator;
 use Calendar;
 use Response;
 use DB;
+use File;
+
 
 use App\Scout;
 use App\Featured;
@@ -28,7 +30,7 @@ use App\Subscription;
 use App\Groupmember;
 use App\TalentDetail;
 use App\ScoutDetail;
-
+use App\VaultCreditCard;
 
 use Hash;
 use Auth;
@@ -108,6 +110,7 @@ class HomeController extends Controller
         $profilearray = array();
         $i = 0;
         $profile = Featured::where('isProfile','=',1)->get();
+        $slideshow = Featured::where('isFeedback', '=', 1)->get();
         foreach ($profile as $key => $value) {
             $userdetail = User::find($value['profile_id']);
             $checkexpiration = Carbon::parse($value['end_date']);
@@ -122,11 +125,14 @@ class HomeController extends Controller
             $i++;
             }
             else {
-                //remove from db
+                //remove profile from db
+                $rempro = Featured::where('profile_id', '=', $value['profile_id']);
+                $rempro->delete();
             }
         }
         return view('home')
                 ->with('profilearray', $profilearray)
+                ->with('slideshow', $slideshow)
                 ->with('testimonialarr', $testimonialarr);
         }
     }
@@ -166,6 +172,7 @@ class HomeController extends Controller
             }
         }
         $profile = Featured::where('isProfile','=',1)->get();
+        $slideshow = Featured::where('isFeedback', '=', 1)->get();
         $profilearray = array();
         $i = 0;
         foreach ($profile as $key => $value) {
@@ -183,10 +190,13 @@ class HomeController extends Controller
             }
             else {
                 //remove from db
+                $rempro = Featured::where('profile_id', '=', $value['profile_id']);
+                $rempro->delete();
             }
         }
         return view('home')
             ->with('profilearray', $profilearray)
+            ->with('slideshow', $slideshow)
             ->with('testimonialarr', $testimonialarr);
     }
     }
@@ -214,10 +224,170 @@ class HomeController extends Controller
             if(count($posts) < 0 ){
                 $posts = null;
             }
-
+            else {
+                $postarr = array();
+                $i = 0;
+                //retrieve posts which matches the users talent criteria
+                foreach ($posts as $key => $value) {
+                    foreach (json_decode($value['tags'],true) as $tal) {
+                       $temp = TalentDetail::where('talent_id', '=', Session::get('id'))
+                                           ->where('talent', '=', $tal)
+                                           ->get();
+                        if(count($temp) > 0){
+                            // dd(empty($postarr));
+                            if(!empty($postarr)){
+                                for ($j=0; $j < count($postarr); $j++) { 
+                                    
+                                    //check post if it has same id
+                                    // $checkduplicate = array_search($value['id'], $postarr[$j]);
+                                    if($value['id'] !== $postarr[$j]['id']){
+                                        $postarr[$i]['id'] = $value['id'];
+                                        $postarr[$i]['scout_id'] = $value['scout_id'];
+                                        $postarr[$i]['scout_id'] = $value['scout_id'];
+                                        $postarr[$i]['title'] = $value['title'];
+                                        $postarr[$i]['description'] = $value['description'];
+                                        $postarr[$i]['file'] = $value['file'];
+                                        $postarr[$i]['description'] = $value['description'];
+                                        $postarr[$i]['tags'] = $value['tags'];
+                                        $postarr[$i]['age'] = $value['age'];
+                                        $postarr[$i]['gender'] = $value['gender'];
+                                        $postarr[$i]['budget'] = $value['budget'];
+                                        $postarr[$i]['rate'] = $value['rate'];
+                                        $postarr[$i]['group'] = $value['group'];
+                                        $postarr[$i]['date_posted'] = $value['date_posted'];
+                                        $postarr[$i]['status'] = $value['status'];
+                                        $postarr[$i]['hire_id'] = $value['hire_id'];
+                                        $postarr[$i]['start_date'] = $value['start_date'];
+                                        $postarr[$i]['end_date'] = $value['end_date'];
+                                        $i++;
+                                    }
+                                    //end
+                                }
+                            }
+                            else {
+                            $postarr[$i]['id'] = $value['id'];
+                            $postarr[$i]['scout_id'] = $value['scout_id'];
+                            $postarr[$i]['title'] = $value['title'];
+                            $postarr[$i]['description'] = $value['description'];
+                            $postarr[$i]['file'] = $value['file'];
+                            $postarr[$i]['description'] = $value['description'];
+                            $postarr[$i]['tags'] = $value['tags'];
+                            $postarr[$i]['age'] = $value['age'];
+                            $postarr[$i]['gender'] = $value['gender'];
+                            $postarr[$i]['budget'] = $value['budget'];
+                            $postarr[$i]['rate'] = $value['rate'];
+                            $postarr[$i]['group'] = $value['group'];
+                            $postarr[$i]['date_posted'] = $value['date_posted'];
+                            $postarr[$i]['status'] = $value['status'];
+                            $postarr[$i]['hire_id'] = $value['hire_id'];
+                            $postarr[$i]['start_date'] = $value['start_date'];
+                            $postarr[$i]['end_date'] = $value['end_date'];
+                            $i++;
+                            }
+                        }
+                    }
+                }
+                //end
+            }
+            $testi = Rating::where('testimonial_score', '=', 5)
+                       ->where('testimonial_comment', '!=', '')
+                       ->groupBy('user_id')
+                       ->get();
+                $testimonialarr = array();
+                $i=0;
+                if(count($testi) !== 0){
+                    foreach ($testi as $key => $value) {
+                        $user = User::find($value['user_id']);
+                        if($user !== null){
+                            $testimonialarr[$i]['firstname'] = $user['firstname'];
+                            $testimonialarr[$i]['lastname'] = $user['lastname'];
+                            $testimonialarr[$i]['picture'] = $user['profile_image'];
+                            $testimonialarr[$i]['score'] = $value['testimonial_score'];
+                            $testimonialarr[$i]['comment'] = $value['testimonial_comment'];
+                            $i++;
+                        }
+                    }
+                }
+                $otherpost = Post::where('status', '=', 0)->get();
+                $op = array();
+                $i = 0;
+                    // for ($j=0; $j < count($otherpost); $j++) { 
+                    //     $find = array_search($otherpost[$j]['id'], array_column($postarr, 'id'));
+                    //     if($find == false && array_search($postarr[$j]['id'], array_column($otherpost, 'id')) == false){
+                    //         $op[$i]['id'] = $value['id'];
+                    //         $op[$i]['scout_id'] = $value['scout_id'];
+                    //         $op[$i]['title'] = $value['title'];
+                    //         $op[$i]['description'] = $value['description'];
+                    //         $op[$i]['file'] = $value['file'];
+                    //         $op[$i]['description'] = $value['description'];
+                    //         $op[$i]['tags'] = $value['tags'];
+                    //         $op[$i]['age'] = $value['age'];
+                    //         $op[$i]['gender'] = $value['gender'];
+                    //         $op[$i]['budget'] = $value['budget'];
+                    //         $op[$i]['rate'] = $value['rate'];
+                    //         $op[$i]['group'] = $value['group'];
+                    //         $op[$i]['date_posted'] = $value['date_posted'];
+                    //         $op[$i]['status'] = $value['status'];
+                    //         $op[$i]['hire_id'] = $value['hire_id'];
+                    //         $op[$i]['start_date'] = $value['start_date'];
+                    //         $op[$i]['end_date'] = $value['end_date'];
+                    //         $i++;
+                    //     }
+                    // }
+                foreach ($otherpost as $key => $value) {
+                    $find = array_search($value['id'], array_column($postarr, 'id'));
+                    if(count($op) == 0){
+                        if($find == false){
+                            $op[$i]['id'] = $value['id'];
+                            $op[$i]['scout_id'] = $value['scout_id'];
+                            $op[$i]['title'] = $value['title'];
+                            $op[$i]['description'] = $value['description'];
+                            $op[$i]['file'] = $value['file'];
+                            $op[$i]['description'] = $value['description'];
+                            $op[$i]['tags'] = $value['tags'];
+                            $op[$i]['age'] = $value['age'];
+                            $op[$i]['gender'] = $value['gender'];
+                            $op[$i]['budget'] = $value['budget'];
+                            $op[$i]['rate'] = $value['rate'];
+                            $op[$i]['group'] = $value['group'];
+                            $op[$i]['date_posted'] = $value['date_posted'];
+                            $op[$i]['status'] = $value['status'];
+                            $op[$i]['hire_id'] = $value['hire_id'];
+                            $op[$i]['start_date'] = $value['start_date'];
+                            $op[$i]['end_date'] = $value['end_date'];
+                            $i++;
+                        }
+                    }
+                    else {
+                        dd('ok');
+                        if($find == false && array_search($value['id'], array_column($op, 'id')) == false){
+                            $op[$i]['id'] = $value['id'];
+                            $op[$i]['scout_id'] = $value['scout_id'];
+                            $op[$i]['title'] = $value['title'];
+                            $op[$i]['description'] = $value['description'];
+                            $op[$i]['file'] = $value['file'];
+                            $op[$i]['description'] = $value['description'];
+                            $op[$i]['tags'] = $value['tags'];
+                            $op[$i]['age'] = $value['age'];
+                            $op[$i]['gender'] = $value['gender'];
+                            $op[$i]['budget'] = $value['budget'];
+                            $op[$i]['rate'] = $value['rate'];
+                            $op[$i]['group'] = $value['group'];
+                            $op[$i]['date_posted'] = $value['date_posted'];
+                            $op[$i]['status'] = $value['status'];
+                            $op[$i]['hire_id'] = $value['hire_id'];
+                            $op[$i]['start_date'] = $value['start_date'];
+                            $op[$i]['end_date'] = $value['end_date'];
+                            $i++;
+                        }
+                    }
+                }
+                dd($op);
             return view('talent.home')
-                ->with('posts',$posts)
+                ->with('posts',$postarr)
                 ->with('succ',$succ)
+                ->with('otherpost', $otherpost)
+                ->with('testimonialarr', $testimonialarr)
                 ->with('unreadNotifications', $unreadNotifications)
                 ->with('readNotifications', $readNotifications)
                 ->with('slideshow', $slideshow);
@@ -230,7 +400,81 @@ class HomeController extends Controller
                 ->with('succ',$succ);
         }
         else {
+            $recomprofile = array();
+            $counter = 0;
         $posts = Post::where('scout_id', Auth::user()->id)->orderBy('status', 'asc')->get();
+        foreach ($posts as $key => $value) {
+            foreach (json_decode($value['tags'],true) as $tal) {
+                $temp = DB::table('users')
+                            ->join('talent', function ($join){
+                            $join->on('users.id', '=', 'talent.id');
+                                 // dd($join);
+                            })
+                            ->join('talent_details', function ($join) use ($tal) {
+                            $join->on('talent_details.talent_id', '=', 'users.id')
+                                 ->where('talent_details.talent', '=', $tal);
+                            })
+                            ->get();
+                            if(!empty($temp)){
+                                foreach ($temp as $key) {
+                                    if(!empty($recomprofile)){
+                                        for ($i=0; $i < count($recomprofile); $i++) { 
+                                            if($key->talent_id !== $recomprofile[$i]['id']){
+                                                if($key->roleID == 2)
+                                                    {
+                                                        $gp = Group::find($key->talent_id);
+                                                        $recomprofile[$counter]['id'] = $key->talent_id;
+                                                        $recomprofile[$counter]['firstname'] = $gp['groupname'];
+                                                        $recomprofile[$counter]['lastname'] = '';
+                                                        $recomprofile[$counter]['gender'] = 'group';
+                                                        $recomprofile[$counter]['profile_image'] = $key->profile_image;
+                                                        $recomprofile[$counter]['profile_description'] = $key->profile_description;
+                                                        $recomprofile[$counter]['score'] = $key->score;
+                                                        $counter++;
+                                                    }
+                                                    else {
+                                                        $recomprofile[$counter]['id'] = $key->talent_id;
+                                                        $recomprofile[$counter]['firstname'] = $key->firstname;
+                                                        $recomprofile[$counter]['lastname'] = $key->lastname;
+                                                        $recomprofile[$counter]['gender'] = $key->gender;
+                                                        $recomprofile[$counter]['age'] = $key->age;
+                                                        $recomprofile[$counter]['profile_image'] = $key->profile_image;
+                                                        $recomprofile[$counter]['profile_description'] = $key->profile_description;
+                                                        $recomprofile[$counter]['score'] = $key->score;
+                                                        $counter++;
+                                                    }
+                                            }
+                                        }
+                                    }
+                                    else {
+                                                    if($key->roleID == 2)
+                                                    {
+                                                        $gp = Group::find($key->talent_id);
+                                                        $recomprofile[$counter]['id'] = $key->talent_id;
+                                                        $recomprofile[$counter]['firstname'] = $gp['groupname'];
+                                                        $recomprofile[$counter]['lastname'] = '';
+                                                        $recomprofile[$counter]['gender'] = 'group';
+                                                        $recomprofile[$counter]['profile_image'] = $key->profile_image;
+                                                        $recomprofile[$counter]['profile_description'] = $key->profile_description;
+                                                        $recomprofile[$counter]['score'] = $key->score;
+                                                        $counter++;
+                                                    }
+                                                    else {
+                                                        $recomprofile[$counter]['id'] = $key->talent_id;
+                                                        $recomprofile[$counter]['firstname'] = $key->firstname;
+                                                        $recomprofile[$counter]['lastname'] = $key->lastname;
+                                                        $recomprofile[$counter]['gender'] = $key->gender;
+                                                        $recomprofile[$counter]['age'] = $key->age;
+                                                        $recomprofile[$counter]['profile_image'] = $key->profile_image;
+                                                        $recomprofile[$counter]['profile_description'] = $key->profile_description;
+                                                        $recomprofile[$counter]['score'] = $key->score;
+                                                        $counter++;
+                                                    }
+                                    }
+                                }
+                            }
+            }
+        }
         $succ = Post::where('status', 1)->get();
         $profile = Featured::where('isProfile','=',1)->get();
         $profilearray = array();
@@ -261,10 +505,31 @@ class HomeController extends Controller
                 //remove from db
             }
         }
-        // dd($posts);
+        $testi = Rating::where('testimonial_score', '=', 5)
+                       ->where('testimonial_comment', '!=', '')
+                       ->groupBy('user_id')
+                       ->get();
+                $testimonialarr = array();
+                $i=0;
+                if(count($testi) !== 0){
+                    foreach ($testi as $key => $value) {
+                        $user = User::find($value['user_id']);
+                        if($user !== null){
+                            $testimonialarr[$i]['firstname'] = $user['firstname'];
+                            $testimonialarr[$i]['lastname'] = $user['lastname'];
+                            $testimonialarr[$i]['picture'] = $user['profile_image'];
+                            $testimonialarr[$i]['score'] = $value['testimonial_score'];
+                            $testimonialarr[$i]['comment'] = $value['testimonial_comment'];
+                            $i++;
+                        }
+                    }
+                }
+        // dd($recomprofile);
         return view('scout.home')
                 ->with('posts',$posts)
                 ->with('succ',$succ)
+                ->with('recomprofile', $recomprofile)
+                ->with('testimonialarr', $testimonialarr)
                 ->with('unreadNotifications', $unreadNotifications)
                 ->with('readNotifications', $readNotifications)
                 ->with('profilearray', $profilearray);
@@ -341,8 +606,24 @@ if ($validator->fails()) {
         Session::set('id', $cred['id']);
         Session::set('roleID', $cred['roleID']);
         if($cred['roleID'] == '2') {
-            $groupcred = Group::where('id', '=', $cred['id'])->first();
-            Session::set('groupname', $groupcred['groupname']);
+                $groupcred = Group::where('id', '=', $cred['id'])->first();
+                Session::set('groupname', $groupcred['groupname']);
+                Session::set('birthday', $cred['birthday']);
+                Session::set('contactno', $cred['contactno']);
+                Session::set('address', $cred['address']);
+                Session::set('emailaddress', $cred['emailaddress']);
+                Session::set('groupname', $cred['groupname']);
+                Session::set('username', $cred['username']);
+                Session::set('profile_image', $cred['profile_image']);
+                Session::set('profile_description', $cred['profile_description']);
+                Session::set('first_login', $cred['first_login']);
+                $card = VaultCreditCard::where('user_id', '=', $cred['id'])->first();
+                if(!empty($card)){
+                    Session::set('cc', 'activated');
+                }
+                else {
+                    Session::set('cc', 'null');
+                }
             }
         else {
         Session::set('firstname', $cred['firstname']);
@@ -356,6 +637,13 @@ if ($validator->fails()) {
         Session::set('profile_image', $cred['profile_image']);
         Session::set('profile_description', $cred['profile_description']);
         Session::set('first_login', $cred['first_login']);
+        $card = VaultCreditCard::where('user_id', '=', $cred['id'])->first();
+                if(!empty($card)){
+                    Session::set('cc', 'activated');
+                }
+                else {
+                    Session::set('cc', 'null');
+                }
             }
         }
         $tf = Talent::find(Auth::user()->id);
@@ -365,17 +653,18 @@ if ($validator->fails()) {
         if($cred['roleID'] == 1 || $cred['roleID'] == 2){
             //check if first time login
             if($cred['first_login'] == 1){
-                Session::flash('message', 'You need to setup your profile!');
+                Session::flash('message', 'You need to setup your profile! Setup the following: Talents, Talent fee, Address, link your card!');
                 return Redirect::to('http://localhost:8000/profile'.'/'.$cred['id']);
             }
             else {
+
             return Redirect::to('http://localhost:8000/hometalent');
             }
         }
         elseif($cred['roleID'] == 3) {
             //check if first time login
             if($cred['first_login'] == 1){
-                Session::flash('message', 'You need to setup your profile!');
+                Session::flash('message', 'You need to setup your profile! Setup the following: Talents, Talent fee, Address, link your card!');
                 return Redirect::to('http://localhost:8000/profile'.'/'.$cred['id']);
             }
             else {
@@ -396,6 +685,7 @@ if ($validator->fails()) {
     }
     public function doLogout(){
         Auth::logout(); // log the user out of our application
+        Session::flush(); //flush existing session
         return Redirect::to('/home'); // redirect the user to the login screen
     }
     public function readAllNotifications(){
@@ -677,6 +967,7 @@ if ($validator->fails()) {
             'birthday' => 'before:2011-01-01',
             'contact' => 'numeric|regex:/(09)[0-9]{9}/',
             'emailaddress' => 'unique:users',
+            'address' => 'required',
             'username' => 'unique:users|min:5',
             'password' => 'alphaNum|min:6',
             'image' => 'max:1500|mimes:png,jpeg,jpg',
@@ -698,21 +989,27 @@ if ($validator->fails()) {
         $validation = Validator::make($data, $rules, $message);
 
         if($validation->passes()) {
+            //if initial address is empty save it to session for future use
             $new_profile->address = $data['address'];
+            Session::set('address', $data['address']);
             $new_profile->contactno = $data['contactno'];
+            //if new username is not empty and not the old username then save it else use the old one
             if($new_profile['username'] !== $data['username'] &&  !empty($data['username'])){
             $new_profile->username = $data['username'];
             }
             else {
                 $old_profile->username = $old_profile['username'];
             }
+            //if new emailaddress is not empty and not the old emailaddress then save it else use the old one
             if($new_profile['emailaddress'] !== $data['emailaddress'] &&  !empty($data['emailaddress'])) {
             $new_profile->emailaddress = $data['emailaddress'];
             }
             else {
                 $old_profile->username = $old_profile['emailaddress'];
             }
-            $new_profile->profile_description = $data['description'];
+            if($data['description'] !== null) {
+                $new_profile->profile_description = $data['description'];
+            }
             $new_profile->birthday = date("Y-m-d", strtotime($data['birthday']));
             if( Request::hasFile('image') ) {
                         $destinationPath = public_path().'/files/';
@@ -725,18 +1022,22 @@ if ($validator->fails()) {
             $new_profile->password = Hash::make($data['password']);
             }
             $new_profile->save();
-            $new_fee = Talent::find($user_id);
-            if(!empty($new_fee)){
-            $new_fee->fee = $data['fee'];
-            Session::set('talentfee', $data['fee']);
-            $new_fee->save();
-            }
-            else {
-                $new_fee = new Talent;
-                $new_fee->id = $user_id;
-                $new_fee->fee = $data['fee'];
-                $new_fee->save();
-            }
+            //determine if scout then the fee field is empty
+                if (Session::get('roleID') !== 0) {
+                    
+                    $new_fee = Talent::find($user_id);
+                    if(!empty($new_fee)){
+                    $new_fee->fee = $data['fee'];
+                    Session::set('talentfee', $data['fee']);
+                    $new_fee->save();
+                    }
+                    else {
+                        $new_fee = new Talent;
+                        $new_fee->id = $user_id;
+                        $new_fee->fee = $data['fee'];
+                        $new_fee->save();
+                    }
+                }
             Session::flash('message', 'Successfully edited profile!');
             return Redirect::back();
         
@@ -963,17 +1264,22 @@ if ($validator->fails()) {
                                              CLOSE: function() {
                                                  $("#dialog").dialog( "close" );
                                              },
-                                             "DELETE": function() {
+                                             "YES": function() {
+
                                                 $.ajax({
                                                             method: "POST", // Type of response and matches what we said in the route
                                                             url: "/deleteschedule", // This is the url we gave in the route
                                                             data: {id : id}, // a JSON object to send back
                                                             success: function(response){ // What to do if we succeed
-                                                                console.log(id);
+                                                                console.log(response);
                                                                 alert("Successfully Deleted Event!");
-                                                                location.reload();
+                                                                //location.reload();
+                                                            },
+                                                            error: function(response){
+                                                                console.log(response);
                                                             }
                                                         });
+                                                
                                              }
                                            }
 
@@ -994,21 +1300,82 @@ if ($validator->fails()) {
     }
     public function deleteSchedule(Request $request){
         $eventID = Request::all('id');
-        EventModel::where('id', '=', $eventID)->delete();
-        Session::flash('message', 'Successfully deleted event!');
+        $eventDetail = EventModel::find($eventID)->first();
+
+        //find out if it's not an event made by the current User by finding post_id not equal to 0.
+        if ($eventDetail['post_id'] !== 0) {
+            $post = Post::find($eventDetail['post_id']);
+            $today = Carbon::now();
+            $days = $today->diffInDays(Carbon::parse($post['start_date']));
+            
+            $findHireID = json_decode($post['hire_id'],true);
+            //if the user is not a scout then no need to notify the talents and just notify the scout.
+            if(Session::get('roleID') !== 0){
+                $position = array_search($eventDetail['user_id'], $findHireID);
+                if($position !== false) {
+                    //if start date of the event starts in 3 or 
+                        if($days <= 3 && $today->eq(Carbon::parse($post['start_date']))){
+                            PaypalController::penalizeTalent($post['scout_id']);
+                            $notification = new Notification;
+                            $notification->id = null;
+                            $notification->user_id = $post['scout_id'];
+                            $notification->subject = 'invitation';
+                            $notification->body = 'Hello '.Session::get('username').'! This is to inform that you recently violated the Terms and Policy of the site: Cancelling the event 3 days prior to the start date of event. You have been penalized.';
+                            $notification->object_id = $post['id'];
+                            $notification->is_read = 0;
+                            $notification->sent_at = new Carbon();
+                            $notification->save();
+                        }
+
+                        $notification = new Notification;
+                        $notification->id = null;
+                        $notification->user_id = $post['scout_id'];
+                        $notification->subject = 'invitation';
+                        $notification->body = Session::get('username').' has cancelled his participation on event entitled: '.$post['title'];
+                        $notification->object_id = $post['id'];
+                        $notification->is_read = 0;
+                        $notification->sent_at = new Carbon();
+                        $notification->save();
+
+
+
+                        unset($findHireID[$position]);
+                        $post->hire_id = json_encode($findHireID);
+                        $post->save();
+
+                }
+            }
+            //if the user is a scout then notify 
+            else {
+
+            }
+            
+        }
+        //it is customized or not connected to any post/events thus safe to delete without any penalties.
+        else {
+            $eventDetail->delete();
+            Session::flash('message', 'Successfully deleted event!');
         return Redirect::to('/schedule/'.Session::get('id'));
+        }
+        
     }
     public function addSchedule(Request $request, $user_id){
         $data = Request::all();
-        $start_date = Carbon::parse($data['start_date'].$data['start_time']);
-        $end_date = Carbon::parse($data['end_date'].$data['end_time']);
+        if($data['allday'] == 'False'){
+             $start_date = Carbon::parse($data['start_date'].$data['start_time']);
+             $end_date = Carbon::parse($data['end_date'].$data['end_time']);
+        }
+        else{
+             $start_date = Carbon::parse($data['start_date']);
+             $end_date = Carbon::parse($data['end_date']);
+        }
+       
 
         $rules = array(
             'title' => 'required|regex:/^[\pL\s\-]+$/u',
             'start_date' => 'required|date', //before:tomorrow
-            'start_time' => 'required',
             'end_date' => 'required|date', //before:tomorrow
-            'end_time' => 'required|after:start_time',
+            'end_time' => 'after:start_time',
         );
 
         $message = array(
@@ -1027,7 +1394,7 @@ if ($validator->fails()) {
 
                 $detail->id =null;
                 $detail->user_id =$user_id;
-                if($data['allday'] == 'true'){
+                if($data['allday'] == 'False'){
                     $data['allday'] = 0;
                 }
                 else {
@@ -1035,6 +1402,7 @@ if ($validator->fails()) {
                 }
                 $detail->isAllDay =$data['allday'];
                 $detail->title =$data['title'];
+                $detail->post_id = 0;
                 $detail->start_date =$start_date->format('Y-m-d G:i:s');
                 $detail->end_date =$end_date->format('Y-m-d G:i:s');
                 $detail->save();
@@ -1056,16 +1424,25 @@ if ($validator->fails()) {
         foreach ($schedule as $key => $value) {
             $schedStartdate = Carbon::parse($value['start_date']);
             $schedEnddate = Carbon::parse($value['end_date']);
-            if(!$postStartdate->gte($schedEnddate)){
-                Session::flash('message', 'You are not available in that event day!');
+            $today = Carbon::now();
+            //check if the start date is not greater than today's date
+            if($today->gt($postStartdate)) {
+                Session::flash('message', 'Invalid start date! Event is already starting or done!');
                 return Redirect::back();
             }
-            elseif($postStartdate->eq($schedStartdate)){ //check same day
-                if($value['isAllDay'] == '0'){
-                Session::flash('message', 'You are not available in that event day!');
-                return Redirect::back();
+            else {
+                if(!$postStartdate->gte($schedEnddate)){
+                    Session::flash('message', 'You are not available in that event day!');
+                    return Redirect::back();
+                }
+                elseif($postStartdate->eq($schedStartdate)){ //check same day
+                    if($value['isAllDay'] == '0'){
+                    Session::flash('message', 'You are not available in that event day!');
+                    return Redirect::back();
+                    }
                 }
             }
+                
         }
         if(!empty($invited)){
             $invited->status = 1;
@@ -1073,7 +1450,12 @@ if ($validator->fails()) {
             $newSchedule = new EventModel;
             $newSchedule->id = null;
             $newSchedule->user_id = Session::get('id');
+            $newSchedule->title = $postDetails['title'];
             $newSchedule->isAllDay = 0;
+            $newSchedule->start_date = $postStartdate;
+            $newSchedule->end_date = $postEnddate;
+            $newSchedule->post_id = $post_id;
+            $newSchedule->save();
 
             $hire = Post::find($post_id);
             if(empty($hire['hire_id'])){
@@ -1091,6 +1473,15 @@ if ($validator->fails()) {
             // $hire->hire_id = json_encode(explode(',', $talent_id[0]));
             $hire->save();
 
+            $notification = new Notification;
+                    $notification->id = null;
+                    $notification->user_id = $postDetails['scout_id'];
+                    $notification->subject = 'comment';
+                    $notification->body = Session::get('username').' has accepted your invitation on event entitled: '.$postDetails['title'];
+                    $notification->object_id = $postDetails['id'];
+                    $notification->is_read = 0;
+                    $notification->sent_at = new Carbon();
+                    $notification->save();
             return Redirect::back();
             
         }
@@ -1121,6 +1512,21 @@ if ($validator->fails()) {
         Session::flash('message', 'Successfully joined group!');
         return Redirect::back();
     }
+    public function showSearchTalent(){
+        $unreadNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 0)
+                                            ->limit(6)
+                                            ->get();
+            $readNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 1)
+                                            ->limit(6)
+                                            ->get();
+        $arr = array();
+        return view('scout.searchtalent')
+                ->with('result', $arr)
+                ->with('unreadNotifications', $unreadNotifications)
+                ->with('readNotifications', $readNotifications);
+    }
     public function searchTalent(){
         $data = Request::except('_token');
         $unreadNotifications = Notification::where('user_id', '=', Session::get('id'))
@@ -1133,11 +1539,11 @@ if ($validator->fails()) {
                                             ->get();
         $keyword = strtolower($data['search']);
         //categorize talents
-        $guitar = array('acoustic', 'guitar', 'wood guitar','acoustic guitar');
-        $bass = array('bass', 'acoustic bass',);
-        $dancing = array('dancing', 'dance', 'hip-hop', 'modern dance', 'dance troupe', 'dancers', 'dancer');
-        $drum = array('drum', 'drummer', 'drummer band', 'marching band');
-        $vocalist = array('singing', 'singer', 'songer', 'sing', 'vocalist', 'choir', 'vocal');
+        // $guitar = array('acoustic', 'guitar', 'wood guitar','acoustic guitar');
+        // $bass = array('bass', 'acoustic bass',);
+        // $dancing = array('dancing', 'dance', 'hip-hop', 'modern dance', 'dance troupe', 'dancers', 'dancer');
+        // $drum = array('drum', 'drummer', 'drummer band', 'marching band');
+        // $vocalist = array('singing', 'singer', 'songer', 'sing', 'vocalist', 'choir', 'vocal');
 
         $searchUser = User::where('roleID', '=', '1')
                           ->orWhere('roleID', '=', '2')
@@ -1375,8 +1781,34 @@ if ($validator->fails()) {
         }
         // dd($arr);
         arsort($arr);
-        // dd($arr);
+        $endorsed = Endorse::where('endorser_id', '=', Session::get('id'))->get();
+        $endorsedarr = array();
+        $i = 0;
+        if(count($endorsed)  !== 0){
+            foreach ($endorsed as $key => $value) {
+                $endorsedarr[$i] = $value['endorsed_id'];
+                $i++;
+            }
+        }
+        // dd($endorsedarr);
+        
         return view('scout.searchtalent')
+                ->with('result', $arr)
+                ->with('endorsedarr', $endorsedarr)
+                ->with('unreadNotifications', $unreadNotifications)
+                ->with('readNotifications', $readNotifications);
+    }
+    public function showSearchScout(){
+        $unreadNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 0)
+                                            ->limit(6)
+                                            ->get();
+            $readNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 1)
+                                            ->limit(6)
+                                            ->get();
+        $arr = array();
+        return view('talent.searchscout')
                 ->with('result', $arr)
                 ->with('unreadNotifications', $unreadNotifications)
                 ->with('readNotifications', $readNotifications);
@@ -1689,10 +2121,9 @@ if ($validator->fails()) {
                 if(array_search($id, $hireid) !== false){
                     $findRating = Rating::where('post_id', '=', $value['id'])->first();
                     if($findRating !== null){
-
-                    $checkpost = $findRating->post()
-                                ->join('post', 'post.id', '=', 'rating.post_id')
-                                ->get(['post.*']); // exclude extra details from friends table
+                        // dd($value['id']);
+                    $checkpost = Rating::where('post_id', '=', $value['id'])->with('post')->get();
+                    // ^ forgot what to do with this variable :|
                     }
                     $average_score = ceil($findRating['attitude'] + $findRating['performance'] + $findRating['punctuality'])/3;
                     // dd(json_decode($value['file']));
@@ -2041,7 +2472,11 @@ if ($validator->fails()) {
         return Redirect::to('/home');
     }
     public function removeFeaturedFeedback($id){
-        Featured::where('id','=', $id)->delete();
+        $fb = Featured::find($id);
+        $destinationPath = public_path().'/files/';
+        $file = $fb['image'];
+        File::delete($destinationPath.$file);
+        $fb->delete();
          Session::flash('message', 'Successfully deleted!');
          return Redirect::back();
     }
@@ -2096,7 +2531,7 @@ if ($validator->fails()) {
                         ->where('endorser_id','=', Session::get('id'))
                         ->delete();
         Session::flash('message', 'Successfully unendorsed!');
-        return Redirect::back();
+        return Redirect::to('/connection'.'/'.Session::get('id'));
     }
     public function endorseUser($id){
         $endorse = new Endorse;
@@ -2119,7 +2554,7 @@ if ($validator->fails()) {
                 $notification->save();
 
         Session::flash('message', 'Successfully endorse!');
-        return Redirect::to('/home');
+         return Redirect::to('/connection'.'/'.Session::get('id'));
     }
     public function rateScout($scout_id, $post_id){
         $data = Request::except('_token');

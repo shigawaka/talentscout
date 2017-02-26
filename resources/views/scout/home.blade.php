@@ -78,13 +78,16 @@
               <a href="{!! URL::to('/post') !!}">My Posts</a>
             </li>
             @endif
+            <li>
+              <a href="{{ URL::to('/search') }}">SEARCH</a>
+            </li>
           </ul>
           
-          {!! Form::open(['url'=>'/search', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
+          <!-- {!! Form::open(['url'=>'/search', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
           
           {!! Form::text('search', '', array('placeholder' => 'Search talent', 'class' => 'form-control', 'style' => 'width:70%;')) !!}              
           {!! Form::submit('Search', array('class' => 'btn btn-default')) !!}   
-            {!! Form::close() !!}
+            {!! Form::close() !!} -->
           
           <ul class="nav navbar-nav navbar-right">
             <li>
@@ -149,30 +152,93 @@
       </nav>
       <div class="row">
     <div class="col-md-12">
-      <div class="page-header">
+      <div class="carouselcontainer" style="background-color:#2c3e50;">
+       
+
+                <!--  START OF carousel -->
+
+
+
+
+                <div id="myCarousel" class="carousel slide" data-ride="carousel">
+  <!-- Indicators -->
+  <ol class="carousel-indicators">
+    <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+    <li data-target="#myCarousel" data-slide-to="1"></li>
+    @if(count($testimonialarr) !== 0)
+        @for($i = 1; $i <= count($testimonialarr); $i++)
+        <li data-target="#myCarousel" data-slide-to="{!! $i !!}"></li>
+        @endfor
+    @endif()
+  </ol>
+
+  <!-- Wrapper for slides -->
+  <div class="carousel-inner" role="listbox">
+    <div class="item active">
+      <img src="img/carousel_1.jpg" alt="Chania">
+    </div>
+
+    <div class="item">
+      <img src="img/carousel_2.jpg" alt="Chania">
+    </div>
+    @if(!empty($testimonialarr))
+        @foreach($testimonialarr as $key => $value)
+        <div class="item">
+            <div class="col-md-3 text-center">
+          <img style="max-width:65%;" src="{{ URL::to('/files').'/'.$value['picture'] }}" alt="Chania">
+            </div>
+          <blockquote class="blockquote" style="padding-top:105px;">
+          <p class="mb-0" style="color:white;">{{ $value['comment'] }}</p>
+          <footer class="blockquote-footer">Talent Scout User <cite title="Source Title">{{ ucfirst($value['firstname']) }} {{ ucfirst($value['lastname']) }}.</cite><br /><cite>Rated Talent Scout {{ $value['score'] }}/5</cite></footer>
+        </blockquote>
+        </div>
+        @endforeach
+    @endif
+  </div>
+
+  <!-- Left and right controls -->
+  <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
+    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+    <span class="sr-only">Previous</span>
+  </a>
+  <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">
+    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+    <span class="sr-only">Next</span>
+  </a>
+</div>
+
+<!--end of carousel-->
+               
+
+
+    </div>
+    <div class="page-header" style="background-color: #86E2D5; padding-top: 5px;">
         <h1 style="text-align:center;">
-          Featured Profiles<br />
+          Talents which matches your criteria
         </h1>
       </div>
       <div class="row">
-      @foreach($profilearray as $value)
-        <div class="col-md-4 text-center">
-          <div class="thumbnail">
-            <img style="height:200px; width:250px;"  alt="Bootstrap Thumbnail First" src="{!! URL::to('/files').'/'.$value['profile_image'] !!}" />
-            <div class="caption">
-              <h3>
-                {!! ucfirst($value['firstname']).' '.ucfirst($value['lastname']) !!}
-              </h3>
-              <p>
-              {!! $value['profile_description'] !!}
-              </p>
-              <p>
-                <a class="btn btn-primary" href="{{ URL::to('/profile').'/'.$value['id'] }}">View</a>
-              </p>
-            </div>
-          </div>
+      @if(count($recomprofile) == 0)
+        <div class="col-md-4">
+            <p>None for now</p>
         </div>
-      @endforeach
+      @else
+        @foreach($recomprofile as $pro)
+          <div class="col-md-2 text-center">
+            <img style="height:150px;" src="{{ URL::to('/files').'/'.$pro['profile_image'] }}" alt="Chania">
+            <p>{!! ucfirst($pro['firstname']) !!} {!! ucfirst($pro['lastname']) !!}</p>
+            <p style="font-size:10px;">{!! ucfirst($pro['profile_description']) !!}</p>
+            @if($pro['gender'] == 'group')
+            <small>Group</small></br>
+            @else
+            <small>Gender: {!! ucfirst($pro['gender']) !!}</small> </br>
+            <small>Age: {!! $pro['age'] !!}</small> </br>
+            @endif
+            <small>Score accumulated: {!! $pro['score'] !!} points</small>
+            <a class="btn btn-info" href="{!! URL::to('/profile').'/'.$pro['id'] !!}">Visit profile</a>
+          </div>
+        @endforeach
+      @endif
       </div>
       <div class="page-header" style="background-color: #EB9532; padding-top: 5px;">
         <h1 style="text-align:center;">

@@ -473,37 +473,36 @@ class ScoutController extends Controller
                 }
             })
             ->get();
-            // dd($temp);
             foreach ($temp as $key) {
-            $checkexperience = Rating::where('user_id', '=', $key->id)->get();
-            if(count($checkexperience) == 0){
-                    $recommendednewbie[$t]['id'] = $key->id;
-                    $recommendednewbie[$t]['profile_image'] = $key->profile_image;
-                if($key->firstname == null){
-                    $group = Group::find($key->id);
-                    $recommendednewbie[$t]['firstname'] = ucfirst($group['groupname']);
-                    $recommendednewbie[$t]['lastname'] = '';
-                }
-                else {
-                    $recommendednewbie[$t]['firstname'] = ucfirst($key->firstname);
-                    $recommendednewbie[$t]['lastname'] = ucfirst($key->lastname);
-                }
-                $t++;
-                }
-            else {
-                    $recommended[$t]['id'] = $key->id;
-                    $recommended[$t]['profile_image'] = $key->profile_image;
+                $checkexperience = Rating::where('user_id', '=', $key->id)->get();
+                if(count($checkexperience) == 0){
+                        $recommendednewbie[$t]['id'] = $key->id;
+                        $recommendednewbie[$t]['profile_image'] = $key->profile_image;
                     if($key->firstname == null){
                         $group = Group::find($key->id);
-                        $recommended[$t]['firstname'] = ucfirst($group['groupname']);
-                        $recommended[$t]['lastname'] = '';
+                        $recommendednewbie[$t]['firstname'] = ucfirst($group['groupname']);
+                        $recommendednewbie[$t]['lastname'] = '';
                     }
                     else {
-                        $recommended[$t]['firstname'] = ucfirst($key->firstname);
-                        $recommended[$t]['lastname'] = ucfirst($key->lastname);
+                        $recommendednewbie[$t]['firstname'] = ucfirst($key->firstname);
+                        $recommendednewbie[$t]['lastname'] = ucfirst($key->lastname);
                     }
                     $t++;
                     }
+                else {
+                        $recommended[$t]['id'] = $key->id;
+                        $recommended[$t]['profile_image'] = $key->profile_image;
+                        if($key->firstname == null){
+                            $group = Group::find($key->id);
+                            $recommended[$t]['firstname'] = ucfirst($group['groupname']);
+                            $recommended[$t]['lastname'] = '';
+                        }
+                        else {
+                            $recommended[$t]['firstname'] = ucfirst($key->firstname);
+                            $recommended[$t]['lastname'] = ucfirst($key->lastname);
+                        }
+                        $t++;
+                        }
                 }
             }
          
@@ -572,6 +571,24 @@ class ScoutController extends Controller
             if(Post::where('title', $data['title'])->first()) {
                 return back()->withInput();
             } else {
+                $postStartdate = Carbon::parse($data['start_date']);
+                $postEnddate = Carbon::parse($data['end_date']);
+                $schedule = EventModel::where('user_id','=', Session::get('id'))->get();
+                foreach ($schedule as $key => $value) {
+                    $schedStartdate = Carbon::parse($value['start_date']);
+                    $schedEnddate = Carbon::parse($value['end_date']);
+                    if(!$postStartdate->gte($schedEnddate)){
+                        Session::flash('message', 'You are not available in that event day!');
+                        return Redirect::back()->withInput();
+                    }
+                    elseif($postStartdate->eq($schedStartdate)){ //check same day
+                        if($value['isAllDay'] == '0'){
+                        Session::flash('message', 'You are not available in that event day!');
+                        return Redirect::back()->withInput();
+                        }
+                    }
+                }
+                    
                 $detail = new Post;
                 $detail->id =null;
                 $detail->scout_id = Auth::user()->id;
@@ -605,6 +622,16 @@ class ScoutController extends Controller
                 $detail->end_date = $data['end_date'];
                 $detail->status = 0;
                 $detail->save();
+                //save schedule in db
+                $newSchedule = new EventModel;
+                    $newSchedule->id = null;
+                    $newSchedule->user_id = Session::get('id');
+                    $newSchedule->title = $data['title'];
+                    $newSchedule->isAllDay = 0;
+                    $newSchedule->start_date = $postStartdate;
+                    $newSchedule->end_date = $postEnddate;
+                    $newSchedule->post_id = $detail->id;
+                    $newSchedule->save();
                 Session::flash('message', 'Successfully posted!');
                 return Redirect::to('http://localhost:8000/post');
             }

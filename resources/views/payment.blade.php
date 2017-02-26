@@ -200,7 +200,7 @@ div.product-chooser{
         <div class="product-chooser-item selected">
           <img src="{{ URL::to('/images').'/'.$value['file']}}" class="img-rounded col-xs-4 col-sm-4 col-md-12 col-lg-12" alt="Mobile and Desktop">
                 <div class="col-xs-8 col-sm-8 col-md-12 col-lg-12">
-            <span class="title">{{$key + 1}} week · For only ‎₱{{ $value['price'] }} </span>
+            <span class="title">{{$key + 1}} week · For only ‎${{ $value['price'] }} </span>
             <span class="description">{{ $value['description'] }}</span>
             <!-- <input type="radio" name="product" value="mobile_desktop" checked="checked"> -->
             {!! Form::hidden('hiddenprice[]',$value['price'] , array('id' => 'hehe')) !!}
@@ -213,6 +213,7 @@ div.product-chooser{
       
       <button type="submit"><img class="img-responsive center-block" src="{{ URL::to('images/paynow_button.png') }}"></button>
       {!! Form::close() !!}
+      <a href="" class="btn btn-info" id="linkcc">USE LINKED CARD</a>
     </div>
     </div>
   </div>
@@ -248,7 +249,9 @@ div.product-chooser{
     $(this).parent().parent().find('div.product-chooser-item').removeClass('selected');
     $(this).addClass('selected');
     $(this).find('input[type="radio"]').prop("checked", true);
-    
+    var duration = $(this).find("input[type='hidden']").val();
+    var price = $(this).find("[name=duration]").val();
+    $("#linkcc").attr("href", "http://localhost:8000/paythroughcard"+"/"+duration+"/"+price);
   });
 });
     </script>

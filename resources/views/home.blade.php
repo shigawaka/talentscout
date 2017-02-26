@@ -64,10 +64,19 @@
                 <div id="myCarousel" class="carousel slide" data-ride="carousel">
   <!-- Indicators -->
   <ol class="carousel-indicators">
-    <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-    <li data-target="#myCarousel" data-slide-to="1"></li>
+    @if(count($slideshow) !== 0)
+        @for($i = 0; $i <= count($slideshow); $i++)
+        @if($i == 0)
+        <li data-target="#myCarousel" data-slide-to="{!! $i !!}" class="active"></li>
+        @else
+         <li data-target="#myCarousel" data-slide-to="{!! $i !!}"></li>
+        @endif
+        @endfor
+    @endif()
+    <!-- <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+    <li data-target="#myCarousel" data-slide-to="1"></li> -->
     @if(count($testimonialarr) !== 0)
-        @for($i = 1; $i <= count($testimonialarr); $i++)
+        @for($i = count($slideshow); $i <= count($testimonialarr); $i++)
         <li data-target="#myCarousel" data-slide-to="{!! $i !!}"></li>
         @endfor
     @endif()
@@ -75,13 +84,28 @@
 
   <!-- Wrapper for slides -->
   <div class="carousel-inner" role="listbox">
-    <div class="item active">
+  @if(!empty($slideshow))
+        @foreach($slideshow as $key => $value)
+        @if($key == 0)
+        <div class="item active">
+          <img src="{{ URL::to('/files').'/'.$value['image'] }}" alt="Chania">
+        </div>
+        @else
+        <div class="item">
+            <div class="col-md-12 text-center">
+          <img style="max-width:55%;height:380px;" src="{{ URL::to('/files').'/'.$value['image'] }}" alt="Chania">
+          </div>
+        </div>
+        @endif
+        @endforeach
+    @endif
+    <!-- <div class="item active">
       <img src="img/carousel_1.jpg" alt="Chania">
     </div>
 
     <div class="item">
       <img src="img/carousel_2.jpg" alt="Chania">
-    </div>
+    </div> -->
     @if(!empty($testimonialarr))
         @foreach($testimonialarr as $key => $value)
         <div class="item">

@@ -80,7 +80,7 @@
             </ul>
 
             <ul class="right">
-              @if(Session::get('first_login') == 1)
+              @if(Session::get('first_login') == 1 || Session::get('address') == null || Session::get('profile_image') == 'avatar.png')
               <li><a href="/home" class="disabled">Home</a></li>
             @else
               <li><a href="/home">Home</a></li>
@@ -215,12 +215,17 @@
       selectMonths: true, // Creates a dropdown to control month
       selectYears: 100 // Creates a dropdown of 15 years to control year
     });
-    $('.disabled').click(function(e){
-      alert('Setup your profile first!');
+  </script>
+@if(Session::get('first_login') == 1 || Session::get('address') == null || Session::get('profile_image') == 'avatar.png')
+  <script>
+    $(document).ready(function() {
+      $('.disabled').click(function(e){
+      alert('You need to setup your profile! Setup the following: Profile Image, Talents, Talent fee, Address, link your card!');
      e.preventDefault();
   });
+    });
   </script>
-
+  @endif
 
     <!--    
      {!! HTML::script('vendor/jquery/jquery.min.js') !!}

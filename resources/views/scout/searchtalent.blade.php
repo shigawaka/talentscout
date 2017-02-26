@@ -63,7 +63,7 @@
       <nav class="navbar navbar-inverse" role="navigation">
         <div class="collapse navbar-collapse"  id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
-            <li  class="active">
+            <li>
               <a href="{!! URL::to('/home') !!}">Home</a>
             </li>
             <li>
@@ -77,14 +77,17 @@
               <a href="{!! URL::to('/post') !!}">My Posts</a>
             </li>
             @endif
+            <li  class="active">
+              <a href="{{ URL::to('/search') }}">SEARCH</a>
+            </li>
           </ul>
-          {!! Form::open(['url'=>'/search', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
+          <!-- {!! Form::open(['url'=>'/search', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
           
             
           {!! Form::text('search', '', array('placeholder' => 'Search talent', 'class' => 'form-control', 'style' => 'width:70%;')) !!}              
           {!! Form::submit('Search', array('class' => 'btn btn-default')) !!}   
             
-            {!! Form::close() !!}
+            {!! Form::close() !!} -->
           <ul class="nav navbar-nav navbar-right">
             <li>
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -147,12 +150,15 @@
         
       </nav>
       <div class="row">
+        @if (Session::has('message'))
+        <div class="alert alert-info text-center">{{ Session::get('message') }}</div>
+        @endif
         <div class="col-xs-3" style="height:900px;">
         <div class="form-group">
         <div class="col-sm-10">
           <h3>Search Criteria</h3>
           </div>
-          {!! Form::open(['url'=>'/search', 'files' => true]) !!}
+          {!! Form::open(['url'=>'/searchkeytalent', 'files' => true]) !!}
           <div class="col-sm-10">
           {!! Form::text('search', '', array('class' => 'form-control','placeholder' => 'Enter the Keywords')) !!}
           <!-- <input class="form-control" type="text" name="keyword" placeholder="Enter the Keywords"> --><br>
@@ -173,7 +179,7 @@
         @if(count($result) == 0)
         No match found!
         @else
-        @foreach($result as $res)
+        @foreach($result as $key => $res)
         <div class="col-md-3" style="width: 250px;height:500px;">
           <div class="thumbnail" style="height: 100%;">
             <img alt="Bootstrap Thumbnail First" src="{!! URL::to('/files').'/'.$res['profile_image'] !!}" />
@@ -189,8 +195,12 @@
                 <i>{!! $res['profile_description'] !!}</i><br>
               </p>
               <p>
-                <a class="btn btn-primary" href="{{ URL::to('/endorseUser').'/'.$res['id'] }}">Endorse</a> <a class="btn" href="{{ URL::to('/profile').'/'.$res['id'] }}">View</a>@if(!empty($res['fee']))<span class="label label-default"> Talent Fee:  {!! $res['fee'] !!} @endif 
-                </span>
+
+                  @if(array_search($res['id'], $endorsedarr)  !== false)
+                  <a class="btn btn-info" href="{{ URL::to('/removeEndorsement').'/'.$res['id'] }}">Unendorse</a> <a class="btn" href="{{ URL::to('/profile').'/'.$res['id'] }}">View</a>@if(!empty($res['fee']))<span class="label label-default"> Talent Fee:  {!! $res['fee'] !!} @endif </span>
+                  @else
+                  <a class="btn btn-primary" href="{{ URL::to('/endorseUser').'/'.$res['id'] }}">Endorse</a> <a class="btn" href="{{ URL::to('/profile').'/'.$res['id'] }}">View</a>@if(!empty($res['fee']))<span class="label label-default"> Talent Fee:  {!! $res['fee'] !!} @endif </span>
+                  @endif
                 </br>
                 @if($res['rank'] <= 1000)
                 <span class="label label-success">Profile Rank: Newbie</span>
