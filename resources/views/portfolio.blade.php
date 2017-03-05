@@ -166,29 +166,35 @@
                 
                 <div class="card horizontal">
                   <div class="card-image">
-                  @if(is_array($value['file']))
-                    @foreach($value['file'] as $key => $val)
-                      @if(strpos($val,'.mp4') == true)
-                      <video style="width: 100%;" width="400" controls>
-                          <source src="{!! URL::to('/files').'/'.$val !!}" type="video/mp4">
-                      </video>
-                      @else
-                      <img src="{!! URL::to('/files').'/'.$val !!}">
-                      @endif
-                    @endforeach
+                  @if($value['file'] !== null)
+                    @if(is_array($value['file']))
+                      @foreach($value['file'] as $key => $val)
+                        @if(strpos($val,'.mp4') == true)
+                        <video style="width: 100%;" width="400" controls>
+                            <source src="{!! URL::to('/files').'/'.$val !!}" type="video/mp4">
+                        </video>
+                        @else
+                        <img src="{!! URL::to('/files').'/'.$val !!}">
+                        @endif
+                      @endforeach
+                    @else
+                       @if(strpos($value['file'],'.mp4') == true)
+                        <video style="width: 100%;" width="400" controls>
+                            <source src="{!! URL::to('/files').'/'.$value['file'] !!}" type="video/mp4">
+                        </video>
+                        @else
+                        <img src="{!! URL::to('/files').'/'.$value['file'] !!}">
+                        @endif
+                    @endif
                   @else
-                     @if(strpos($value['file'],'.mp4') == true)
-                      <video style="width: 100%;" width="400" controls>
-                          <source src="{!! URL::to('/files').'/'.$value['file'] !!}" type="video/mp4">
-                      </video>
-                      @else
-                      <img src="{!! URL::to('/files').'/'.$value['file'] !!}">
-                      @endif
                   @endif
                   </div>
                   <div class="card-stacked">
                     <div class="card-content">
+                    @if($value['event_name'] !== null)
                     <h5 class="header">Event Name: {{ $value['event_name'] }}</h5>
+                    @else
+                    @endif
                     <h5 class="header">Event Date: {{ Carbon\Carbon::parse($value['event_date'])->format('F d,Y') }}</h5>
                       <p>{{$value['description']}}</p>
                     </div>

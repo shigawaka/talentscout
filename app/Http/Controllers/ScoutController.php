@@ -8,17 +8,28 @@ use Validator;
 // use Storage;
 
 
+use App\Scout;
+use App\Featured;
 use App\User;
+use App\Talent;
 use App\Post;
+use App\Rating;
 use App\Comment;
 use App\Proposal;
-use App\Rating;
 use App\Invitation;
-use App\Talent;
-use App\Notification;
-use App\Subscription;
-use App\TalentDetail;
+use App\EventModel;
 use App\Group;
+use App\Endorse;
+use App\Notification;
+use App\Paypalpayment;
+use App\Portfolio;
+use App\Subscription;
+use App\Groupmember;
+use App\TalentDetail;
+use App\ScoutDetail;
+use App\VaultCreditCard;
+
+
 use DB;
 use Carbon\Carbon;
 use Hash;
@@ -143,7 +154,7 @@ class ScoutController extends Controller
                                             ->where('is_read', '=', 1)
                                             ->limit(6)
                                             ->get();
-        return view('scout/post')
+        return view('scout.post')
                 ->with('posts',$posts)
                 ->with('unreadNotifications', $unreadNotifications)
                 ->with('readNotifications', $readNotifications);
@@ -243,27 +254,27 @@ class ScoutController extends Controller
                  $fullproposals[$j]['firstname'] = $userdets['firstname'];
                  $fullproposals[$j]['lastname'] = $userdets['lastname'];
                  $fullproposals[$j]['body'] = $retrieveprops['body'];
+                 $fullproposals[$j]['file'] = $retrieveprops['file'];
                  $fullproposals[$j]['proposed_rate'] = $retrieveprops['proposed_rate'];
                  $hired = Post::where('id', '=', $post_id)->get();
                  foreach($hired as $hire){
-                    if(count(json_decode($hire['hire_id'], true)) > 1) {
+                    if(count(json_decode($hire['hire_id'], true)) >= 1) {
                     $numhire = count(json_decode($hire['hire_id'], true));
                     $temp = json_decode($hire['hire_id']);
                     // list($temp) = explode(',', implode(',',json_decode($hire['hire_id'], true)));
                     // $fullproposals[$j]['hired'] = $temp[$j++];
                     // echo $temp;
-                    for ($i=0; $i < $numhire; $i++) { 
-                    $otheruser = User::find($temp[$i]);
-                     $fullproposals[$j]['hired'] = $temp[$i];
-                            // $fullproposals[$i]['user_id'] = $otheruser['id'];
-                            // $fullproposals[$i]['profile_image'] = $otheruser['profile_image'];
-                            // $fullproposals[$i]['firstname'] = $otheruser['firstname'];
-                            // $fullproposals[$i]['lastname'] = $otheruser['lastname'];
-                            // $fullproposals[$i]['body'] = $retrieveprops['body'];
-                            // $fullproposals[$i]['proposed_rate'] = $retrieveprops['proposed_rate'];
-                            // $fullproposals[$i]['hired'] = $temp[$i];
-                    }
-                    // dd($otheruser);
+                        // for ($i=0; $i < $numhire; $i++) { 
+                        // $otheruser = User::find($temp[$i]);
+                         $fullproposals[$j]['hired'] = $temp;
+                                // $fullproposals[$i]['user_id'] = $otheruser['id'];
+                                // $fullproposals[$i]['profile_image'] = $otheruser['profile_image'];
+                                // $fullproposals[$i]['firstname'] = $otheruser['firstname'];
+                                // $fullproposals[$i]['lastname'] = $otheruser['lastname'];
+                                // $fullproposals[$i]['body'] = $retrieveprops['body'];
+                                // $fullproposals[$i]['proposed_rate'] = $retrieveprops['proposed_rate'];
+                                // $fullproposals[$i]['hired'] = $temp[$i];
+                        // }
                     }
                     else {
                     $fullproposals[$j]['hired'] = null;
@@ -275,7 +286,7 @@ class ScoutController extends Controller
          $fullclosedeals = array();
          $hired = Post::where('id', '=', $post_id)->get();
                  foreach($hired as $hire){
-                    if(count(json_decode($hire['hire_id'], true)) >= 1) {
+                    if(count(json_decode($hire['hire_id'], true)) >= 1 && json_decode($hire['hire_id'], true) !== 0) {
                     $numhire = count(json_decode($hire['hire_id'], true));
                     $temp = json_decode($hire['hire_id']);
                     // list($temp) = explode(',', implode(',',json_decode($hire['hire_id'], true)));
@@ -301,9 +312,11 @@ class ScoutController extends Controller
 
          // dd(count(json_decode($posts['tags'],true)));
          foreach (json_decode($posts['tags'],true) as $tal){
-            $getTalent = Talent::where('fee', '<=', $posts['budget'])
-                                ->where('demerit', '<', 1500)
-                                ->get();
+            // $getTalent = Talent::where('fee', '<=', $posts['budget'])
+            //                     ->where('demerit', '<', 1500)
+            //                     ->get();
+
+            //joining 3 tables talent, talent_details and users(for profiling).
             $temp = DB::table('users')
             ->join('talent', function ($join) use ($posts){
             $join->on('users.id', '=', 'talent.id')
@@ -316,14 +329,14 @@ class ScoutController extends Controller
                  ->where('talent_details.talent', '=', $tal);
             })
             ->join('users AS u', function ($join) use ($posts) {
-                $hires = json_decode($posts['hire_id'], true);
-                    if($hires !== null){
-                    $checkhired = array_search($findProf['id'], $hires);
-                    }
-                    else {
-                        $checkhired = false;
-                    }
-                if($checkhired == false){
+                // $hires = json_decode($posts['hire_id'], true);
+                //     if($hires !== null){
+                //     $checkhired = array_search($findProf['id'], $hires);
+                //     }
+                //     else {
+                //         $checkhired = false;
+                //     }
+                // if($checkhired == false){
                     if($posts['age'] == 1) {
                         if($posts['gender'] == 'any'){
                             if($posts['group'] == 0){
@@ -470,39 +483,48 @@ class ScoutController extends Controller
                             }
                         }
                     }
-                }
+                // }
             })
             ->get();
             foreach ($temp as $key) {
-                $checkexperience = Rating::where('user_id', '=', $key->id)->get();
-                if(count($checkexperience) == 0){
-                        $recommendednewbie[$t]['id'] = $key->id;
-                        $recommendednewbie[$t]['profile_image'] = $key->profile_image;
-                    if($key->firstname == null){
-                        $group = Group::find($key->id);
-                        $recommendednewbie[$t]['firstname'] = ucfirst($group['groupname']);
-                        $recommendednewbie[$t]['lastname'] = '';
+                $hires = json_decode($posts['hire_id'], true);
+                    if($hires !== null){
+                    $checkhired = array_search($key->id, $hires);
                     }
                     else {
-                        $recommendednewbie[$t]['firstname'] = ucfirst($key->firstname);
-                        $recommendednewbie[$t]['lastname'] = ucfirst($key->lastname);
+                        $checkhired = false;
                     }
-                    $t++;
-                    }
-                else {
-                        $recommended[$t]['id'] = $key->id;
-                        $recommended[$t]['profile_image'] = $key->profile_image;
+                if($checkhired == false && $checkhired !== 0){
+                    $checkexperience = Rating::where('user_id', '=', $key->id)->get();
+                    if(count($checkexperience) == 0){
+                            $recommendednewbie[$t]['id'] = $key->id;
+                            $recommendednewbie[$t]['profile_image'] = $key->profile_image;
                         if($key->firstname == null){
                             $group = Group::find($key->id);
-                            $recommended[$t]['firstname'] = ucfirst($group['groupname']);
-                            $recommended[$t]['lastname'] = '';
+                            $recommendednewbie[$t]['firstname'] = ucfirst($group['groupname']);
+                            $recommendednewbie[$t]['lastname'] = '';
                         }
                         else {
-                            $recommended[$t]['firstname'] = ucfirst($key->firstname);
-                            $recommended[$t]['lastname'] = ucfirst($key->lastname);
+                            $recommendednewbie[$t]['firstname'] = ucfirst($key->firstname);
+                            $recommendednewbie[$t]['lastname'] = ucfirst($key->lastname);
                         }
                         $t++;
                         }
+                    else {
+                            $recommended[$t]['id'] = $key->id;
+                            $recommended[$t]['profile_image'] = $key->profile_image;
+                            if($key->firstname == null){
+                                $group = Group::find($key->id);
+                                $recommended[$t]['firstname'] = ucfirst($group['groupname']);
+                                $recommended[$t]['lastname'] = '';
+                            }
+                            else {
+                                $recommended[$t]['firstname'] = ucfirst($key->firstname);
+                                $recommended[$t]['lastname'] = ucfirst($key->lastname);
+                            }
+                            $t++;
+                            }
+                    }
                 }
             }
          
@@ -541,12 +563,63 @@ class ScoutController extends Controller
     }
     public function deleteYourPost($post_id){
         $post = Post::find($post_id);
-        $destinationPath = public_path().'/files/';
-        $file = $post['file'];
-        File::delete($destinationPath.$file);
-        $post->delete();
-        Session::flash('message', 'Successfully deleted!');
-         return Redirect::back();
+        $today = Carbon::now();
+        $days = $today->diffInDays(Carbon::parse($post['start_date']));
+        $findHireID = json_decode($post['hire_id'],true);
+        //penalty
+                if($days <= 3 && $days !== 1){
+                    foreach ($findHireID as $key => $value) {
+                        //call function to penalize user
+                        PaypalController::penalizeUser($value);
+                        $notification = new Notification;
+                        $notification->id = null;
+                        $notification->user_id = $value;
+                        $notification->subject = 'invitation';
+                        $notification->body = Session::get('username').' has cancelled his event entitled: '.$post['title'];
+                        $notification->object_id = $post['id'];
+                        $notification->is_read = 0;
+                        $notification->sent_at = new Carbon();
+                        $notification->save();
+                    }
+                        //send money to system
+                        PaypalController::sendPaymentToSystem();
+                        //delete all schedules of hired talents
+                        $cancelevent = EventModel::where('post_id', '=', $post['id'])->get();
+                        foreach ($cancelevent as $key2 => $value2) {
+                            $value2->delete();
+                        }
+                        $destinationPath = public_path().'/files/';
+                        $file = $post['file'];
+                        File::delete($destinationPath.$file);
+                        $post->delete();
+                        Session::flash('message', 'Successfully deleted!');
+                         return Redirect::back();
+                }
+                //just inform the hired talents no penalty
+                else {
+                    foreach ($findHireID as $key => $value) {
+                        $notification = new Notification;
+                        $notification->id = null;
+                        $notification->user_id = $value;
+                        $notification->subject = 'invitation';
+                        $notification->body = Session::get('username').' has cancelled his event entitled: '.$post['title'];
+                        $notification->object_id = $post['id'];
+                        $notification->is_read = 0;
+                        $notification->sent_at = new Carbon();
+                        $notification->save();
+                    }
+                    //delete all schedules of hired talents
+                        $cancelevent = EventModel::where('post_id', '=', $post['id'])->get();
+                        foreach ($cancelevent as $key2 => $value2) {
+                            $value2->delete();
+                        }
+                        $destinationPath = public_path().'/files/';
+                        $file = $post['file'];
+                        File::delete($destinationPath.$file);
+                        $post->delete();
+                        Session::flash('message', 'Successfully deleted!');
+                         return Redirect::back();
+                }
     }
     public function addPost(Request $request)
     {
@@ -577,7 +650,7 @@ class ScoutController extends Controller
                 foreach ($schedule as $key => $value) {
                     $schedStartdate = Carbon::parse($value['start_date']);
                     $schedEnddate = Carbon::parse($value['end_date']);
-                    if(!$postStartdate->gte($schedEnddate)){
+                    if($postStartdate->gte($schedEnddate)){
                         Session::flash('message', 'You are not available in that event day!');
                         return Redirect::back()->withInput();
                     }
@@ -588,7 +661,6 @@ class ScoutController extends Controller
                         }
                     }
                 }
-                    
                 $detail = new Post;
                 $detail->id =null;
                 $detail->scout_id = Auth::user()->id;
@@ -627,7 +699,7 @@ class ScoutController extends Controller
                     $newSchedule->id = null;
                     $newSchedule->user_id = Session::get('id');
                     $newSchedule->title = $data['title'];
-                    $newSchedule->isAllDay = 0;
+                    $newSchedule->isAllDay = 1;
                     $newSchedule->start_date = $postStartdate;
                     $newSchedule->end_date = $postEnddate;
                     $newSchedule->post_id = $detail->id;
@@ -665,8 +737,10 @@ class ScoutController extends Controller
     }
     public function hire($talent_id){
         $hire = Post::find(Session::get('post_id'));
+        $postStartdate = Carbon::parse($hire['start_date']);
+            $postEnddate = Carbon::parse($hire['end_date']);
         if(empty($hire['hire_id'])){
-            $hire->hire_id = json_encode(explode(',', $talent_id[0]));
+            $hire->hire_id = json_encode(explode(',', $talent_id)); //$talent_id[0]
         }
         else {
             $getHire = json_decode($hire['hire_id'], true);
@@ -677,8 +751,38 @@ class ScoutController extends Controller
             // dd(implode(',',$getHire));
             $hire->hire_id = json_encode($getHire);
         }
+
         // $hire->hire_id = json_encode(explode(',', $talent_id[0]));
         $hire->save();
+
+        $invite = new Invitation;
+                $invite->id = null;
+                $invite->post_id = Session::get('post_id');
+                $invite->talent_id = $talent_id;
+                $invite->status = 1;
+                $invite->save();
+                    $notification = new Notification;
+                    $notification->id = null;
+                    $notification->user_id = $talent_id;
+                    $notification->subject = 'invitation';
+                    $notification->body = Session::get('username').' has accepted your booking on event entitled: '.$hire['title'];
+                    $notification->object_id = $hire['id'];
+                    $notification->is_read = 0;
+                    $notification->sent_at = new Carbon();
+                    $notification->save();
+        $newSchedule = new EventModel;
+            $newSchedule->id = null;
+            $newSchedule->user_id = $talent_id;
+            $newSchedule->title = $hire['title'];
+            $newSchedule->isAllDay = 1;
+            $newSchedule->start_date = $postStartdate;
+            $newSchedule->end_date = $postEnddate;
+            $newSchedule->post_id = Session::get('post_id');
+            $newSchedule->save();
+
+        $changecontact = preg_replace('/^0/','63',Session::get('contactno'));
+        $chikkadata = array('number'=> $changecontact, 'message'=> 'Congratulations! A scout has accepted your booking! Please visit Talent Scout for more details!');
+        ChikkaController::send($chikkadata);
         return Redirect::back();
     }
     public function closePost($post_id){

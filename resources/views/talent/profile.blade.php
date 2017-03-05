@@ -248,7 +248,7 @@
                         <div class="row">
                         {!! Form::open(['url'=>'/linkcreditcard', 'files' => true]) !!}
                           <div class="input-field col s6">
-            {!! Form::text('firstname', '', array('class' => 'validate','placeholder' => 'Enter Firstname')) !!}
+            {!! Form::text('firstname', '', array('class' => 'validate','placeholder' => 'Enter Firstname', 'required' => 'required')) !!}
               <!-- <input  value="Frete" id="firstname" type="text" class="validate"> -->
               <label for="firstname">First Name</label>
               @foreach($errors->get('firstname') as $message)
@@ -256,7 +256,7 @@
                 @endforeach
             </div>
             <div class="input-field col s6">
-            {!! Form::text('lastname', '', array('class' => 'validate','placeholder' => 'Enter Lastname')) !!}
+            {!! Form::text('lastname', '', array('class' => 'validate','placeholder' => 'Enter Lastname', 'required' => 'required')) !!}
               <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
               <label for="lastname">Last Name</label>
               @foreach($errors->get('lastname') as $message)
@@ -264,23 +264,31 @@
                 @endforeach
             </div>
             <div class="input-field col s6">
+            {!! Form::email('paypalemail', '', array('class' => 'validate','placeholder' => 'Enter Your Paypal email address', 'required' => 'required')) !!}
+              <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
+              <label for="lastname">Paypal Email <small>The cash bonds will be sent from this email.</small></label>
+              @foreach($errors->get('paypalemail') as $message)
+                {!! $message !!}
+                @endforeach
+            </div>
+            <div class="input-field col s6">
             <label for="cardtype" style="margin-top:-30px;">Card Type</label>
-            {!! Form::select('cardtype', ['visa' => 'Visa','mastercard' => 'MasterCard', 'maestro' => 'Maestro', 'amex' => 'American Express', 'discover' => 'Discover'], null, ['class' => 'browser-default']) !!}
+            {!! Form::select('cardtype', ['visa' => 'Visa','mastercard' => 'MasterCard', 'maestro' => 'Maestro', 'amex' => 'American Express', 'discover' => 'Discover'], null, ['class' => 'browser-default', 'required' => 'required']) !!}
               @foreach($errors->get('cardtype') as $message)
                 {!! $message !!}
                 @endforeach
             </div>
             <div class="input-field col s6">
             <label for="cardtype">Card Number</label>
-            {!! Form::number('cardnumber', null, ['class' => 'browser-default', 'min' => '0']) !!}
+            {!! Form::number('cardnumber', null, ['class' => 'browser-default', 'min' => '0', 'required' => 'required']) !!}
               @foreach($errors->get('cardnumber') as $message)
                 {!! $message !!}
                 @endforeach
             </div>
             <div class="input-field col s6">
             <label for="cardtype" style="margin-top:-30px;">Expiry Date</label>
-            {!! Form::select('cardmonth', ['01' => '01','02' => '02', '03' => '03','04' => '04','05' => '05','06' => '06','07' => '07','08' => '08','09' => '09','10' => '10','11' => '11','12' => '12'], null, ['class' => 'browser-default']) !!}
-            {!! Form::select('cardyear', ['2014' => '2014','2015'  => '2015', '2016'  => '2016','2017'  => '2017','2018'  => '2018','2019'  => '2019','2020'  => '2020','2021'  => '2021','2022'  => '2022'], null, ['class' => 'browser-default']) !!}
+            {!! Form::select('cardmonth', ['01' => '01','02' => '02', '03' => '03','04' => '04','05' => '05','06' => '06','07' => '07','08' => '08','09' => '09','10' => '10','11' => '11','12' => '12'], null, ['class' => 'browser-default', 'required' => 'required']) !!}
+            {!! Form::select('cardyear', ['2014' => '2014','2015'  => '2015', '2016'  => '2016','2017'  => '2017','2018'  => '2018','2019'  => '2019','2020'  => '2020','2021'  => '2021','2022'  => '2022'], null, ['class' => 'browser-default', 'required' => 'required']) !!}
               @foreach($errors->get('cardmonth') as $message)
                 {!! $message !!}
                 @endforeach
@@ -290,7 +298,7 @@
             </div>
             <div class="input-field col s6">
             <label for="cardtype">CVV</label>
-            {!! Form::number('cardcvv', null, ['class' => 'browser-default', 'min' => '0']) !!}
+            {!! Form::number('cardcvv', null, ['class' => 'browser-default', 'min' => '0', 'required' => 'required']) !!}
               @foreach($errors->get('cardcvv') as $message)
                 {!! $message !!}
                 @endforeach

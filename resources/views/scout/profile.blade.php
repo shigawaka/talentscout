@@ -390,7 +390,7 @@
 
             <div class="col s12 m12 card-panel white">
               <div class="icon-block">
-                <h5>Talents @if($user['id'] == Session::get('id'))
+                <h5>Talents Needed @if($user['id'] == Session::get('id'))
                    <a class="btn-floating btn-small waves-effect waves-light grey btn modal-trigger" data-target="modal1"><i class="material-icons">add</i></a>
                 @endif</h5>
                 @if(!empty($td))
@@ -405,7 +405,7 @@
              <div id="modal1" class="modal modal-fixed-footer" style="width:80%;">
               {!! Form::open(['url'=>'/addtalent/'.$user['id'].'', 'files' => true]) !!}
                        <div class="modal-content">
-                       <h4>Your talents</h4>
+                       <h4>Talents Needed</h4>
                        <div class="divider"></div>
                        <div class="wrap">
                        @if (Session::has('duplicate'))

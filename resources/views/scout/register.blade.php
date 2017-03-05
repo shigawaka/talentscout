@@ -94,18 +94,7 @@
                                                     @endforeach
                         </div>
                       </div>
-                         <div class="form-group">
-                       
-                        <div class="col-sm-10">
-                          {!! Form::text('address',null,['class'=>'form-control', 'placeholder'=>'Enter your address *', 'required'=>'required']) !!}
-                          <!-- <input type="text" class="form-control" name="firstname" id="firstname" placeholder="Your First Name"> -->
-                            
-
-                                                  @foreach($errors->get('address') as $message)
-                                                    {{ $message }}
-                                                    @endforeach
-                        </div>
-                      </div>
+                         
                          <div class="form-group">
                        
                         <div class="col-sm-10">

@@ -25,7 +25,7 @@
     <!-- Theme CSS -->
     <link href="../../css/creative.min.css" rel="stylesheet">
     <link href="../../css/creative.css" rel="stylesheet">
-    
+    <link rel="stylesheet" type="text/css" href="../../css/customcssdropdown.css">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -117,6 +117,9 @@ div.product-chooser{
     <section class="light">
         <div class="container-fluid">
   <div class="row">
+  <div class="col-md-12">
+    <a  href="{{ URL::to('/paymentprocess') }}">Get your profile featured!</a>
+    </div>
     <div class="col-md-12">
       <nav class="navbar navbar-inverse" role="navigation">
         <div class="collapse navbar-collapse"  id="bs-example-navbar-collapse-1">
@@ -127,33 +130,76 @@ div.product-chooser{
             <li>
               <a href="{!! URL::to('/profile').'/'.Session::get('id') !!}">Profile</a>
             </li>
-            <li class="active">
+            <li>
               <a href="{!! URL::to('/about') !!}">About</a>
             </li>
             @if(Session::get('roleID') == 0)
             <li>
               <a href="{!! URL::to('/post') !!}">My Posts</a>
             </li>
+            
             @endif
+            <li>
+              <a href="{{ URL::to('/searchscout') }}">SEARCH</a>
+            </li>
           </ul>
-          {!! Form::open(['url'=>'/searchscout', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
+         <!--  {!! Form::open(['url'=>'/searchscout', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
           
             
           {!! Form::text('search', '', array('id' => 'q','placeholder' => 'Search...', 'class' => 'form-control', 'style' => 'width:70%;')) !!}              
           {!! Form::submit('Search', array('class' => 'btn btn-default')) !!}   
             
-            {!! Form::close() !!}
+            {!! Form::close() !!} -->
           <ul class="nav navbar-nav navbar-right">
             <li>
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              <span class="glyphicon glyphicon-bell"></span>
+              @if(count($unreadNotifications) == 0)
+              <span class="glyphicon glyphicon-bell "></span>
+              @else
+              <span class="glyphicon glyphicon-bell notification-icon"></span>
+              @endif
               </a>
-              {{-- @foreach($unreadNotifications as $notification)
-              <div class="notification {{ $notification->type }}">    
-                  <p class="subject">{{ $notification->subject }}</p>
-                  <p class="body">{{ $notification->body }}</p>
-              </div>
-              @endforeach --}}
+              <ul class="dropdown-menu notifications" role="menu" aria-labelledby="dLabel">
+    
+    <div class="notification-heading"><h4 class="menu-title">Notifications ( @if(!empty($unreadNotifications)) {{ count($unreadNotifications) }} )@endif</h4><h4 class="menu-title pull-right">View all<i class="glyphicon glyphicon-circle-arrow-right"></i></h4>
+    </div>
+    <li class="divider"></li>
+   <div class="notifications-wrapper">
+    @foreach($unreadNotifications as $notification)
+      @if($notification->subject == 'comment')
+     <a class="content" href="{{ URL::to('/post').'/'.$notification->object_id }}">
+      @elseif($notification->subject == 'invitation')
+     <a class="content" href="{{ URL::to('/invitation').'/'.Session::get('id') }}">
+      @elseif($notification->subject == 'connections')
+     <a class="content" href="{{ URL::to('/connection').'/'.Session::get('id') }}">
+      @endif
+       <div class="notification-item">
+        <h4 class="item-title">{{ $notification->sent_at->diffForHumans() }}</h4>
+        <p class="item-info">{{$notification->body }}</p>
+      </div>
+    </a>
+    @endforeach
+   </div>
+    <li class="divider"></li>
+    @if(count($readNotifications) !== 0)
+    <div class="notification-heading"><h4 class="menu-title">Read notifications</h4></div>
+    @endif
+    <div class="notifications-wrapper">
+    @foreach($readNotifications as $notification)
+      @if($notification->subject == 'comment')
+     <a class="content" href="{{ URL::to('/post').'/'.$notification->object_id }}">
+      @endif
+       <div class="notification-item" style="background: #ecf0f1;">
+        <h4 class="item-title">{{ $notification->sent_at->diffForHumans() }}</h4>
+        <p class="item-info">{{$notification->body }}</p>
+      </div>
+    </a>
+    @endforeach
+    <li class="divider"></li>
+    <div class="notification-footer"><h4 class="menu-title">Mark all as read<a href="{{ URL::to('/readNotifications') }}"><i class="glyphicon glyphicon-circle-arrow-right"></i></a></h4></div>
+   </div>
+  </ul>
+              
             </li>
             @if(Session::get('roleID') == 2)
             <li>
@@ -174,16 +220,12 @@ div.product-chooser{
     </div>
     <div class="col-md-12">
     @if (Session::has('success'))
-                  <div id="card-alert" class="card green">
-                  <div class="card-content white-text">
-                  <p><i class="mdi-navigation-check"></i> {{ Session::get('success') }}</p>
-                  </div>
+                  <div class="alert alert-success">
+                    <strong>{{ Session::get('success') }}</strong>
                   </div>
     @elseif (Session::has('failed'))
-                  <div id="card-alert" class="card green">
-                  <div class="card-content white-text">
-                  <p><i class="mdi-navigation-check"></i> {{ Session::get('success') }}</p>
-                  </div>
+                  <div class="alert alert-success">
+                    <strong>{{ Session::get('success') }}</strong>
                   </div>
     @endif
         <h1 class="text-center" style="color:#F22613;">Get your profile to be featured!</h1>
@@ -200,7 +242,7 @@ div.product-chooser{
         <div class="product-chooser-item selected">
           <img src="{{ URL::to('/images').'/'.$value['file']}}" class="img-rounded col-xs-4 col-sm-4 col-md-12 col-lg-12" alt="Mobile and Desktop">
                 <div class="col-xs-8 col-sm-8 col-md-12 col-lg-12">
-            <span class="title">{{$key + 1}} week · For only ‎${{ $value['price'] }} </span>
+            <span class="title">{{$key + 1}} week · For only ‎${{ $value['price']  }}  or in Peso‎(₱{!! $value['price']*49 !!}) </span>
             <span class="description">{{ $value['description'] }}</span>
             <!-- <input type="radio" name="product" value="mobile_desktop" checked="checked"> -->
             {!! Form::hidden('hiddenprice[]',$value['price'] , array('id' => 'hehe')) !!}

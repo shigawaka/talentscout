@@ -332,7 +332,7 @@
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
                     Add Tags (Separated by Comma)
                 </h3>
-                <div class="col-xs-12">
+                <div class="col-xs-12" id="talentcontainer">
                 {!! Form::text('tags[]', implode(',', $tag) , array('placeholder' => 'Add Tags', 'data-role' => 'tagsinput')) !!}              
                  @foreach($errors->get('tags') as $message)
                 {!! $message !!}
@@ -666,7 +666,7 @@
                 <h3 class="form-group" style="padding-left: 10px;" id="myModalLabel">
                     {!! $val['firstname'] , ' ',  $val['lastname'] !!}
                     @if(!empty($val['hired']))
-                      @if($val['user_id'] === $val['hired'])
+                      @if(array_search($val['user_id'], $val['hired']) !== false)
                       <a disabled class="btn btn-success" href="{!! URL::to('/hire').'/'.$val['user_id'] !!}">Booked</a>
                       @else
                       <a class="btn btn-info" href="{!! URL::to('/hire').'/'.$val['user_id'] !!}">Hire</a>
@@ -679,6 +679,16 @@
                 <a href="{!! URL::to('/profile').'/'.$val['user_id'] !!}"><img style="width: 150px; height: 130px;" src="{!! URL::to('/files').'/'.$val['profile_image'] !!}"></a>
                 <blockquote class="blockquote">
                 <p class="m-b-0">{!! $val['body'] !!}</p>
+                @if($val['file'] !== null)
+                  @if(strpos($val['file'],'.mp4') == true)
+                  <video style="width: 100%;" width="400" controls>
+                      <source src="{!! URL::to('/files').'/'.$val['file'] !!}" type="video/mp4">
+                  </video>
+                  @else
+                   <img class="img-responsive" style="height: 300px; width: 450px;" src="{!! URL::to('/files').'/'.$val['file'] !!}" alt="Chania"> 
+                  @endif
+                @else
+                @endif
                 <p class="m-b-0">Proposed Rate: ₱{!! $val['proposed_rate'] !!}</p>
                 </blockquote>
                 </div>

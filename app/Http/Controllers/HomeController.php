@@ -32,6 +32,7 @@ use App\TalentDetail;
 use App\ScoutDetail;
 use App\VaultCreditCard;
 
+
 use Hash;
 use Auth;
 use Session;
@@ -308,81 +309,63 @@ class HomeController extends Controller
                         }
                     }
                 }
-                $otherpost = Post::where('status', '=', 0)->get();
+                $today = Carbon::now();
+                $otherpost = Post::where('status', '=', 0)
+                            ->whereDate('start_date', '>=', $today)
+                            ->get();
                 $op = array();
                 $i = 0;
-                    // for ($j=0; $j < count($otherpost); $j++) { 
-                    //     $find = array_search($otherpost[$j]['id'], array_column($postarr, 'id'));
-                    //     if($find == false && array_search($postarr[$j]['id'], array_column($otherpost, 'id')) == false){
-                    //         $op[$i]['id'] = $value['id'];
-                    //         $op[$i]['scout_id'] = $value['scout_id'];
-                    //         $op[$i]['title'] = $value['title'];
-                    //         $op[$i]['description'] = $value['description'];
-                    //         $op[$i]['file'] = $value['file'];
-                    //         $op[$i]['description'] = $value['description'];
-                    //         $op[$i]['tags'] = $value['tags'];
-                    //         $op[$i]['age'] = $value['age'];
-                    //         $op[$i]['gender'] = $value['gender'];
-                    //         $op[$i]['budget'] = $value['budget'];
-                    //         $op[$i]['rate'] = $value['rate'];
-                    //         $op[$i]['group'] = $value['group'];
-                    //         $op[$i]['date_posted'] = $value['date_posted'];
-                    //         $op[$i]['status'] = $value['status'];
-                    //         $op[$i]['hire_id'] = $value['hire_id'];
-                    //         $op[$i]['start_date'] = $value['start_date'];
-                    //         $op[$i]['end_date'] = $value['end_date'];
-                    //         $i++;
-                    //     }
-                    // }
-                foreach ($otherpost as $key => $value) {
-                    $find = array_search($value['id'], array_column($postarr, 'id'));
-                    if(count($op) == 0){
-                        if($find == false){
-                            $op[$i]['id'] = $value['id'];
-                            $op[$i]['scout_id'] = $value['scout_id'];
-                            $op[$i]['title'] = $value['title'];
-                            $op[$i]['description'] = $value['description'];
-                            $op[$i]['file'] = $value['file'];
-                            $op[$i]['description'] = $value['description'];
-                            $op[$i]['tags'] = $value['tags'];
-                            $op[$i]['age'] = $value['age'];
-                            $op[$i]['gender'] = $value['gender'];
-                            $op[$i]['budget'] = $value['budget'];
-                            $op[$i]['rate'] = $value['rate'];
-                            $op[$i]['group'] = $value['group'];
-                            $op[$i]['date_posted'] = $value['date_posted'];
-                            $op[$i]['status'] = $value['status'];
-                            $op[$i]['hire_id'] = $value['hire_id'];
-                            $op[$i]['start_date'] = $value['start_date'];
-                            $op[$i]['end_date'] = $value['end_date'];
-                            $i++;
-                        }
-                    }
-                    else {
-                        dd('ok');
-                        if($find == false && array_search($value['id'], array_column($op, 'id')) == false){
-                            $op[$i]['id'] = $value['id'];
-                            $op[$i]['scout_id'] = $value['scout_id'];
-                            $op[$i]['title'] = $value['title'];
-                            $op[$i]['description'] = $value['description'];
-                            $op[$i]['file'] = $value['file'];
-                            $op[$i]['description'] = $value['description'];
-                            $op[$i]['tags'] = $value['tags'];
-                            $op[$i]['age'] = $value['age'];
-                            $op[$i]['gender'] = $value['gender'];
-                            $op[$i]['budget'] = $value['budget'];
-                            $op[$i]['rate'] = $value['rate'];
-                            $op[$i]['group'] = $value['group'];
-                            $op[$i]['date_posted'] = $value['date_posted'];
-                            $op[$i]['status'] = $value['status'];
-                            $op[$i]['hire_id'] = $value['hire_id'];
-                            $op[$i]['start_date'] = $value['start_date'];
-                            $op[$i]['end_date'] = $value['end_date'];
-                            $i++;
-                        }
-                    }
-                }
-                dd($op);
+                // foreach ($otherpost as $key => $value) {
+                //     $find = array_search($value['id'], array_column($postarr, 'id'));
+                //     if(count($op) == 0){
+                //         if($find == false){
+                //             $op[$i]['id'] = $value['id'];
+                //             $op[$i]['scout_id'] = $value['scout_id'];
+                //             $op[$i]['title'] = $value['title'];
+                //             $op[$i]['description'] = $value['description'];
+                //             $op[$i]['file'] = $value['file'];
+                //             $op[$i]['description'] = $value['description'];
+                //             $op[$i]['tags'] = $value['tags'];
+                //             $op[$i]['age'] = $value['age'];
+                //             $op[$i]['gender'] = $value['gender'];
+                //             $op[$i]['budget'] = $value['budget'];
+                //             $op[$i]['rate'] = $value['rate'];
+                //             $op[$i]['group'] = $value['group'];
+                //             $op[$i]['date_posted'] = $value['date_posted'];
+                //             $op[$i]['status'] = $value['status'];
+                //             $op[$i]['hire_id'] = $value['hire_id'];
+                //             $op[$i]['start_date'] = $value['start_date'];
+                //             $op[$i]['end_date'] = $value['end_date'];
+                //             $i++;
+                //         }
+                //     }
+                //     else {
+                //         dd('ok');
+                //         if($find == false && array_search($value['id'], array_column($op, 'id')) == false){
+                //             $op[$i]['id'] = $value['id'];
+                //             $op[$i]['scout_id'] = $value['scout_id'];
+                //             $op[$i]['title'] = $value['title'];
+                //             $op[$i]['description'] = $value['description'];
+                //             $op[$i]['file'] = $value['file'];
+                //             $op[$i]['description'] = $value['description'];
+                //             $op[$i]['tags'] = $value['tags'];
+                //             $op[$i]['age'] = $value['age'];
+                //             $op[$i]['gender'] = $value['gender'];
+                //             $op[$i]['budget'] = $value['budget'];
+                //             $op[$i]['rate'] = $value['rate'];
+                //             $op[$i]['group'] = $value['group'];
+                //             $op[$i]['date_posted'] = $value['date_posted'];
+                //             $op[$i]['status'] = $value['status'];
+                //             $op[$i]['hire_id'] = $value['hire_id'];
+                //             $op[$i]['start_date'] = $value['start_date'];
+                //             $op[$i]['end_date'] = $value['end_date'];
+                //             $i++;
+                //         }
+                //     }
+                // }
+                $one_dimension = array_map("serialize", $postarr);
+            $unique_one_dimension = array_unique($one_dimension);
+            $postarr = array_map("unserialize", $unique_one_dimension);
             return view('talent.home')
                 ->with('posts',$postarr)
                 ->with('succ',$succ)
@@ -488,23 +471,24 @@ class HomeController extends Controller
                                             ->limit(6)
                                             ->get();
         $i = 0;
-        foreach ($profile as $key => $value) {
-            $userdetail = User::find($value['profile_id']);
-            $checkexpiration = Carbon::parse($value['end_date']);
-            if(!Carbon::now()->gte($checkexpiration)){
-            $profilearray[$i]['id'] = $value['profile_id'];
-            $profilearray[$i]['profile_image'] = $userdetail['profile_image'];
-            $profilearray[$i]['firstname'] = $userdetail['firstname'];
-            $profilearray[$i]['lastname'] = $userdetail['lastname'];
-            $profilearray[$i]['profile_description'] = $userdetail['profile_description'];
-            $profilearray[$i]['start_date'] = $value['start_date'];
-            $profilearray[$i]['end_date'] = $value['end_date'];
-            $i++;
-            }
-            else {
-                //remove from db
-            }
-        }
+        // I FORGOT WHAT THIS FUNCTION IS FOR :| .
+        // foreach ($profile as $key => $value) {
+        //     $userdetail = User::find($value['profile_id']);
+        //     $checkexpiration = Carbon::parse($value['end_date']);
+        //     if(!Carbon::now()->gte($checkexpiration)){
+        //     $profilearray[$i]['id'] = $value['profile_id'];
+        //     $profilearray[$i]['profile_image'] = $userdetail['profile_image'];
+        //     $profilearray[$i]['firstname'] = $userdetail['firstname'];
+        //     $profilearray[$i]['lastname'] = $userdetail['lastname'];
+        //     $profilearray[$i]['profile_description'] = $userdetail['profile_description'];
+        //     $profilearray[$i]['start_date'] = $value['start_date'];
+        //     $profilearray[$i]['end_date'] = $value['end_date'];
+        //     $i++;
+        //     }
+        //     else {
+        //         //remove from db
+        //     }
+        // }
         $testi = Rating::where('testimonial_score', '=', 5)
                        ->where('testimonial_comment', '!=', '')
                        ->groupBy('user_id')
@@ -524,15 +508,17 @@ class HomeController extends Controller
                         }
                     }
                 }
-        // dd($recomprofile);
+                //delete duplicate profiles 
+                $one_dimension = array_map("serialize", $recomprofile);
+            $unique_one_dimension = array_unique($one_dimension);
+            $unique_multi_dimension = array_map("unserialize", $unique_one_dimension);
         return view('scout.home')
                 ->with('posts',$posts)
                 ->with('succ',$succ)
-                ->with('recomprofile', $recomprofile)
+                ->with('recomprofile', $unique_multi_dimension)
                 ->with('testimonialarr', $testimonialarr)
                 ->with('unreadNotifications', $unreadNotifications)
-                ->with('readNotifications', $readNotifications)
-                ->with('profilearray', $profilearray);
+                ->with('readNotifications', $readNotifications);
         }
     }
 
@@ -672,7 +658,15 @@ if ($validator->fails()) {
             }
         }
         else {
-        return Redirect::to('http://localhost:8000/homescout');
+         //check if first time login
+            if($cred['first_login'] == 1){
+                Session::flash('message', 'You need to setup your profile! Setup the following: Talent Needed,profile image, Address, link your card!');
+                return Redirect::to('http://localhost:8000/profile'.'/'.$cred['id']);
+            }
+            else {
+
+            return Redirect::to('http://localhost:8000/homescout');
+            }
         }
             } else {        
 
@@ -746,7 +740,36 @@ if ($validator->fails()) {
     }
     public function addProposal(){
         $data = Request::all();
-        dd($data);
+        $post = Post::find(Session::get('post_id'));
+        $start_date = Carbon::parse($post['start_date']);
+        $end_date = Carbon::parse($post['end_date']);
+        $schedule = EventModel::where('user_id','=', Session::get('id'))->get();
+        foreach ($schedule as $key => $value) {
+            $schedStartdate = Carbon::parse($value['start_date']);
+            $schedEnddate = Carbon::parse($value['end_date']);
+            $today = Carbon::now();
+                if($start_date->gte($schedEnddate) && $end_date->lte($schedStartdate)){
+                    if($value['isAllDay'] == '0'){
+                    Session::flash('message', 'You are not available in that event day!');
+                    return Redirect::back();
+                    }
+                    elseif($data['allday'] == 'True'){
+                    Session::flash('message', 'You are not available in that event day!');
+                    return Redirect::back();
+                    }
+                }
+                elseif($start_date->isSameDay($schedStartdate)){ //check same day
+                     if($value['isAllDay'] == '0'){
+                    Session::flash('message', 'You are not available in that event day!');
+                    return Redirect::back();
+                    }
+                    elseif($data['allday'] == 'True'){
+                    Session::flash('message', 'You are not available in that event day!');
+                    return Redirect::back();
+                    }
+                }
+        }
+
         $rules = array(
             'body' => 'required',
             'rate' => 'required',
@@ -778,6 +801,17 @@ if ($validator->fails()) {
                 $detail->proposed_rate = $data['rate'];
                 $detail->save();
                 
+                $notification = new Notification;
+                $notification->id = null;
+                $post = Post::find(Session::get('post_id'));
+                $notification->user_id = $post['scout_id'];
+                $notification->subject = 'comment';
+                $notification->body = Session::get('username').' has applied on your post. Titled: '.$post['title'];
+                $notification->object_id = Session::get('post_id');
+                $notification->is_read = 0;
+                $notification->sent_at = new Carbon();
+                $notification->save();
+
                 return Redirect::back();
             }
         } else {
@@ -1017,6 +1051,7 @@ if ($validator->fails()) {
                         $filename = str_random(10).".".$file->getClientOriginalExtension();
                         $file->move($destinationPath, $filename);
                         $new_profile->profile_image = $filename;
+                        Session::set('profile_image', $filename);
                     }
             if(!empty($data['password'])) {
             $new_profile->password = Hash::make($data['password']);
@@ -1028,12 +1063,14 @@ if ($validator->fails()) {
                     $new_fee = Talent::find($user_id);
                     if(!empty($new_fee)){
                     $new_fee->fee = $data['fee'];
+                    $new_fee->fee_type = $data['fee_type'];
                     Session::set('talentfee', $data['fee']);
                     $new_fee->save();
                     }
                     else {
                         $new_fee = new Talent;
                         $new_fee->id = $user_id;
+                        $new_fee->fee_type = $data['fee_type'];
                         $new_fee->fee = $data['fee'];
                         $new_fee->save();
                     }
@@ -1074,7 +1111,8 @@ if ($validator->fails()) {
             }
                for ($i=0; $i < count($data['category']); $i++) { 
                     if($data['category'][$i] !== 'Select Category' || $data['talent'][$i] !== 'Select talent'){
-                        //every loop checking for db for duplicate entry entered by the user
+                        if(Session::get('roleID') == 1 || Session::get('roleID') == 2) {
+                            //every loop checking for db for duplicate entry entered by the user
                         $td = TalentDetail::where('talent_id', '=', $user_id)
                                 ->where('category', '=', $data['category'][$i])
                                 ->where('talent', '=', $data['talent'][$i])
@@ -1087,6 +1125,23 @@ if ($validator->fails()) {
                             $newtd->talent = $data['talent'][$i];
                             $newtd->save();
                             }
+                        }
+                        else {
+                            //every loop checking for db for duplicate entry entered by the user
+                        $td = ScoutDetail::where('scout_id', '=', $user_id)
+                                ->where('category', '=', $data['category'][$i])
+                                ->where('talent', '=', $data['talent'][$i])
+                                ->get();
+                            if(count($td) == 0){
+                                $newtd = new ScoutDetail;
+                            $newtd->id = null;
+                            $newtd->scout_id = $user_id;
+                            $newtd->category = $data['category'][$i];
+                            $newtd->talent = $data['talent'][$i];
+                            $newtd->save();
+                            }
+                        }
+                        
                     }
                 }
                             Session::flash('message', 'Successfully added talent!');
@@ -1236,13 +1291,30 @@ if ($validator->fails()) {
                     else {
                         $eve->isAllDay = false;
                     }
-                  $events[] = \Calendar::event(
-                  $eve->title, //event title
-                  $eve->isAllDay, //full day event?
-                  $eve->start_date, //start time (you can also use Carbon instead of DateTime)
-                  $eve->end_date, //end time (you can also use Carbon instead of DateTime)
-                  $eve->id //optionally, you can specify an event ID
-                  );
+                if($eve['post_id'] !== 0) {
+                    $events[] = \Calendar::event(
+                      $eve->title, //event title
+                      $eve->isAllDay, //full day event?
+                      $eve->start_date, //start time (you can also use Carbon instead of DateTime)
+                      $eve->end_date, //end time (you can also use Carbon instead of DateTime)
+                      $eve->id, //optionally, you can specify an event ID
+                      [
+                      'color' => '#e74c3c'
+                      ]
+                      );
+                }
+                else {
+                    $events[] = \Calendar::event(
+                      $eve->title, //event title
+                      $eve->isAllDay, //full day event?
+                      $eve->start_date, //start time (you can also use Carbon instead of DateTime)
+                      $eve->end_date, //end time (you can also use Carbon instead of DateTime)
+                      $eve->id //optionally, you can specify an event ID
+                      );
+                }
+                  
+
+                  
                 }
 
                 // $eloquentEvent = EventModel::first(); //EventModel implements MaddHatter\LaravelFullcalendar\Event
@@ -1273,7 +1345,7 @@ if ($validator->fails()) {
                                                             success: function(response){ // What to do if we succeed
                                                                 console.log(response);
                                                                 alert("Successfully Deleted Event!");
-                                                                //location.reload();
+                                                                location.reload();
                                                             },
                                                             error: function(response){
                                                                 console.log(response);
@@ -1311,43 +1383,130 @@ if ($validator->fails()) {
             $findHireID = json_decode($post['hire_id'],true);
             //if the user is not a scout then no need to notify the talents and just notify the scout.
             if(Session::get('roleID') !== 0){
+                //find the user's ID in hired array 
                 $position = array_search($eventDetail['user_id'], $findHireID);
                 if($position !== false) {
                     //if start date of the event starts in 3 or 
-                        if($days <= 3 && $today->eq(Carbon::parse($post['start_date']))){
-                            PaypalController::penalizeTalent($post['scout_id']);
+                        if($days <= 3 && $days !== 1){
+                            PaypalController::penalizeUser($post['scout_id']);
+                            PaypalController::sendPaymentToSystem();
+                            //notify the user that he violated the terms and policy
                             $notification = new Notification;
                             $notification->id = null;
-                            $notification->user_id = $post['scout_id'];
+                            $notification->user_id = Session::get('id');
                             $notification->subject = 'invitation';
-                            $notification->body = 'Hello '.Session::get('username').'! This is to inform that you recently violated the Terms and Policy of the site: Cancelling the event 3 days prior to the start date of event. You have been penalized.';
+                            $notification->body = 'Hello '.Session::get('username').'! This is to inform that you recently violated the Terms and Policy of the site: Cancelling the event 3 or 2 days prior to the start date of event. You have been penalized.';
                             $notification->object_id = $post['id'];
                             $notification->is_read = 0;
                             $notification->sent_at = new Carbon();
                             $notification->save();
-                        }
+                            //notify the scout
+                            $notification = new Notification;
+                            $notification->id = null;
+                            $notification->user_id = $post['scout_id'];
+                            $notification->subject = 'invitation';
+                            $notification->body = Session::get('username').' has cancelled his participation on event entitled: '.$post['title'];
+                            $notification->object_id = $post['id'];
+                            $notification->is_read = 0;
+                            $notification->sent_at = new Carbon();
+                            $notification->save();
+                            unset($findHireID[$position]);
+                            if(empty($findHireID)){
+                                $post->hire_id = 0;
+                            }
+                            else {
+                                $post->hire_id = json_encode($findHireID);
+                            }
+                            $post->save();
+                            $eventDetail->delete();
 
+
+                            Session::flash('message', 'Successfully deleted event!');
+                            return Redirect::to('/schedule/'.Session::get('id'));
+                        }
+                        else {
+                            //notify the scout then 
+                            $notification = new Notification;
+                            $notification->id = null;
+                            $notification->user_id = $post['scout_id'];
+                            $notification->subject = 'invitation';
+                            $notification->body = Session::get('username').' has cancelled his participation on event entitled: '.$post['title'];
+                            $notification->object_id = $post['id'];
+                            $notification->is_read = 0;
+                            $notification->sent_at = new Carbon();
+                            $notification->save();
+                            unset($findHireID[$position]);
+                            if(empty($findHireID)){
+                                $post->hire_id = 0;
+                            }
+                            else {
+                                $post->hire_id = json_encode($findHireID);
+                            }
+                            $post->save();
+                            $eventDetail->delete();
+                            Session::flash('message', 'Successfully deleted event!');
+                            return Redirect::to('/schedule/'.Session::get('id'));
+                        }
+                }
+            }
+            //if the user is a scout then notify 
+            else {
+                //penalty
+                if($days <= 3 && $days !== 1){
+                    foreach ($findHireID as $key => $value) {
+                        //call function to penalize user
+                        PaypalController::penalizeUser($value);
                         $notification = new Notification;
                         $notification->id = null;
-                        $notification->user_id = $post['scout_id'];
+                        $notification->user_id = $value;
                         $notification->subject = 'invitation';
-                        $notification->body = Session::get('username').' has cancelled his participation on event entitled: '.$post['title'];
+                        $notification->body = Session::get('username').' has cancelled his event entitled: '.$post['title'];
                         $notification->object_id = $post['id'];
                         $notification->is_read = 0;
                         $notification->sent_at = new Carbon();
                         $notification->save();
 
-
-
-                        unset($findHireID[$position]);
-                        $post->hire_id = json_encode($findHireID);
+                        $invitation = Invitation::where('post_id','=',$post['id'])
+                                                    ->where('talent_id', '=', $value)->first();
+                        $invitation->delete();
+                    }
+                        //send money to system
+                        PaypalController::sendPaymentToSystem();
+                        //delete all schedules of hired talents
+                        $cancelevent = EventModel::where('post_id', '=', $post['id'])->get();
+                        foreach ($cancelevent as $key2 => $value2) {
+                            $value2->delete();
+                        }
+                        $post->status = 1;
                         $post->save();
-
+                        $eventDetail->delete();
+                        Session::flash('message', 'Successfully deleted event!');
+                        return Redirect::to('/schedule/'.Session::get('id'));
                 }
-            }
-            //if the user is a scout then notify 
-            else {
-
+                //just inform the hired talents no penalty
+                else {
+                    foreach ($findHireID as $key => $value) {
+                        $notification = new Notification;
+                        $notification->id = null;
+                        $notification->user_id = $value;
+                        $notification->subject = 'invitation';
+                        $notification->body = Session::get('username').' has cancelled his event entitled: '.$post['title'];
+                        $notification->object_id = $post['id'];
+                        $notification->is_read = 0;
+                        $notification->sent_at = new Carbon();
+                        $notification->save();
+                    }
+                    //delete all schedules of hired talents
+                        $cancelevent = EventModel::where('post_id', '=', $post['id'])->get();
+                        foreach ($cancelevent as $key2 => $value2) {
+                            $value2->delete();
+                        }
+                        $post->status = 1;
+                        $post->save();
+                        $eventDetail->delete();
+                        Session::flash('message', 'Successfully deleted event!');
+                        return Redirect::to('/schedule/'.Session::get('id'));
+                }
             }
             
         }
@@ -1355,7 +1514,7 @@ if ($validator->fails()) {
         else {
             $eventDetail->delete();
             Session::flash('message', 'Successfully deleted event!');
-        return Redirect::to('/schedule/'.Session::get('id'));
+            return Redirect::to('/schedule/'.Session::get('id'));
         }
         
     }
@@ -1368,8 +1527,34 @@ if ($validator->fails()) {
         else{
              $start_date = Carbon::parse($data['start_date']);
              $end_date = Carbon::parse($data['end_date']);
+             $end_date->addHours(23)->addMinutes(59)->addSeconds(59);
         }
-       
+        $schedule = EventModel::where('user_id','=', Session::get('id'))->get();
+        foreach ($schedule as $key => $value) {
+            $schedStartdate = Carbon::parse($value['start_date']);
+            $schedEnddate = Carbon::parse($value['end_date']);
+            $today = Carbon::now();
+                if($start_date->gte($schedEnddate) && $end_date->lte($schedStartdate)){
+                    if($value['isAllDay'] == '0'){
+                    Session::flash('message', 'You are not available in that event day!');
+                    return Redirect::back();
+                    }
+                    elseif($data['allday'] == 'True'){
+                    Session::flash('message', 'You are not available in that event day!');
+                    return Redirect::back();
+                    }
+                }
+                elseif($start_date->isSameDay($schedStartdate)){ //check same day
+                     if($value['isAllDay'] == '0'){
+                    Session::flash('message', 'You are not available in that event day!');
+                    return Redirect::back();
+                    }
+                    elseif($data['allday'] == 'True'){
+                    Session::flash('message', 'You are not available in that event day!');
+                    return Redirect::back();
+                    }
+                }
+        }
 
         $rules = array(
             'title' => 'required|regex:/^[\pL\s\-]+$/u',
@@ -1387,9 +1572,7 @@ if ($validator->fails()) {
         $validation = Validator::make($data, $rules, $message);
 
         if($validation->passes()) {
-            if(EventModel::where('start_date', $start_date)->first()) {
-                return back()->withInput();
-            } else {
+            
                 $detail = new EventModel;
 
                 $detail->id =null;
@@ -1409,7 +1592,7 @@ if ($validator->fails()) {
 
                 Session::flash('message', 'Successfully added Event!');
                 return Redirect::back();
-            }
+            
         } else {
             return Redirect::back()->withInput()->withErrors($validation);
         }
@@ -1431,18 +1614,19 @@ if ($validator->fails()) {
                 return Redirect::back();
             }
             else {
-                if(!$postStartdate->gte($schedEnddate)){
-                    Session::flash('message', 'You are not available in that event day!');
-                    return Redirect::back();
-                }
-                elseif($postStartdate->eq($schedStartdate)){ //check same day
+                if($postStartdate->gte($schedEnddate) && $postEnddate->lte($schedStartdate)){
                     if($value['isAllDay'] == '0'){
                     Session::flash('message', 'You are not available in that event day!');
                     return Redirect::back();
                     }
                 }
+                elseif($postStartdate->isSameDay($schedStartdate)){ //check same day
+                     if($value['isAllDay'] == '0'){
+                    Session::flash('message', 'You are not available in that event day!');
+                    return Redirect::back();
+                    }
+                }
             }
-                
         }
         if(!empty($invited)){
             $invited->status = 1;
@@ -1451,7 +1635,7 @@ if ($validator->fails()) {
             $newSchedule->id = null;
             $newSchedule->user_id = Session::get('id');
             $newSchedule->title = $postDetails['title'];
-            $newSchedule->isAllDay = 0;
+            $newSchedule->isAllDay = 1;
             $newSchedule->start_date = $postStartdate;
             $newSchedule->end_date = $postEnddate;
             $newSchedule->post_id = $post_id;
@@ -1538,12 +1722,12 @@ if ($validator->fails()) {
                                             ->limit(6)
                                             ->get();
         $keyword = strtolower($data['search']);
-        //categorize talents
-        // $guitar = array('acoustic', 'guitar', 'wood guitar','acoustic guitar');
-        // $bass = array('bass', 'acoustic bass',);
-        // $dancing = array('dancing', 'dance', 'hip-hop', 'modern dance', 'dance troupe', 'dancers', 'dancer');
-        // $drum = array('drum', 'drummer', 'drummer band', 'marching band');
-        // $vocalist = array('singing', 'singer', 'songer', 'sing', 'vocalist', 'choir', 'vocal');
+        //categorize talents 
+        $entertainment = array('Clown', 'Magician', 'Trickster', 'Fire-Eating', 'Fire-dancing');
+        $photovideo = array('Actor', 'Actress', 'Models', 'Photographer', 'Videographer');
+        $hosting = array('Hosting', 'Organizer', 'Speaker');
+        $singing = array('Legit', 'Traditional Musical Theatre', 'Contemporary Musical Theatre', 'Modern Pop', 'Pop/Rock');
+        $dancing = array('Ballet','Belly Dance','Break dance','Hip-hop','Line Dance', 'RnB', 'Salsa', 'Samba', 'Sarabande','Tap Dance','Traditional Dancing','Yongko Dance');
 
         $searchUser = User::where('roleID', '=', '1')
                           ->orWhere('roleID', '=', '2')
@@ -1564,10 +1748,14 @@ if ($validator->fails()) {
                     else {
                         $arr[$counter]['fee'] = 'Unavailable';
                          }
-                    $arr[$counter]['id'] = $value['id'];
+                         //check category matches
+                    $td = TalentDetail::where('talent_id','=', $group['id'])->first();
+                    if ($td['category'] == $data['category']) {
+                        $arr[$counter]['id'] = $value['id'];
                     $arr[$counter]['groupname'] = $group['groupname'];
                     $arr[$counter]['profile_image'] = $value['profile_image'];
                     $arr[$counter]['profile_description'] = $value['profile_description'];
+                    }
                     $rank = Rating::where('user_id', '=', $value['id'])->first();
                     if(!empty($rank)){
                         $arr[$counter]['rank'] = $rank['score'];
@@ -1949,6 +2137,47 @@ if ($validator->fails()) {
             }
           }
         }
+        elseif($data['category'] !== 'Select Category'){
+            foreach ($searchUser as $key => $value) {
+            $fee = TalentDetail::where('talent_id', '=', $value['id'])
+                         ->where('category', '=', $data['category'])
+                         ->get();
+            if(count($fee) !== 0){
+                if($value['roleID'] == 2){
+                    $gro = Group::find($value['id']);
+                    $arr[$counter]['id'] = $value['id'];
+                    $arr[$counter]['firstname'] = $gro['groupname'];
+                    $arr[$counter]['lastname'] = '';
+                    $arr[$counter]['profile_image'] = $value['profile_image'];
+                    $arr[$counter]['profile_description'] = $value['profile_description'];
+                    $rank = Rating::where('user_id', '=', $value['id'])->first();
+                    if(!empty($rank)){
+                        $arr[$counter]['rank'] = $rank['score'];
+                    }
+                    else {
+                        $arr[$counter]['rank'] = 0;
+                    }
+                    $counter++;
+                }
+                else {
+                    $arr[$counter]['id'] = $value['id'];
+                    $arr[$counter]['firstname'] = $value['firstname'];
+                    $arr[$counter]['lastname'] = $value['lastname'];
+                    $arr[$counter]['profile_image'] = $value['profile_image'];
+                    $arr[$counter]['profile_description'] = $value['profile_description'];
+                    $rank = Rating::where('user_id', '=', $value['id'])->first();
+                    if(!empty($rank)){
+                        $arr[$counter]['rank'] = $rank['score'];
+                    }
+                    else {
+                        $arr[$counter]['rank'] = 0;
+                    }
+                    $counter++;
+                }
+            }
+            
+          }
+        }
         // elseif(empty($data['search']) && !empty($data['category'])) {
         //     foreach ($searchUser as $key => $value) {
         //     $fee = Talent::where('id', '=', $value['id'])
@@ -1980,9 +2209,19 @@ if ($validator->fails()) {
         //   }
         // }
         arsort($arr);
+        $endorsed = Endorse::where('endorser_id', '=', Session::get('id'))->get();
+        $endorsedarr = array();
+        $i = 0;
+        if(count($endorsed)  !== 0){
+            foreach ($endorsed as $key => $value) {
+                $endorsedarr[$i] = $value['endorsed_id'];
+                $i++;
+            }
+        }
         // dd($arr);
         return view('talent.searchscout')
                 ->with('result', $arr)
+                ->with('endorsedarr', $endorsedarr)
                 ->with('unreadNotifications', $unreadNotifications)
                 ->with('readNotifications', $readNotifications);
     }
@@ -2036,7 +2275,10 @@ if ($validator->fails()) {
     public function revealTalent(){
         $data = Request::all();
         $results = array();
-        $entertainment = array('Clown', 'Magician', 'Trickster');
+        //categorize talents 
+        $entertainment = array('Clown', 'Magician', 'Trickster', 'Fire-Eating', 'Fire-dancing');
+        $photovideo = array('Actor', 'Actress', 'Models', 'Photographer', 'Videographer');
+        $hosting = array('Hosting', 'Organizer', 'Speaker');
         $singing = array('Legit', 'Traditional Musical Theatre', 'Contemporary Musical Theatre', 'Modern Pop', 'Pop/Rock');
         $dancing = array('Ballet','Belly Dance','Break dance','Hip-hop','Line Dance', 'RnB', 'Salsa', 'Samba', 'Sarabande','Tap Dance','Traditional Dancing','Yongko Dance');
         if($data['tal_cal'] == "Select Category"){
@@ -2058,6 +2300,16 @@ if ($validator->fails()) {
                     $results[$i] = ['value' => $entertainment[$i]];
                     }
             }
+            elseif($data['tal_cal'] == 'Photography / Videography'){
+                    for ($i=0; $i < count($photovideo); $i++) { 
+                    $results[$i] = ['value' => $photovideo[$i]];
+                    }
+            }
+            elseif($data['tal_cal'] == 'Event Hosting'){
+                    for ($i=0; $i < count($hosting); $i++) { 
+                    $results[$i] = ['value' => $hosting[$i]];
+                    }
+            }
             
         }
         return Response::json($results);
@@ -2065,7 +2317,7 @@ if ($validator->fails()) {
     public function revealCategory(){
         $data = Request::all();
         $results = array();
-        $cat = array('Select Category','Singing', 'Dancing', 'Entertainment');
+        $cat = array('Select Category','Singing', 'Dancing', 'Entertainment', 'Photography / Videography', 'Event Hosting');
 
         for ($i=0; $i < count($cat); $i++) { 
             $results[$i] = ['value' => $cat[$i]];
@@ -2115,9 +2367,8 @@ if ($validator->fails()) {
         $hiredposts = array();
         $counter = 0;
         foreach ($posts as $key => $value) {
-            $hireid = json_decode($value['hire_id']);
-            if($hireid !== null){
-
+            $hireid = json_decode($value['hire_id'], true);
+            if($hireid !== null && $hireid !== 0){
                 if(array_search($id, $hireid) !== false){
                     $findRating = Rating::where('post_id', '=', $value['id'])->first();
                     if($findRating !== null){
@@ -2383,8 +2634,18 @@ if ($validator->fails()) {
     }
     public function showPaymentprocess(){
         $subscription = Subscription::all();
+        $unreadNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 0)
+                                            ->limit(6)
+                                            ->get();
+        $readNotifications = Notification::where('user_id', '=', Session::get('id'))
+                                            ->where('is_read', '=', 1)
+                                            ->limit(6)
+                                            ->get();
         return view('payment')
-               ->with('subscription', $subscription);
+               ->with('subscription', $subscription)
+               ->with('unreadNotifications', $unreadNotifications)
+                ->with('readNotifications', $readNotifications);
     }
     public function addSubscription(){
         $data = Request::all();
@@ -2598,6 +2859,15 @@ if ($validator->fails()) {
                     }
                     break;
                 }
+                if(empty($data['testi_score'])){
+                $rateUser->testimonial_score = null;
+                $rateUser->testimonial_comment = null;
+                }
+                else {
+                $rateUser->testimonial_score = $data['testi_score'];
+                $rateUser->testimonial_comment = $data['testimonial_comment'];
+                }
+                $rateUser->comment = $data['comment'];
                 $rateUser->score = $score;
                 $rateUser->demerit = $demerit;
                 $rateUser->save();

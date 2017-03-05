@@ -81,15 +81,18 @@
               <a href="{!! URL::to('/post') !!}">My Posts</a>
             </li>
             @endif
+            <li>
+              <a href="{{ URL::to('/search') }}">SEARCH</a>
+            </li>
           </ul>
           
-          {!! Form::open(['url'=>'/search', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
+          <!-- {!! Form::open(['url'=>'/search', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
           
             
           {!! Form::text('search', '', array('placeholder' => 'Search talent', 'class' => 'form-control', 'style' => 'width:70%;')) !!}              
           {!! Form::submit('Search', array('class' => 'btn btn-default')) !!}   
             
-            {!! Form::close() !!}
+            {!! Form::close() !!} -->
           
           <ul class="nav navbar-nav navbar-right">
             <li>
@@ -270,7 +273,7 @@
                     Add Budget      
                 </h3>
                 <div class="col-xs-12">
-                {!! Form::text('budget', '', array('placeholder' => 'Enter Budget', 'class' => 'form-group', 'required'=>'required')) !!}              
+                {!! Form::number('budget', '', array('min' => '0','placeholder' => 'Enter Budget', 'class' => 'form-group', 'required'=>'required')) !!}              
                 @foreach($errors->get('budget') as $message)
                 <div class="alert alert-danger text-center">{{ $message }}</div>
                 @endforeach
@@ -345,6 +348,12 @@
           @else
           <img class="img-responsive" style="height: 250px; width: 250px;" src="{!! URL::to('/files').'/'.$post['file'] !!}" alt="Chania">
           @endif
+          <p>Budget: {!! $post['budget'] !!} <br />
+          Start date: {!! Carbon\Carbon::parse($post['start_date'])->format('F d,Y H:i A') !!}<br />
+          End date: {!! Carbon\Carbon::parse($post['end_date'])->format('F d,Y H:i A') !!}</p>
+          @foreach(json_decode($post['tags'],true) as $tags => $val)
+          <span class="badge"><span class="glyphicon glyphicon-tag"></span>{!! $val !!}</span>
+          @endforeach
           <p>
             @if($post['status'] == 0)
            <span class="label label-primary">Status: Ongoing</span>
@@ -367,10 +376,13 @@
     
 
 <section class="bg-dark">
+<div class="footer navbar-fixed-bottom">
+  
                     <p class="text-center">Talent Scout.</br>
                         All Rights Reserved. 2016 </br>
                         <small style="color: gray;">Contact Talent scout: talentscoutphil@gmail.com</small>
                         </p>
+</div>
 </section>
     <!-- jQuery -->
     <script src="../../vendor/jquery/jquery.min.js"></script>

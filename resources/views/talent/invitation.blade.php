@@ -201,6 +201,28 @@
     </div>
                 </div>
           </div>
+          <div class="col-xs-12">
+                {!! Form::textarea('comment', '', array('style' => 'min-width:100%;resize:none;','class' => 'form-group','placeholder' => 'Describe your experience with this scout!')) !!}
+                </div>
+                <div class="col-xs-12" id="testimony">
+                <hr />
+                <label class="label label-info">How helpful was Talent Scout to you?</label>
+                <div class="stars" style="margin:0;">
+                {!! Form::radio('testi_score', 1, false, ['class' => 'star-1', 'id' => 'star-1']) !!}
+                <label title="Bad!" class="star-1" for="star-1">1</label>
+                {!! Form::radio('testi_score', 2, false, ['class' => 'star-2', 'id' => 'star-2']) !!}
+                <label title="Not Bad!" class="star-2" for="star-2">2</label>
+                {!! Form::radio('testi_score', 3, false, ['class' => 'star-3', 'id' => 'star-3']) !!}
+                <label title="Good!" class="star-3" for="star-3">3</label>
+                {!! Form::radio('testi_score', 4, false, ['class' => 'star-4', 'id' => 'star-4']) !!}
+                <label title="Very Good!" class="star-4" for="star-4">4</label>
+                {!! Form::radio('testi_score', 5, false, ['class' => 'star-5', 'id' => 'star-5']) !!}
+                <label title="Excellent!" class="star-5" for="star-5">5</label>
+                <span></span>
+                </div>
+                {!! Form::textarea('testimonial_comment', '', array('style' => 'min-width:100%;resize:none;','class' => 'form-group','placeholder' => 'Describe how helpful was Talent Scout to you.')) !!}
+                <a href="#" id="skip">Skip review</a>
+                </div>
           <div class="modal-footer">
             <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
           {!! Form::submit('Rate scout!', array('class' => 'btn btn-info')) !!}  

@@ -381,9 +381,10 @@ class PaypalController extends Controller
           $cred->id = null;
           $cred->user_id = Session::get('id');
           $cred->creditcardID = $card->getId();
+          $cred->ppemail = $data['paypalemail'];
           $cred->save();
           Session::set('cc','activated');
-          Session::set('first_login' == 0);
+          Session::set('first_login', 0);
           $changeFirstLogin = User::find(Session::get('id'));
           $changeFirstLogin->first_login = 0;
           $changeFirstLogin->save();
@@ -405,14 +406,14 @@ class PaypalController extends Controller
       $cred = VaultCreditCard::where('user_id', '=', $id)->first();
       $cred->delete();
       Session::forget('cc');
-      Session::set('first_login' == 1);
+      Session::set('first_login', 1);
           $changeFirstLogin = User::find(Session::get('id'));
           $changeFirstLogin->first_login = 1;
           $changeFirstLogin->save();
       Session::flash('message', 'Successfully unlinked card!');
           return Redirect::back();
     }
-    public function penalizeTalent($scout_id){
+    public static function penalizeUser($id){
        $cc = VaultCreditCard::where('user_id', '=', Session::get('id'))->first();
       $creditCardToken = new CreditCardToken();
       $creditCardToken->setCreditCardId($cc['creditcardID']);
@@ -438,6 +439,86 @@ class PaypalController extends Controller
         $amount = new Amount();
         $amount->setCurrency('USD')
             ->setTotal($total);
+            //get the scout's paypal email to send the payment
+            $scoutpp = VaultCreditCard::where('user_id', '=', $id)->first();
+        $payee = new Payee();
+        $payee->setEmail($scoutpp['ppemail']);
+
+        $transaction = new Transaction();
+        $transaction->setAmount($amount)
+            ->setPayee($payee)
+            ->setItemList($item_list)
+            ->setDescription('Your transaction description');
+        $redirect_urls = new RedirectUrls();
+        $redirect_urls->setReturnUrl(\URL::route('payment.status'))
+            ->setCancelUrl(\URL::route('payment.status'));
+        $payment = new Payment();
+        $payment->setIntent('Sale')
+            ->setPayer($payer)
+            ->setRedirectUrls($redirect_urls)
+            ->setTransactions(array($transaction));
+        try { 
+          $paypal_conf = \Config::get('paypal');
+          $_api_context = new ApiContext(new OAuthTokenCredential($paypal_conf['client_id'], $paypal_conf['secret']));
+          $_api_context->setConfig($paypal_conf['settings']);
+            $payment->create($_api_context);
+            // dd($payment);
+            if ($payment->getState() == 'approved') { // payment made
+                    Session::forget('duration');
+                    return Redirect::back();
+                }
+        } catch (\PayPal\Exception\PayPalConnectionException $ex) {
+            if (\Config::get('app.debug')) {
+                echo "Exception: " . $ex->getMessage() . PHP_EOL;
+                $err_data = json_decode($ex->getData(), true);
+                exit;
+            } else {
+                die('Some error occur, sorry for inconvenient');
+            }
+        }
+        foreach($payment->getLinks() as $link) {
+            if($link->getRel() == 'approval_url') {
+                $redirect_url = $link->getHref();
+                break;
+            }
+        }
+        // add payment ID to session
+        Session::put('paypal_payment_id', $payment->getId());
+        if(isset($redirect_url)) {
+            // redirect to paypal
+            return Redirect::away($redirect_url);
+        }
+        Session::flash('failed', 'Something went wrong!');
+        return Redirect::back()
+            ->with('error', 'Unknown error occurred');
+    }
+    public static function sendPaymentToSystem() {
+      $cc = VaultCreditCard::where('user_id', '=', Session::get('id'))->first();
+      $creditCardToken = new CreditCardToken();
+      $creditCardToken->setCreditCardId($cc['creditcardID']);
+      $fi = new FundingInstrument();
+        $fi->setCreditCardToken($creditCardToken);
+        // ### Payer
+        // A resource representing a Payer that funds a payment
+        // For stored credit card payments, set payment method
+        // to 'credit_card'.
+        $payer = new Payer();
+        $payer->setPaymentMethod("credit_card")
+              ->setFundingInstruments(array($fi));
+        $total = 0;
+        $item_1 = new Item();
+            $item_1->setName('Penalty') // item name
+            ->setCurrency('USD')
+            ->setQuantity(1)
+            ->setPrice('5.00'); // unit price
+            $total = 5.00;
+            // add item to list
+        $item_list = new ItemList();
+        $item_list->setItems(array($item_1));
+        $amount = new Amount();
+        $amount->setCurrency('USD')
+            ->setTotal($total);
+            //the system's paypal email must be put there
         $payee = new Payee();
         $payee->setEmail("talentscoutphil-facilitator@gmail.com");
 
@@ -455,27 +536,17 @@ class PaypalController extends Controller
             ->setRedirectUrls($redirect_urls)
             ->setTransactions(array($transaction));
         try { 
-            $payment->create($this->_api_context);
-            dd($payment);
+           $paypal_conf = \Config::get('paypal');
+           $_api_context = new ApiContext(new OAuthTokenCredential($paypal_conf['client_id'], $paypal_conf['secret']));
+           $_api_context->setConfig($paypal_conf['settings']);
+            $payment->create($_api_context);
+            // dd($payment);
             if ($payment->getState() == 'approved') { // payment made
-                    $data = new Paypalpayment;
-                    $user = User::find(Session::get('id'));
-                    $data->id = null;
-                    $data->payment_id = $payment->id;
-                    $data->user_id = Session::get('id');
-                    $data->firstname = $user['firstname'];
-                    $data->lastname = $user['lastname'];
-                    $data->state = 'pending';
-                    $data->duration = Session::get('duration');
-                    $data->save();
                     Session::forget('duration');
-                    Session::flash('success', 'Payment Successful!');
-                    return Redirect::to('/paymentprocess')
-                        ->with('success', 'Payment success');
+                   return Redirect::back();
                 }
         } catch (\PayPal\Exception\PayPalConnectionException $ex) {
             if (\Config::get('app.debug')) {
-              dd($ex);
                 echo "Exception: " . $ex->getMessage() . PHP_EOL;
                 $err_data = json_decode($ex->getData(), true);
                 exit;

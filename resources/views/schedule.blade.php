@@ -208,7 +208,10 @@
               {!! Form::close(); !!}
             </div>
           </div>
-        <div id="dialog" title="" style="display:none;">Are you sure want to cancel it? <br/> <small>Please be mindful when cancelling which involves an event booking you got invited or proposed.</small> <br/> <small>If you are confused, Please read our <a style="color:blue;" target="_blank" href="{{ URL::to('/terms') }}">Policy and Terms</a></small> </div>
+        <div id="dialog" title="" style="display:none;">Are you sure want to cancel it? <br/> 
+        <small>Please be mindful when cancelling which involves an event booking you got invited or proposed.</small> <br/> 
+        <small>If you are confused, Please read our <a style="color:blue;" target="_blank" href="{{ URL::to('/terms') }}">Policy and Terms</a></small> 
+        </div>
         {!! $calendar->calendar() !!}
         {!! $calendar->script() !!}
       </div>

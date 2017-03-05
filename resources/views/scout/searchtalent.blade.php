@@ -160,7 +160,7 @@
           </div>
           {!! Form::open(['url'=>'/searchkeytalent', 'files' => true]) !!}
           <div class="col-sm-10">
-          {!! Form::text('search', '', array('class' => 'form-control','placeholder' => 'Enter the Keywords')) !!}
+          {!! Form::text('search', '', array('class' => 'form-control','placeholder' => 'Enter  name')) !!}
           <!-- <input class="form-control" type="text" name="keyword" placeholder="Enter the Keywords"> --><br>
           </div>
           <div class="col-sm-10">

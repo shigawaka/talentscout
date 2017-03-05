@@ -103,11 +103,13 @@
                 @endif
           <div class="row">
           
-          <div>
-                {!! Form::open(['url'=>'/searchscout', 'class' => 'navbar-form navbar-left', 'style'=>'width:600px;']) !!}
-          {!! Form::text('search', '', array('placeholder' => 'Search...', 'class' => 'form-control', 'style' => 'width:70%;display:none;')) !!}              
-                  @if(empty($endorsed) && empty($endorser))
-                <h5 class="center-align">There's nothing here. {!! Form::submit('Search for connections!', array('class' => 'btn btn-default')) !!}
+          <div>            
+                  @if(empty($endorsed) && empty($endorser) && Session::get('first_login') !== 1)
+                    @if(Session::get('roleID') == 1 || Session::get('roleID') == 2)
+                <h5 class="center-align">There's nothing here. <a class="btn btn-info" href="{{ URL::to('/searchscout') }}">SEARCH</a>
+                    @else
+                <h5 class="center-align">There's nothing here. <a class="btn btn-info" href="{{ URL::to('/search') }}">SEARCH</a>
+                    @endif
                   @endif
             
           

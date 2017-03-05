@@ -268,8 +268,8 @@
       </div>
       <div class="page-header" style="background-color:#2c3e50;">
         <h1 style="text-align:center;color:white;">
-          All events<br />
-          <small style="color:#e74c3c;">All the current events</small>
+          All current/upcoming events<br />
+          <small style="color:#e74c3c;">Current/Upcoming events</small>
         </h1>
       </div>
       <div class="row">
@@ -305,7 +305,7 @@
         @endforeach
       @endif
       </div>
-      <div class="page-header" style="background-color: #86E2D5; padding-top: 5px;">
+      <!-- <div class="page-header" style="background-color: #86E2D5; padding-top: 5px;">
         <h1 style="text-align:center;">
           Recent Successful Deals
         </h1>
@@ -339,7 +339,7 @@
         </div>
         @endforeach
       @endif
-      </div>
+      </div> -->
     </div>
   </div>
     </div>

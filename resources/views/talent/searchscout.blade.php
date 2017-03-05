@@ -191,8 +191,11 @@
                 <i>{!! $res['profile_description'] !!}</i><br>
               </p>
               <p>
-                <a class="btn btn-primary" href="{{ URL::to('/endorseUser').'/'.$res['id'] }}">Endorse</a> <a class="btn" href="{{ URL::to('/profile').'/'.$res['id'] }}">View</a>@if(!empty($res['fee']))<span class="label label-default"> Talent Fee:  {!! $res['fee'] !!} @endif 
-                </span>
+               @if(array_search($res['id'], $endorsedarr)  !== false)
+                  <a class="btn btn-info" href="{{ URL::to('/removeEndorsement').'/'.$res['id'] }}">Unendorse</a> <a class="btn" href="{{ URL::to('/profile').'/'.$res['id'] }}">View</a>@if(!empty($res['fee']))<span class="label label-default"> Talent Fee:  {!! $res['fee'] !!} @endif </span>
+                  @else
+                  <a class="btn btn-primary" href="{{ URL::to('/endorseUser').'/'.$res['id'] }}">Endorse</a> <a class="btn" href="{{ URL::to('/profile').'/'.$res['id'] }}">View</a>@if(!empty($res['fee']))<span class="label label-default"> Talent Fee:  {!! $res['fee'] !!} @endif </span>
+                  @endif
                 </br>
                 @if($res['rank'] <= 1000)
                 <span class="label label-success">Profile Rank: Newbie</span>

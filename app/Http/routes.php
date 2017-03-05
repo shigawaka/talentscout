@@ -169,7 +169,7 @@ Route::post('/payment', array(
     'as' => 'payment',
     'uses' => 'PaypalController@postPayment',
 ));
-Route::get('/penalizetalent/{id}', 'PaypalController@penalizeTalent');
+// Route::get('/penalizetalent/{id}', 'PaypalController@penalizeTalent');
 Route::get('/paymentprocess', 'HomeController@showPaymentprocess');
 //link to tie-up account in paypal
 Route::get('/linkuserpaypal', 'PaypalController@createAgreement');
