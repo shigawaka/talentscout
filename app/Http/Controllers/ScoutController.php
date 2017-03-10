@@ -220,9 +220,16 @@ class ScoutController extends Controller
         Session::set('post_id', $post_id);
         $exists = Proposal::where('user_id', '=', Auth::user()->id)->where('post_id', '=', $post_id)->first();
         
+        
+
         Session::set('proposal_id', $exists['id']);
         
          $posts = Post::where('id', $post_id)->first();
+         $invitationhired = false;
+         $checkhires = json_decode($posts['hire_id'], true);
+         if($checkhires !== 0 && $checkhires !== null){
+            $invitationhired = in_array(Session::get('id'), $checkhires);
+         }
          //comments
          $comments = Comment::where('post_id', $post_id)->orderBy('date_posted', 'desc')->get();
             $i = 0;
@@ -310,19 +317,16 @@ class ScoutController extends Controller
          $k = 0;
          $t = 0;
 
-         // dd(count(json_decode($posts['tags'],true)));
+         
          foreach (json_decode($posts['tags'],true) as $tal){
-            // $getTalent = Talent::where('fee', '<=', $posts['budget'])
-            //                     ->where('demerit', '<', 1500)
-            //                     ->get();
 
             //joining 3 tables talent, talent_details and users(for profiling).
             $temp = DB::table('users')
             ->join('talent', function ($join) use ($posts){
             $join->on('users.id', '=', 'talent.id')
                  ->where('talent.fee', '<=', $posts['budget'])
-                 ->where('talent.demerit', '<=', 1500)
-                 ->where('talent.fee_type', '=', $posts['rate']);
+                 ->where('talent.demerit', '<=', 1500);
+                 // ->where('talent.fee_type', '=', $posts['rate']);
             })
             ->join('talent_details', function ($join) use ($tal) {
             $join->on('users.id', '=', 'talent_details.talent_id')
@@ -488,7 +492,7 @@ class ScoutController extends Controller
             ->get();
             foreach ($temp as $key) {
                 $hires = json_decode($posts['hire_id'], true);
-                    if($hires !== null){
+                    if($hires !== null && $hires !== 0){
                     $checkhired = array_search($key->id, $hires);
                     }
                     else {
@@ -496,21 +500,25 @@ class ScoutController extends Controller
                     }
                 if($checkhired == false && $checkhired !== 0){
                     $checkexperience = Rating::where('user_id', '=', $key->id)->get();
-                    if(count($checkexperience) == 0){
-                            $recommendednewbie[$t]['id'] = $key->id;
-                            $recommendednewbie[$t]['profile_image'] = $key->profile_image;
-                        if($key->firstname == null){
-                            $group = Group::find($key->id);
-                            $recommendednewbie[$t]['firstname'] = ucfirst($group['groupname']);
-                            $recommendednewbie[$t]['lastname'] = '';
-                        }
+                    $invited = Invitation::where('post_id', '=', $post_id)
+                                        ->where('talent_id', '=', $key->id)
+                                        ->first();
+                    if(empty($invited)){
+                        if(count($checkexperience) == 0){
+                                $recommendednewbie[$t]['id'] = $key->id;
+                                $recommendednewbie[$t]['profile_image'] = $key->profile_image;
+                            if($key->firstname == null){
+                                $group = Group::find($key->id);
+                                $recommendednewbie[$t]['firstname'] = ucfirst($group['groupname']);
+                                $recommendednewbie[$t]['lastname'] = '';
+                            }
+                            else {
+                                $recommendednewbie[$t]['firstname'] = ucfirst($key->firstname);
+                                $recommendednewbie[$t]['lastname'] = ucfirst($key->lastname);
+                            }
+                            $t++;
+                            }
                         else {
-                            $recommendednewbie[$t]['firstname'] = ucfirst($key->firstname);
-                            $recommendednewbie[$t]['lastname'] = ucfirst($key->lastname);
-                        }
-                        $t++;
-                        }
-                    else {
                             $recommended[$t]['id'] = $key->id;
                             $recommended[$t]['profile_image'] = $key->profile_image;
                             if($key->firstname == null){
@@ -524,6 +532,7 @@ class ScoutController extends Controller
                             }
                             $t++;
                             }
+                        }
                     }
                 }
             }
@@ -548,8 +557,10 @@ class ScoutController extends Controller
             // $comm = new LengthAwarePaginator($currentPageSearchResults, count($col), $perPage);
             // $comm->setpath('');
             // $comm->setPageName('comm');
+            // dd($exists);
          return view('scout.viewpost')
          ->with('posts', $posts)
+         ->with('invitationhired', $invitationhired)
          ->with('users', $users)
          ->with('proposal', $exists)
          ->with('recommended', $entries)
@@ -650,16 +661,26 @@ class ScoutController extends Controller
                 foreach ($schedule as $key => $value) {
                     $schedStartdate = Carbon::parse($value['start_date']);
                     $schedEnddate = Carbon::parse($value['end_date']);
-                    if($postStartdate->gte($schedEnddate)){
-                        Session::flash('message', 'You are not available in that event day!');
-                        return Redirect::back()->withInput();
+                if($postStartdate->gte($schedEnddate) && $postEnddate->lte($schedStartdate)){
+                    if($value['isAllDay'] == '0'){
+                    Session::flash('message', 'You are not available in that event day!');
+                    return Redirect::back();
                     }
-                    elseif($postStartdate->eq($schedStartdate)){ //check same day
-                        if($value['isAllDay'] == '0'){
-                        Session::flash('message', 'You are not available in that event day!');
-                        return Redirect::back()->withInput();
-                        }
+                    elseif($data['allday'] == 'True'){
+                    Session::flash('message', 'You are not available in that event day!');
+                    return Redirect::back();
                     }
+                }
+                elseif($postStartdate->isSameDay($schedStartdate)){ //check same day
+                     if($value['isAllDay'] == '0'){
+                    Session::flash('message', 'You are not available in that event day!');
+                    return Redirect::back();
+                    }
+                    elseif($data['allday'] == 'True'){
+                    Session::flash('message', 'You are not available in that event day!');
+                    return Redirect::back();
+                    }
+                }
                 }
                 $detail = new Post;
                 $detail->id =null;
@@ -795,7 +816,7 @@ class ScoutController extends Controller
             $demerit = 0;
             $user = User::find($test[$i]);
             $findUser = Rating::find($user['id']);
-            if($findUser == null){
+            // if($findUser == null){
                 $rateUser = new Rating;
                 $rateUser->id = null;
                 $rateUser->user_id = $user['id'];
@@ -832,10 +853,10 @@ class ScoutController extends Controller
                     }
                     break;
                 }
-                $rateUser->attitude = $data['attitude'][0];
-                $rateUser->performance = $data['performance'][0];
-                $rateUser->punctuality = $data['punctuality'][0];
-                $rateUser->comment = $data['comment'][0];
+                $rateUser->attitude = $data['attitude'][$i];
+                $rateUser->performance = $data['performance'][$i];
+                $rateUser->punctuality = $data['punctuality'][$i];
+                $rateUser->comment = $data['comment'][$i];
                 if(empty($data['testi_score'])){
                 $rateUser->testimonial_score = null;
                 $rateUser->testimonial_comment = null;
@@ -847,58 +868,59 @@ class ScoutController extends Controller
                 $rateUser->score = $score;
                 $rateUser->demerit = $demerit;
                 $rateUser->save();
-            }
-            else {
-                $findUser->id = null;
-                $findUser->user_id = $user['id'];
-                $rateUser->post_id = $post['id'];
-                foreach($data['attitude'] as $atti){
-                    if($atti == 1){
-                         $score += $atti * 10;
-                         $demerit += 1;
-                    }
-                    else {
-                    $score += $atti * 10;
-                    }
+            // }
+            // else {
+            //     $findUser->id = null;
+            //     $findUser->user_id = $user['id'];
+            //     $rateUser->post_id = $post['id'];
+            //     foreach($data['attitude'] as $atti){
+            //         if($atti == 1){
+            //              $score += $atti * 10;
+            //              $demerit += 1;
+            //         }
+            //         else {
+            //         $score += $atti * 10;
+            //         }
                     
-                    break;
-                }
-                foreach($data['performance'] as $perfo){
-                    if($perfo == 1){
-                         $score += $perfo * 10;
-                         $demerit += 1;
-                    }
-                    else {
-                    $score += $perfo * 10;
-                    }
-                    break;
-                }
-                foreach($data['punctuality'] as $punc){
-                    if($punc == 1){
-                         $score += $punc * 10;
-                         $demerit += 1;
-                    }
-                    else {
-                    $score += $punc * 10;
-                    }
-                    break;
-                }
-                $rateUser->attitude = $data['attitude'][0];
-                $rateUser->performance = $data['performance'][0];
-                $rateUser->punctuality = $data['punctuality'][0];
-                $rateUser->comment = $data['comment'][0];
-                if(empty($data['testi_score'])){
-                $rateUser->testimonial_score = null;
-                $rateUser->testimonial_comment = null;
-                }
-                else {
-                $rateUser->testimonial_score = $data['testi_score'];
-                $rateUser->testimonial_comment = $data['testimonial_comment'];
-                }
-                $findUser->score = $score;
-                $findUser->demerit = $demerit;
-                $findUser->save();            
-            }
+            //         break;
+            //     }
+            //     foreach($data['performance'] as $perfo){
+            //         if($perfo == 1){
+            //              $score += $perfo * 10;
+            //              $demerit += 1;
+            //         }
+            //         else {
+            //         $score += $perfo * 10;
+            //         }
+            //         break;
+            //     }
+            //     foreach($data['punctuality'] as $punc){
+            //         if($punc == 1){
+            //              $score += $punc * 10;
+            //              $demerit += 1;
+            //         }
+            //         else {
+            //         $score += $punc * 10;
+            //         }
+            //         break;
+            //     }
+            //     $rateUser->attitude = $data['attitude'][$i];
+            //     $rateUser->performance = $data['performance'][$i];
+            //     $rateUser->punctuality = $data['punctuality'][$i];
+            //     $rateUser->comment = $data['comment'][$i];
+            //     if(empty($data['testi_score'])){
+            //     $rateUser->testimonial_score = null;
+            //     $rateUser->testimonial_comment = null;
+            //     }
+            //     else {
+            //     $rateUser->testimonial_score = $data['testi_score'];
+            //     $rateUser->testimonial_comment = $data['testimonial_comment'];
+            //     }
+            //     $findUser->score = $score;
+            //     $findUser->demerit = $demerit;
+            //     $findUser->save();
+            //     $rateUser->save();
+            // }
                 $rating = Rating::where('user_id' , '=', $user['id'])->get();
                 $tal = Talent::find($user['id']);
                 $finalscore = 0;

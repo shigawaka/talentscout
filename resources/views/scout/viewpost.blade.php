@@ -527,8 +527,8 @@
             </div>
             
           </div>
-          @elseif(empty($proposal) && Session::get('roleID') == 1 && $posts['status'] == 0)
-          @if(count($proposal) !== 0)
+          @elseif(empty($proposal) && Session::get('roleID') == 1 && $posts['status'] == 0 || Session::get('roleID') == 2)
+          @if(count($proposal) !== 0 || $invitationhired !== false)
                 <a id="modal-403917" href="#modal-container-403917" role="button" class="btn btn-success btn-lg" data-toggle="modal" disabled>Booked</a>
           @else
           <!-- end of modal -->

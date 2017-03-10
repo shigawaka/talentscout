@@ -326,7 +326,7 @@
                    <div class="card-action">
               <blockquote><h4><i>{!! $user['profile_description'] !!}</i></h4></blockquote>
             </div>
-                   <div class="card-panel grey lighten-3"><h6><i>Talent Fee: ₱{!! $fee['fee'] !!}</i></h6></div>
+                   <div class="card-panel grey lighten-3"><h6><i>Talent Fee: ₱{!! $fee['fee'] !!} / {!! $fee['fee_type'] !!}</i></h6></div>
                        @if($fee['score'] <= 1000)
                        <div class="card-panel orange lighten-2"><img style="width: 50px;font-family: 'Quasiparticles';"class="responsive-img" src="{!! URL::to('/files') !!}/newbie.png"><h6>New Talent <br /> Points: {{ $fee['score'] }}</h6></div>
                        @elseif($fee['score'] >= 1500)
@@ -552,6 +552,7 @@
     
 
      $(document).ready(function($) {
+      var i = 0;
         $.ajax({
             url: "{{ URL('/revealCategory/') }}",
             method: "GET",
@@ -587,7 +588,7 @@
           });
       });
 
-    $('#talentcontainer').on('change', '.category', function() {
+    $('#talentcontainer').on('change', '.category', function(event) {
         var tal_cal = $(this).val();
         $.ajax({
             url: "{{ URL('/revealTalents/') }}",
@@ -596,7 +597,10 @@
             data: {tal_cal:tal_cal},
             success: function(data){
                 var next_id = $(".talent");
-                console.log(data);
+                var categoryID = $(event.target).attr('id');
+                var tid = event.delegateTarget.children[3].children[1].children[0].id;
+                var talentID = $("[class^=talent]").attr('id');
+                console.log(tid);
                 $(".talent").empty().html(' ');
                 $.each(data, function(key, value) {
                     $(next_id).append($("<option></option>").attr("value", value.value).text(value.value));
@@ -627,7 +631,8 @@
 
 
     $("#addtalent").on("click", function (event) {
-      $("#talentcontainer").append("<div class='row' id='temprow'><div class='col s5'><select class='category browser-default' name='category[]'></select></div><div class='col s5'><select class='talent browser-default' name='talent[]'><option value='Select Talent'>Select Talent</option></select></div><div class='col s2'><a href='javascript:void(0)' id='removetalent'>Remove</a></div></div>");
+      $("#talentcontainer").append("<div class='row' id='temprow'><div class='col s5'><select class='category browser-default' id="+i+" name='category[]'></select></div><div class='col s5'><select class='talent browser-default' id="+i+" name='talent[]'><option value='Select Talent'>Select Talent</option></select></div><div class='col s2'><a href='javascript:void(0)' id='removetalent'>Remove</a></div></div>");
+      i++;
     });
 
     $("#talentcontainer").on("click", '#removetalent',function (event) {

@@ -312,7 +312,7 @@
                 {!! Form::number('hire_number', '', array('class' => 'form-control', 'placeholder' => 'Number of Talents Needed', 'required'=>'required', 'min'=>'1', 'max'=>'25')) !!}
                 </div>
                 <div class="modal-footer">
-                {!! Form::submit('Save Changes', array('class' => 'btn btn-info')) !!}  
+                {!! Form::submit('Add event', array('class' => 'btn btn-info')) !!}  
                 {!! Form::close(); !!}          
                  <!--  <button type="button" class="btn btn-primary">
                     Save changes
@@ -375,15 +375,16 @@
 
     
 
-<section class="bg-dark">
-<div class="footer navbar-fixed-bottom">
-  
-                    <p class="text-center">Talent Scout.</br>
+
+<footer class="footer bg-dark" style="bottom: 0;width: 100%;">
+  <div class="container">
+    <p class="text-center">Talent Scout.</br>
                         All Rights Reserved. 2016 </br>
                         <small style="color: gray;">Contact Talent scout: talentscoutphil@gmail.com</small>
                         </p>
-</div>
-</section>
+  </div>
+</footer>
+
     <!-- jQuery -->
     <script src="../../vendor/jquery/jquery.min.js"></script>
      <script src="../../js/jquery-1.10.2.js"></script>

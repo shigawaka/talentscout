@@ -98,8 +98,43 @@
                   </div>
                   </div>
                 @endif
-    @if(empty($postDetails))
-    <div>
+    @if(!empty($group))
+          @foreach($group as $g => $details)
+                <div class="col s12 m7">
+                    @if($details['roleID'] == 1)
+                    <h2 class="header">Requesting to join group</h2>
+                    @else
+                    <h2 class="header">Group Invitation</h2>
+                    @endif
+                    
+                    <div class="card horizontal">
+                      <div class="card-image">
+                        <img style="width:150px;" src="{{ URL::to('/files/').'/'.$details['picture'] }}">
+                      </div>
+                      <div class="card-stacked">
+                        <div class="card-content">
+                          @if($details['groupname'] == null)
+                          <p>Full Name: {{ ucfirst($details['fullname']) }}</p>
+                          @else
+                          <p>Group Name: {{ $details['groupname'] }}</p>
+                          @endif
+                          
+                        </div>
+                        <div class="card-action">
+                        @if($details['roleID'] == 1)
+                        <a href="{{ URL::to('/requestjoingroup/accept').'/'.$details['id'] }}">Accept Invitation</a>
+                        <a href="{!! URL::to('/requestjoingroup/decline').'/'.$details['id'] !!}">Decline Invitation</a>
+                        @else
+                        <a href="{{ URL::to('/groupinvitation/accept').'/'.$details['id'] }}">Accept Invitation</a>
+                        <a href="{!! URL::to('/groupinvitation/decline').'/'.$details['id'] !!}">Decline Invitation</a>
+                        @endif
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+        @endforeach
+    @elseif(empty($postDetails))
+      <div>
     <h5 class="center-align">There's nothing here.</h5>
   </div>
     @else
@@ -202,7 +237,7 @@
                 </div>
           </div>
           <div class="col-xs-12">
-                {!! Form::textarea('comment', '', array('style' => 'min-width:100%;resize:none;','class' => 'form-group','placeholder' => 'Describe your experience with this scout!')) !!}
+                {!! Form::textarea('comment', '', array('style' => 'min-width:100%;resize:none;','class' => 'materialize-textarea','placeholder' => 'Describe your experience with this scout!')) !!}
                 </div>
                 <div class="col-xs-12" id="testimony">
                 <hr />
@@ -220,7 +255,7 @@
                 <label title="Excellent!" class="star-5" for="star-5">5</label>
                 <span></span>
                 </div>
-                {!! Form::textarea('testimonial_comment', '', array('style' => 'min-width:100%;resize:none;','class' => 'form-group','placeholder' => 'Describe how helpful was Talent Scout to you.')) !!}
+                {!! Form::textarea('testimonial_comment', '', array('style' => 'min-width:100%;resize:none;','class' => 'materialize-textarea','placeholder' => 'Describe how helpful was Talent Scout to you.')) !!}
                 <a href="#" id="skip">Skip review</a>
                 </div>
           <div class="modal-footer">
@@ -243,25 +278,6 @@
     </div>
   </div>
         </div>
-        @endforeach
-        @foreach($group as $g => $details)
-        <div class="col s12 m7">
-            <h2 class="header">Group Invitation</h2>
-            <div class="card horizontal">
-              <div class="card-image">
-                <img style="width:150px;" src="{{ URL::to('/files/').'/'.$details['picture'] }}">
-              </div>
-              <div class="card-stacked">
-                <div class="card-content">
-                  <p>Group Name: {{ $details['groupname'] }}</p>
-                  <p>Group Description: {{ $details['description'] }}</p>
-                </div>
-                <div class="card-action">
-                  <a href="{{ URL::to('/groupinvitation/accept').'/'.$details['id'] }}">Accept Invitation</a>
-                </div>
-              </div>
-            </div>
-          </div>
         @endforeach
     @endif
       </div>
@@ -311,6 +327,9 @@
       alert('Setup your profile first!');
      e.preventDefault();
   });
+    $("#skip").click(function(){
+        $("#testimony").remove();
+    });
   </script>
 
 

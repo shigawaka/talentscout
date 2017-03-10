@@ -86,7 +86,6 @@ class HomeController extends Controller
             return Redirect::to('/hometalent');
             }
          }
-            
     }
     else {
         $testi = Rating::where('testimonial_score', '=', 5)
@@ -887,12 +886,18 @@ if ($validator->fails()) {
                 //finding group of the user
                 $grouparray = array();
                 $naccgrouparray = array();
+                $groupmembers = null;
+                if(json_decode($groupdetails['member'] , true) !== null || json_decode($groupdetails['member'] , true) !== 0){
+                    $groupmembers = json_decode($groupdetails['member'] , true);
+                }
                 $groups = json_decode($groupdetails['member'], true);
-                for ($i = 0; $i < count($groups); $i++) { 
+                if(!empty($groups)){
+                    for ($i = 0; $i < count($groups); $i++) { 
                     $searchusergroup = User::find($groups[$i]);
                     $grouparray[$i]['id'] = $searchusergroup['id'];
                     $grouparray[$i]['fullname'] = $searchusergroup['firstname'].' '.$searchusergroup['lastname'];
                     $grouparray[$i]['profile_image'] = $searchusergroup['profile_image'];
+                    }
                 }
                 //end finding group
                 //start finding NACC group member
@@ -942,6 +947,7 @@ if ($validator->fails()) {
                         ->with('rating', $rating)
                         ->with('user', $user)
                         ->with('td', $td)
+                        ->with('groupmembers', $groupmembers)
                         ->with('groupdetails', $groupdetails)
                         ->with('grouparray', $grouparray)
                         ->with('naccgrouparray', $naccgrouparray)
@@ -1214,14 +1220,25 @@ if ($validator->fails()) {
                 $groupinvitation = array();
                 $counter = 0;
                 foreach ($invitation as $k => $v) {
-                    if($v['post_id'] == null){
+                    if($v['post_id'] == null || $v['post_id'] == 0){
                         $groupdetails = Group::where('id', '=', $v['inviter_id'])->first();
                         $groupdetails2 = User::where('id', '=', $v['inviter_id'])->first();
-                        $groupinvitation[$counter]['id'] = $groupdetails['id'];
-                        $groupinvitation[$counter]['groupname'] = $groupdetails['groupname'];
-                        $groupinvitation[$counter]['picture'] = $groupdetails2['profile_image'];
-                        $groupinvitation[$counter]['description'] = $groupdetails2['profile_description'];
-                        $counter++;
+                        if($groupdetails2['roleID'] == 1){
+                            $groupinvitation[$counter]['id'] = $groupdetails2['id'];
+                             $groupinvitation[$counter]['fullname'] = $groupdetails2['firstname'].' '.$groupdetails2['lastname'];
+                            $groupinvitation[$counter]['groupname'] = null;
+                            $groupinvitation[$counter]['picture'] = $groupdetails2['profile_image'];
+                            $groupinvitation[$counter]['roleID'] = 1;
+                            $groupinvitation[$counter]['description'] = $groupdetails2['profile_description'];
+                            $counter++;
+                        } else {
+                            $groupinvitation[$counter]['id'] = $groupdetails['id'];
+                            $groupinvitation[$counter]['groupname'] = $groupdetails['groupname'];
+                            $groupinvitation[$counter]['picture'] = $groupdetails2['profile_image'];
+                            $groupinvitation[$counter]['description'] = $groupdetails2['profile_description'];
+                            $counter++;
+                        }
+                        
                     }
                 }
                 //end group invitation
@@ -1417,6 +1434,8 @@ if ($validator->fails()) {
                             else {
                                 $post->hire_id = json_encode($findHireID);
                             }
+                            Invitation::where('post_id', '=', $post['id'])
+                                      ->where('talent_id', '=', Session::get('id'))->delete();
                             $post->save();
                             $eventDetail->delete();
 
@@ -1444,6 +1463,8 @@ if ($validator->fails()) {
                             }
                             $post->save();
                             $eventDetail->delete();
+                            Invitation::where('post_id', '=', $post['id'])
+                                      ->where('talent_id', '=', Session::get('id'))->delete();
                             Session::flash('message', 'Successfully deleted event!');
                             return Redirect::to('/schedule/'.Session::get('id'));
                         }
@@ -1495,6 +1516,9 @@ if ($validator->fails()) {
                         $notification->is_read = 0;
                         $notification->sent_at = new Carbon();
                         $notification->save();
+                        $invitation = Invitation::where('post_id','=',$post['id'])
+                                                    ->where('talent_id', '=', $value)->first();
+                        $invitation->delete();
                     }
                     //delete all schedules of hired talents
                         $cancelevent = EventModel::where('post_id', '=', $post['id'])->get();
@@ -1621,9 +1645,14 @@ if ($validator->fails()) {
                     }
                 }
                 elseif($postStartdate->isSameDay($schedStartdate)){ //check same day
+                    // dd($schedStartdate);
                      if($value['isAllDay'] == '0'){
                     Session::flash('message', 'You are not available in that event day!');
                     return Redirect::back();
+                    }
+                    else if($postStartdate->lte($schedEnddate) || $postEnddate->gte($schedStartdate)){
+                        Session::flash('message', 'You are not available in that event day!');
+                        return Redirect::back();
                     }
                 }
             }
@@ -1677,6 +1706,7 @@ if ($validator->fails()) {
     public function acceptGroupInvitation($id){
         $group = Group::where('id', '=', $id)->first();
         $user = User::where('id', '=', Session::get('id'))->first();
+
         if(empty($group['member']) || empty($user['group'])){
             $member = json_encode(explode(',', Session::get('id')));
             $group->member = $member;
@@ -1694,6 +1724,47 @@ if ($validator->fails()) {
         $user->save();
         $invitation = Invitation::where('inviter_id', '=', $id)->delete();
         Session::flash('message', 'Successfully joined group!');
+        return Redirect::back();
+    }
+    public function acceptRequestJoin($talent_id){
+        $group = Group::where('id', '=', Session::get('id'))->first();
+        $user = User::where('id', '=', $talent_id)->first();
+
+        if(empty($group['member']) && empty($user['group'])){
+            $member = json_encode(explode(',', $talent_id));
+            $group->member = $member;
+            $user->group = json_encode(explode(',', Session::get('id')));
+        }
+        else {
+            $member = json_decode($group['member'], true);
+            array_push($member, $talent_id);
+            $group->member = json_encode($member);
+            if($user['group'] == null){
+            $user->group = json_encode(explode(',', Session::get('id')));
+            }
+            else {
+            $usergroups = json_decode($user['group'], true);
+            array_push($usergroups, Session::get('id'));
+            $user->group = json_encode(explode(',', $usergroups));
+            }
+            
+        }
+        $group->save();
+        $user->save();
+        $invitation = Invitation::where('inviter_id', '=', $talent_id)->delete();
+        Session::flash('message', 'Successfully joined group!');
+        return Redirect::back();
+    }
+    public function declineRequestJoin($talent_id){
+        $data = Invitation::where('inviter_id', '=', $talent_id)
+                          ->where('talent_id', '=', Session::get('id'))
+                          ->delete();
+        return Redirect::back();
+    }
+    public function declineGroupInvitation($id){
+        $data = Invitation::where('inviter_id', '=', $id)
+                          ->where('talent_id', '=', Session::get('id'))
+                          ->delete();
         return Redirect::back();
     }
     public function showSearchTalent(){
@@ -2005,6 +2076,7 @@ if ($validator->fails()) {
         $data = Request::except('_token');
         $keyword = strtolower($data['search']);
         $searchUser = User::where('roleID', '=', '1')
+                          ->where('id', '!=', Session::get('id'))
                           ->orWhere('roleID', '=', '2')
                           ->orWhere('roleID','=','0')->get();
         $searchPost = Post::all();
@@ -2231,9 +2303,10 @@ if ($validator->fails()) {
     
         $results = array();
         $queries = User::where('firstname', 'like', '%'.$term.'%')
-        ->where('roleID', '=', 1)
+            ->where('roleID', '=', 1)
             ->orWhere('lastname', 'like', '%'.$term.'%')
-            ->take(5)->get();
+            ->get();
+        $i = 0;
         foreach ($queries as $query)
         {
             $invitation = Invitation::where('talent_id', '=', $query->id)
@@ -2242,28 +2315,41 @@ if ($validator->fails()) {
             if(empty($invitation)){
                 $checkgroup = Group::find(Session::get('id'));
                 $checkgroupmember = json_decode($checkgroup['member'], true);
-                for ($i=0; $i < count($checkgroupmember); $i++) { 
-                    if($checkgroupmember[$i] == $query->id){
-                        $results[] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image, 'invited' => 'Talent is already a member!' ];
+                if($checkgroupmember !== null || $checkgroupmember !== 0) {
+                    for ($i=0; $i < count($checkgroupmember); $i++) { 
+                            if($checkgroupmember[$i] == $query->id){
+                                $results[$i] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image, 'invited' => 'Talent is already a member!' ];
+                            }
+                            else {
+                                $results[$i] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image, 'invited' => 'Already invited' ];
+                            }
                     }
-                    else {
-                        $results[] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image, 'invited' => 'Already invited' ];
-                    }
+                    $i++;
                 }
+                else {
+                    $results[$i] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image ];
+                    $i++;
+                }
+                
             }
             else {
-                $checkgroup = Group::find(Session::get('id'));
-                $checkgroupmember = json_decode($checkgroup['member'], true);
-                for ($i=0; $i < count($checkgroupmember); $i++) { 
-                    if($checkgroupmember[$i] == $query->id){
-                        $results[] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image, 'invited' => 'Talent is already a member!' ];
-                    }
-                    else {
-                        $results[] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image ];
-                    }
-                }
-            
-            
+                $results[$i] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image ];
+                $i++;
+                // $checkgroup = Group::find(Session::get('id'));
+                // $checkgroupmember = json_decode($checkgroup['member'], true);
+                // if($checkgroupmember !== null || $checkgroupmember !== 0) {
+                //     for ($i=0; $i < count($checkgroupmember); $i++) { 
+                //             if($checkgroupmember[$i] == $query->id){
+                //                 $results[] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image, 'invited' => 'Talent is already a member!' ];
+                //             }
+                //             else {
+                //                 $results[] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image, 'invited' => 'Already invited' ];
+                //             }
+                //     }
+                // }
+                // else {
+                //     $results[] = [ 'id' => $query->id, 'value' => $query->firstname.' '.$query->lastname, 'picture' => $query->profile_image ];
+                // }
             }
         }
         if(count($results))
@@ -2541,7 +2627,11 @@ if ($validator->fails()) {
             return Redirect::back();
     }
     public function joinGroup($group_id){
-        $sendinvitation =  new Invitation;
+        $alreadyrequested = Invitation::where('talent_id','=', $group_id)
+                                      ->where('inviter_id', '=', Session::get('id'))
+                                      ->first();
+        if($alreadyrequested == null){
+            $sendinvitation =  new Invitation;
             $sendinvitation->id = null;
             $sendinvitation->post_id = null;
             $sendinvitation->talent_id = $group_id;
@@ -2561,6 +2651,12 @@ if ($validator->fails()) {
 
             Session::flash('message', 'You successfully sent a request to join this group!');
             return Redirect::back();
+        }
+        else {
+            Session::flash('message', 'You already sent a request to join this group!');
+            return Redirect::back();
+        }
+        
     }
     public function showFeatured(){
     $profile = Featured::where('isProfile','=',1)->get();
@@ -2822,8 +2918,8 @@ if ($validator->fails()) {
             $score = 0;
             $demerit = 0;
             $user = User::find($scout_id);
-            $findUser = Rating::find($user['id']);
-            if($findUser == null){
+            // $findUser = Rating::find($user['id']);
+            // if($findUser == null){
                 $rateUser = new Rating;
                 $rateUser->id = null;
                 $rateUser->user_id = $user['id'];
@@ -2859,6 +2955,10 @@ if ($validator->fails()) {
                     }
                     break;
                 }
+                $rateUser->attitude = $data['attitude'][0];
+                $rateUser->performance = $data['management'][0];
+                $rateUser->punctuality = $data['integrity'][0];
+                $rateUser->comment = $data['comment'][0];
                 if(empty($data['testi_score'])){
                 $rateUser->testimonial_score = null;
                 $rateUser->testimonial_comment = null;
@@ -2871,47 +2971,47 @@ if ($validator->fails()) {
                 $rateUser->score = $score;
                 $rateUser->demerit = $demerit;
                 $rateUser->save();
-            }
-            else {
-                $findUser->id = null;
-                $findUser->user_id = $user['id'];
-                $rateUser->post_id = $post_id;
-                foreach($data['attitude'] as $atti){
-                    if($atti == 1){
-                         $score += $atti * 10;
-                         $demerit += 1;
-                    }
-                    else {
-                    $score += $atti * 10;
-                    }
+            // }
+            // else {
+            //     $findUser->id = null;
+            //     $findUser->user_id = $user['id'];
+            //     $rateUser->post_id = $post_id;
+            //     foreach($data['attitude'] as $atti){
+            //         if($atti == 1){
+            //              $score += $atti * 10;
+            //              $demerit += 1;
+            //         }
+            //         else {
+            //         $score += $atti * 10;
+            //         }
                     
-                    break;
-                }
-                foreach($data['management'] as $perfo){
-                    if($perfo == 1){
-                         $score += $perfo * 10;
-                         $demerit += 1;
-                    }
-                    else {
-                    $score += $perfo * 10;
-                    }
-                    break;
-                }
-                foreach($data['integrity'] as $punc){
-                    if($punc == 1){
-                         $score += $punc * 10;
-                         $demerit += 1;
-                    }
-                    else {
-                    $score += $punc * 10;
-                    }
-                    break;
-                }
-                // dd($findUser['score']);
-                $findUser->score = $score;
-                $findUser->demerit = $demerit;
-                $findUser->save();            
-            }
+            //         break;
+            //     }
+            //     foreach($data['management'] as $perfo){
+            //         if($perfo == 1){
+            //              $score += $perfo * 10;
+            //              $demerit += 1;
+            //         }
+            //         else {
+            //         $score += $perfo * 10;
+            //         }
+            //         break;
+            //     }
+            //     foreach($data['integrity'] as $punc){
+            //         if($punc == 1){
+            //              $score += $punc * 10;
+            //              $demerit += 1;
+            //         }
+            //         else {
+            //         $score += $punc * 10;
+            //         }
+            //         break;
+            //     }
+            //     // dd($findUser['score']);
+            //     $findUser->score = $score;
+            //     $findUser->demerit = $demerit;
+            //     $findUser->save();            
+            // }
             $rating = Rating::where('user_id' , '=', $scout_id)->get();
                 $tal = Scout::find($scout_id);
                 $finalscore = 0;

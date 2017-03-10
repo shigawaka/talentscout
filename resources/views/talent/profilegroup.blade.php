@@ -110,7 +110,7 @@
                   <button data-target="modal" class="btn modal-trigger" id="btn1">
                   <i class="material-icons">more_vert</i>
                 </button>
-                    @if(empty(Session::get('card')))
+                     @if(Session::get('cc') == 'null')
                     <button data-target="modalcard" class="btn modal-trigger" id="btn1">
                     <i class="material-icons">payment</i>  Link debit/credit card
                     </button>
@@ -235,6 +235,13 @@
               </div>
                 @endforeach
             </div>
+            <div class="input-field col s3">
+            {!! Form::select('fee_type', [
+             'Fixed Rate' => 'Fixed Rate',
+             'Hourly Rate' => 'Hourly Rate'], $fee['fee_type']
+              ) !!}
+            <label for="age" class="left-align">Fee type</label>
+            </div>
 
 
                       
@@ -271,6 +278,14 @@
               <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
               <label for="lastname">Last Name</label>
               @foreach($errors->get('lastname') as $message)
+                {!! $message !!}
+                @endforeach
+            </div>
+            <div class="input-field col s6">
+            {!! Form::email('paypalemail', '', array('class' => 'validate','placeholder' => 'Enter Your Paypal email address', 'required' => 'required')) !!}
+              <!-- <input value="Dela Rosa" id="lastname" type="text" class="validate"> -->
+              <label for="lastname">Paypal Email <small>The cash bonds will be sent from this email.</small></label>
+              @foreach($errors->get('paypalemail') as $message)
                 {!! $message !!}
                 @endforeach
             </div>
@@ -328,7 +343,7 @@
                    <div class="card-action">
               <blockquote><h4><i>{!! $user['profile_description'] !!}</i></h4></blockquote>
             </div>
-                   <div class="card-panel grey lighten-3"><h6><i>Talent Fee: ₱{!! $fee['fee'] !!}</i></h6></div>
+                   <div class="card-panel grey lighten-3"><h6><i>Talent Fee: ₱{!! $fee['fee'] !!} / {!! $fee['fee_type'] !!}</i></h6></div>
                        @if($fee['score'] <= 1000)
                        <div class="card-panel orange lighten-2"><img style="width: 50px;font-family: 'Quasiparticles';"class="responsive-img" src="{!! URL::to('/files') !!}/newbie.png"><h6>New Talent</h6></div>
                        @elseif($fee['score'] >= 1500)
@@ -404,7 +419,15 @@
               </div>
                        <h6> <i class="material-icons cyan-text darken-text">group</i> Group Members</h6>
                        <div class="row">
-                       <h6> <a class="btn" href="{!! URL::to('/joinGroup').'/'.$user['id'] !!}"> Join Group </a></h6>
+                       @if(Session::get('id') !== $user['id'])
+                          @if($groupmembers !== null)
+                            @if(in_array(Session::get('id'), $groupmembers) == false)
+                            <h6> <a class="btn" href="{!! URL::to('/joinGroup').'/'.$user['id'] !!}"> Join Group </a></h6>
+                            @else
+                            <h6> <a href="{!! URL::to('/leaveGroup').'/'.$user['id'] !!}"> Leave Group </a></h6>
+                            @endif
+                          @endif
+                       @endif
                        @foreach($grouparray as $ga)
                        <div class="col s2">
                        @if($user['id'] == Session::get('id'))
@@ -559,6 +582,11 @@
   @endif
   <script src="../../js/jquery.materialize-autocomplete.js"></script>
 <script>
+$(document).ready(function() {
+    // Select - Single
+    $('select:not([multiple])').material_select();
+     $('select').material_select();
+  });
 //    $('document').ready(function(){
 // /* $('#search-input').attr('autocomplete', 'on');*/
 // $("#q").autocomplete({
@@ -578,7 +606,7 @@
      $.ajax({
                 url: "{{ URL('/addmembers/') }}",
                 type: 'GET', // your request type
-                dataType: "json",
+                // dataType: "json",
                 data: {q : q},
                 success: function(data) {
                   
@@ -586,7 +614,7 @@
                   //   console.log(element.value); 
                   //   d = element.id;
                   //   });
-                  console.log(data[0].picture);
+                  console.log(data);
                   $.each(data,function(index, value){
                   var name = value.value;
                   var id = value.id;

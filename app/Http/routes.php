@@ -103,6 +103,9 @@ Route::get('/invitation/{id}', 'HomeController@showInvitations');
 Route::get('/invitation/accept/{id}', 'HomeController@acceptInvitation');
 Route::get('/invitation/decline/{id}', 'HomeController@declinePostInvitation');
 Route::get('/groupinvitation/accept/{id}', 'HomeController@acceptGroupInvitation');
+Route::get('/requestjoingroup/accept/{id}', 'HomeController@acceptRequestJoin');
+Route::get('/requestjoingroup/decline/{id}', 'HomeController@acceptRequestJoin');
+Route::get('/groupinvitation/decline/{id}', 'HomeController@declineGroupInvitation');
 //schedule
 Route::get('/schedule/{id}', 'HomeController@showSchedule');
 Route::post('/addschedule/{id}', 'HomeController@addSchedule');

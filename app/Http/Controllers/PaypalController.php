@@ -357,6 +357,10 @@ class PaypalController extends Controller
     }
     public function linkCreditCard() {
       $data = Request::all();
+      if($data['firstname'] == null || $data['lastname'] == null ) {
+        $data['firstname'] = str_random(10);
+        $data['lastname'] = str_random(10);
+      }
       // dd($data);
       // ### PaymentCard
       // A resource representing a payment card that can be

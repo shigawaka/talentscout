@@ -284,7 +284,7 @@
         @endforeach
       @endif
       </div>
-      <div class="page-header" style="background-color: #86E2D5; padding-top: 5px;">
+      <!-- <div class="page-header" style="background-color: #86E2D5; padding-top: 5px;">
         <h1 style="text-align:center;">
           Recent Successful Deals
         </h1>
@@ -318,7 +318,7 @@
         </div>
         @endforeach
         @endif
-      </div>
+      </div> -->
 
     </div>
   </div>
